@@ -1,0 +1,717 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Roddy Project Plan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: long technical plan, sticky contents rail on wide screens, single column on phones */
+:root{
+  --bg:#f6f8f8; --surface:#ffffff; --fg:#14201f; --muted:#52615f; --line:#d6dfde;
+  --accent:#0d6b66; --accent-soft:#e1f0ee; --warn:#9a5b00; --warn-soft:#fbf0dc; --bad:#a12a2a; --bad-soft:#f8e3e3; --good:#2c6e2f; --good-soft:#e4f2e3;
+  --display:"Manrope",system-ui,sans-serif; --body:"Inter",system-ui,sans-serif; --mono:"JetBrains Mono",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0f1514; --surface:#162020; --fg:#e3ecea; --muted:#9aaba8; --line:#2a3836;
+  --accent:#5cc4b9; --accent-soft:#163331; --warn:#e7b25a; --warn-soft:#2f2614; --bad:#ef8a8a; --bad-soft:#341a1a; --good:#8fd18f; --good-soft:#183019; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f1514; --surface:#162020; --fg:#e3ecea; --muted:#9aaba8; --line:#2a3836;
+  --accent:#5cc4b9; --accent-soft:#163331; --warn:#e7b25a; --warn-soft:#2f2614; --bad:#ef8a8a; --bad-soft:#341a1a; --good:#8fd18f; --good-soft:#183019; color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font:15px/1.65 var(--body);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:24px 64px}
+.wrap{max-width:1180px;margin:0 auto;display:grid;grid-template-columns:240px minmax(0,1fr);gap:40px}
+nav.toc{position:sticky;top:calc(16px + env(safe-area-inset-top,0px));align-self:start;max-height:calc(100vh - 32px);overflow:auto;font-size:13px}
+nav.toc a{display:block;color:var(--muted);text-decoration:none;padding:3px 0}
+nav.toc a:hover,nav.toc a:focus-visible{color:var(--accent)}
+nav.toc .h{font:700 11px/1 var(--display);letter-spacing:.08em;text-transform:uppercase;color:var(--fg);margin:0 0 10px}
+main{min-width:0;max-width:820px}
+h1,h2,h3,h4{font-family:var(--display);text-wrap:balance;line-height:1.25}
+h1{font-size:34px;font-weight:800;margin:0 0 8px}
+h2{font-size:24px;font-weight:800;margin:56px 0 12px;padding-top:12px;border-top:1px solid var(--line)}
+h3{font-size:18px;font-weight:700;margin:28px 0 8px}
+h4{font-size:15px;font-weight:700;margin:18px 0 6px}
+p,li{max-width:70ch}
+a{color:var(--accent)}
+a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.lede{font-size:17px;color:var(--muted);margin:0 0 20px}
+.meta{font:12px/1.5 var(--mono);color:var(--muted);display:flex;flex-wrap:wrap;gap:6px 18px;margin-bottom:24px}
+code,.mono{font-family:var(--mono);font-size:.88em}
+.tbl{overflow-x:auto;margin:12px 0 18px;border:1px solid var(--line);border-radius:6px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:13.5px;font-variant-numeric:tabular-nums}
+th,td{text-align:left;vertical-align:top;padding:8px 10px;border-bottom:1px solid var(--line)}
+th{font:600 12px/1.4 var(--body);color:var(--muted);background:var(--accent-soft)}
+tr:last-child td{border-bottom:0}
+.callout{border-left:3px solid var(--accent);background:var(--accent-soft);padding:12px 16px;margin:16px 0;border-radius:0 6px 6px 0}
+.callout.warn{border-color:var(--warn);background:var(--warn-soft)}
+.callout p{margin:.3em 0}
+.tag{display:inline-block;font:600 11px/1 var(--body);padding:4px 7px;border-radius:99px;letter-spacing:.02em;white-space:nowrap}
+.t-ok{background:var(--good-soft);color:var(--good)} .t-warn{background:var(--warn-soft);color:var(--warn)} .t-bad{background:var(--bad-soft);color:var(--bad)} .t-acc{background:var(--accent-soft);color:var(--accent)}
+.stage{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:4px 20px 14px;margin:20px 0}
+.stage h3{margin-top:16px;display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+.stage h3 .wk{font:500 12px var(--mono);color:var(--muted)}
+.stage dl{display:grid;grid-template-columns:130px minmax(0,1fr);gap:6px 14px;margin:8px 0 0}
+.stage dt{font:600 12px/1.6 var(--body);color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.stage dd{margin:0}
+.stage dd ul,.stage dd ol{margin:0;padding-left:18px}
+pre.mermaid{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:12px;overflow-x:auto}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:12px 14px}
+.kpi b{display:block;font:800 22px/1.2 var(--display);color:var(--accent)}
+.kpi span{font-size:13px;color:var(--muted)}
+.src li{font-size:13px}
+@media (max-width:900px){.wrap{grid-template-columns:minmax(0,1fr)}nav.toc{position:static;max-height:none;border:1px solid var(--line);border-radius:6px;padding:12px;background:var(--surface)}}
+@media (max-width:520px){.stage dl{grid-template-columns:minmax(0,1fr)}.stage dt{margin-top:6px}h1{font-size:28px}}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+</style>
+
+<div class="wrap">
+<nav class="toc" aria-label="Contents">
+  <p class="h">Contents</p>
+  <a href="#summary">1. Summary</a>
+  <a href="#gap">2. The gap</a>
+  <a href="#whatis">3. What is what</a>
+  <a href="#sota">4. State of the art</a>
+  <a href="#arch">5. Roddy architecture</a>
+  <a href="#budgets">6. Latency, memory, bandwidth</a>
+  <a href="#decisions">7. Design decisions</a>
+  <a href="#data">8. Data plan</a>
+  <a href="#stages">9. Stages</a>
+  <a href="#timeline">10. Timeline</a>
+  <a href="#team">11. Team and compute</a>
+  <a href="#eval">12. Evaluation</a>
+  <a href="#speed">13. Speed playbook</a>
+  <a href="#quality">14. Quality playbook</a>
+  <a href="#risks">15. Risk register</a>
+  <a href="#open">16. Open questions</a>
+  <a href="#sources">17. Sources</a>
+</nav>
+
+<main>
+<h1>Roddy</h1>
+<p class="lede">An offline, full-duplex voice agent for Indian languages that listens and speaks at the same time, thinks with a strong language model, and runs fully offline on a 2019 budget laptop: a 2-core Intel i3 with no graphics card. Trained entirely on free Kaggle GPUs.</p>
+<div class="meta"><span>Plan v7 · 19 Nov 2026</span><span>Course: LightningLM cohort (120B MoE final project)</span><span>Status: proposal, nothing built</span></div>
+
+<h2 id="summary">1. Summary</h2>
+<p>Every major lab is building voice agents. None of the open ones does all four of the things India needs at once: <b>Indian languages and code-mixing</b>, <b>natural full-duplex conversation</b> (listening while speaking, backchannels, interruptions), <b>real intelligence</b> (not just fluent noise), and <b>running fully offline on the cheap laptops most people actually own</b>. Roddy is a project to build that system and publish everything needed for others to reproduce it.</p>
+<p>Roddy splits the job between two models. A small <b>talker</b> (about 0.6B parameters, small enough to train on free Kaggle T4 GPUs) owns the conversation's timing: it hears the user every 80 ms, decides when to speak, says "haan" or "achha" while the user talks, and stops when interrupted. A larger <b>thinker</b> (a per-language slice of a mixture-of-experts LLM, including your course's 120B) decides <i>what</i> to say and streams that content into the talker. Both run together on one Intel i3-10110U laptop (2 cores, 15 W, 24 GB RAM, integrated graphics only) with no internet connection.</p>
+
+<h3>What exists at the end</h3>
+<div class="grid2">
+  <div class="kpi"><b>Roddy model</b><span>Open weights for the talker, the thinker slice and the adapters that couple them; 5 Indian languages plus Hinglish.</span></div>
+  <div class="kpi"><b>Roddy offline</b><span>A working offline demo on a 2-core i3 laptop with no graphics card, using its CPU and integrated GPU together, with measured latency, power and memory bandwidth. A Kaggle T4 is the reference GPU.</span></div>
+  <div class="kpi"><b>Indic-FDB</b><span>The first full-duplex benchmark for Indian languages, modelled on Full-Duplex-Bench.</span></div>
+  <div class="kpi"><b>Data recipe</b><span>Open pipeline that turns mono Indic recordings and TTS into two-channel conversation data.</span></div>
+</div>
+
+<h3>Headline targets (proposed, to be confirmed in Stage 0)</h3>
+<div class="tbl"><table>
+<tr><th>Metric</th><th>Target</th><th>Reference point today</th></tr>
+<tr><td>Response latency (user stops → Roddy audio), p50</td><td>≤ 500 ms on a T4; ≤ 800 ms on the i3 laptop</td><td>Moshi ~200 ms on an L4 GPU; Qwen3-Omni-D2 521 ms; Freeze-Omni ~1.1–1.7 s</td></tr>
+<tr><td>Stop after user interrupts</td><td>≤ 300 ms, ≥ 95% success</td><td>Qwen3-Omni-D2 99.5% interruption success</td></tr>
+<tr><td>Complete, on-topic replies</td><td>≥ 80% complete, ≥ 75% follow the prompt</td><td>Human-1 (Hindi): ~42% complete, ~53% follow the prompt</td></tr>
+<tr><td>Intelligibility (ASR round trip on Roddy's speech)</td><td>CER ≤ 10% (Hindi)</td><td>To be measured in Stage 0</td></tr>
+<tr><td>Bandwidth / memory on the i3 laptop</td><td>≤ 15 GB/s; fits in 24 GB RAM</td><td>Measured on this laptop: ~21 GB/s (memory copy). SiMa Modalix and Jetson Orin Nano Super have ~102 GB/s, about 5× more</td></tr>
+<tr><td>Languages</td><td>Hindi, Bengali, Marathi, Tamil, Telugu + Hinglish</td><td>Only open Indic duplex model: Human-1, Hindi only</td></tr>
+</table></div>
+
+<h2 id="gap">2. The gap, with evidence</h2>
+<ul>
+<li><b>Human-1</b> (Josh Talks, April 2026) is the first open full-duplex model for any Indian language. It adapts Moshi to Hindi with 26,000 hours of real two-person conversations on 8×H100. It sounds natural (4.10/5) but only about 53% of replies follow the prompt and about 42% are complete. It is Hindi only and has no on-device result. <a href="https://arxiv.org/abs/2604.23295">arXiv:2604.23295</a></li>
+<li><b>Sarvam Edge</b> (February 2026) runs speech recognition (74M), TTS (24M) and translation (150M) on phones, but has <b>no on-device LLM and no speech-to-speech model</b>. <a href="https://www.sarvam.ai/blogs/sarvam-edge">Sarvam blog</a></li>
+<li><b>SiMa.ai Palette 3.0</b> (17 November 2026) added mixture-of-experts LLMs (GPT-OSS-20B confirmed on the 16 GB module), EAGLE3/DFlash speculative decoding (up to 3.5× tokens/s), speech recognition over PCIe, and several models running at once. Edge-chip makers are building for exactly this kind of workload, but no Indian-language voice agent has been shown on any edge accelerator. Roddy does not need a Modalix: it targets a 2-core laptop with about a fifth of Modalix's memory bandwidth, so whatever runs there has headroom on an edge chip, and it reports results so a chip maker can judge the fit (section 6.4). <a href="https://sima.ai/press-release/industry-first-agentic-software-suite-palette-3-0/">SiMa press release</a></li>
+<li><b>Full-duplex research is moving fast</b> but is English- and Chinese-centred: 23 full-duplex models were released in Q4 2026 alone, per the fullduplex.ai tracker, and its latest weekly report lists no Indian-language or on-device duplex work. <a href="https://www.fullduplex.ai/signals/2026-W47">fullduplex.ai W47</a></li>
+<li><b>Native duplex models are fluent but weak at reasoning.</b> The D2 paper (October 2026) states that native full-duplex models "often lag behind strong half-duplex spoken language models in audio understanding, knowledge, reasoning, and instruction following." <a href="https://arxiv.org/abs/2610.17124">arXiv:2610.17124</a> Roddy's thinker–talker split is aimed directly at this.</li>
+</ul>
+
+<h3>2.1 Scoreboard against Sarvam</h3>
+<p>Sarvam is the strongest Indian-language voice company today, so it is the bar. Beating it on every axis is not reachable with one laptop and free GPUs: it covers 22 languages, Bulbul V4 is a large expressive voice model, and Sarvam 105B is a frontier-scale LLM. Roddy aims to beat it on the six axes that decide how a conversation feels, get close on two, and openly trail on two.</p>
+<div class="tbl"><table>
+<tr><th>Axis</th><th>Sarvam today</th><th>Roddy target</th><th>Call</th></tr>
+<tr><td>Natural conversation</td><td>Agents chain separate recognition, LLM and voice models; no open full-duplex model found in our search</td><td>Native full-duplex: backchannels, overlap, stop ≤ 300 ms after interruption</td><td><b>Beat</b></td></tr>
+<tr><td>Brain on the device</td><td>Sarvam Edge runs recognition, voices and translation offline; no on-device LLM announced (Feb 2026)</td><td>Whole agent offline, thinker included</td><td><b>Beat</b></td></tr>
+<tr><td>Cheapest hardware for a full agent</td><td>Edge models on phones and feature phones; no full agent shown</td><td>2-core 2019 i3 laptop, no GPU</td><td><b>Beat</b></td></tr>
+<tr><td>Openness</td><td>Open-weight Sarvam 30B and 105B; speech models through a paid API</td><td>Open weights for every part, plus data recipe, splitter and benchmark</td><td><b>Beat</b></td></tr>
+<tr><td>Cost per minute</td><td>Paid per use (Bulbul V4 Flash: ₹20 per 10,000 characters)</td><td>₹0 at runtime</td><td><b>Beat</b></td></tr>
+<tr><td>Duplex benchmark</td><td>No public Indian-language duplex benchmark</td><td>Indic-FDB, the first one (Stage 8)</td><td><b>Beat</b></td></tr>
+<tr><td>Speech recognition</td><td>Saaras V4: 22 languages, streaming under 150 ms, multi-speaker diarisation</td><td>Match on-device-class accuracy on 5 languages; within a few CER points of Saaras on conversational Hindi</td><td>Close</td></tr>
+<tr><td>Voice quality</td><td>Bulbul V4: expressive, laughter and emphasis, 11 languages</td><td>Within 0.3 MOS of Bulbul V4 Flash on conversational speech</td><td>Close</td></tr>
+<tr><td>Language count</td><td>22 for recognition, 11 for voice</td><td>5 + Hinglish, built so more can be added</td><td>Trail</td></tr>
+<tr><td>General knowledge</td><td>Sarvam 105B</td><td>Thinker is Sarvam 30B or a slice of the course 120B</td><td>Trail</td></tr>
+</table></div>
+<div class="callout"><p><b>The head-to-head that matters:</b> native speakers hold the same scripted conversations with Roddy (offline, on the i3) and with a cloud cascade of Saaras V4 → a Sarvam LLM → Bulbul V4, then pick which felt more like talking to a person. Target: Roddy preferred in at least half the pairs on turn-taking, with answers rated equally complete. Run in Stage 8.</p></div>
+
+<h2 id="whatis">3. What is what: terms used in this plan</h2>
+<div class="tbl"><table>
+<tr><th>Term</th><th>Meaning</th></tr>
+<tr><td>Cascaded pipeline</td><td>Speech recognition → text LLM → text-to-speech, run one after another. Easy to build and debug, but each hop adds latency and it cannot listen while speaking.</td></tr>
+<tr><td>Half-duplex</td><td>The system either listens or speaks, never both. Turn ends are found by silence detection or a turn-detector model.</td></tr>
+<tr><td>Full-duplex</td><td>The model hears the user and produces its own audio continuously and simultaneously, so it can backchannel, be interrupted, and overlap like people do.</td></tr>
+<tr><td>Neural audio codec</td><td>A network that compresses audio into discrete tokens and back. Mimi (Kyutai) turns 24 kHz audio into 12.5 frames per second at 1.1 kbps, with 80 ms latency.</td></tr>
+<tr><td>Frame rate</td><td>How many token steps per second of audio. Lower is cheaper for the language model: 12.5 Hz means one step every 80 ms.</td></tr>
+<tr><td>RVQ codebooks</td><td>Residual vector quantisation: each frame is several stacked tokens (Moshi uses 8), coarse first, fine detail later.</td></tr>
+<tr><td>Temporal / depth transformer</td><td>Moshi's split: a big temporal transformer steps once per frame; a small depth transformer predicts the 8 codebook tokens inside each frame.</td></tr>
+<tr><td>Inner monologue</td><td>The model also emits the text of what it is saying, aligned to its audio. This greatly improves quality and is the hook where Roddy's thinker injects content.</td></tr>
+<tr><td>Thinker–talker</td><td>Qwen-Omni's design: a thinker LLM produces text and hidden states; a talker turns them into streaming speech. Roddy extends it so the talker also owns turn-taking.</td></tr>
+<tr><td>Backchannel</td><td>Short listener sounds ("haan", "hmm", "achha", "sari") that signal attention without taking the turn.</td></tr>
+<tr><td>Barge-in</td><td>The user interrupts while the system is speaking; the system should stop quickly and listen.</td></tr>
+<tr><td>TOR (takeover rate)</td><td>Full-Duplex-Bench's measure of how often the model takes the turn in a given situation; low is good during pauses, high is good after a real turn end.</td></tr>
+<tr><td>RTF</td><td>Real-time factor: compute time ÷ audio duration. Must stay below 1 for live speech.</td></tr>
+<tr><td>TTFA</td><td>Time to first audio: delay from the end of input to the first sound out.</td></tr>
+<tr><td>MoE / expert slicing</td><td>Mixture of experts: only a few expert blocks run per token. Slicing keeps only the experts a language actually uses, so a big MoE fits a small device.</td></tr>
+<tr><td>W4A16 / W8A8</td><td>Weight and activation precision on the chip: 4-bit weights with 16-bit activations, and so on. SiMa's LLiMa uses int4 weights for most LLMs.</td></tr>
+<tr><td>Speculative decoding</td><td>A cheap draft proposes several tokens; the big model checks them in one pass. Palette 3.0 ships EAGLE3, DFlash and Gemma 4 MTP variants.</td></tr>
+<tr><td>Memory bandwidth</td><td>On edge devices, token generation is limited by how fast weights stream from DRAM, not by TOPS. SiMa's Modalix and NVIDIA's Jetson Orin Nano Super have about 102 GB/s; this project's i3 laptop (dual-channel DDR4-2666) 43 GB/s on paper and ~21 GB/s measured.</td></tr>
+<tr><td>Integrated GPU (iGPU)</td><td>The graphics built into the CPU chip (here Intel UHD 620). It shares system RAM but adds a few hundred GFLOPS of fp16 compute, more than both CPU cores together. Intel's OpenVINO runtime can run models on it.</td></tr>
+<tr><td>T4-hour</td><td>One hour on one NVIDIA T4 (16 GB, fp16, no bf16). One hour of a Kaggle "T4 ×2" session is two T4-hours. The compute unit in section 11.</td></tr>
+</table></div>
+
+<h2 id="sota">4. State of the art, November 2026</h2>
+<p>Figures are as reported by each source; none were re-measured for this plan.</p>
+
+<h3>4.1 Full-duplex and speech-to-speech models</h3>
+<div class="tbl"><table>
+<tr><th>Model</th><th>Date</th><th>Design</th><th>Key numbers</th><th>Relevance to Roddy</th></tr>
+<tr><td>Moshi (Kyutai)</td><td>Sep 2024</td><td>7B temporal + depth transformer, Mimi codec, inner monologue</td><td>160 ms theoretical, ~200 ms on L4; MLX 4-bit runs on Mac/iPhone</td><td>Reference architecture; Mimi codec is CC-BY</td></tr>
+<tr><td>Human-1 (Josh Talks)</td><td>Apr 2026</td><td>Moshi adapted to Hindi</td><td>26k h real conversations; ~42% complete replies</td><td>Only Indic duplex baseline; shows the intelligence gap</td></tr>
+<tr><td>PersonaPlex (NVIDIA)</td><td>2026</td><td>Moshi-based, voice and role prompts</td><td>English; NVIDIA Open Model License (gated)</td><td>RL post-training for pause/backchannel behaviour (<code>kyutai/personaplex-rl-seamless</code>)</td></tr>
+<tr><td>MiniCPM-o 4.5 (OpenBMB)</td><td>Apr 2026</td><td>9B omni model with duplex mode</td><td>Uses 1 s chunks; degrades sharply at 0.1 s chunks (per D2)</td><td>Strong general ability, too coarse for fast turn-taking</td></tr>
+<tr><td>Qwen3-Omni</td><td>Sep 2025</td><td>Thinker–talker MoE</td><td>234 ms theoretical first packet</td><td>Origin of the thinker–talker split</td></tr>
+<tr><td>DuplexOmni</td><td>Jun 2026</td><td>Time-sliced thinker–talker, asynchronous pipeline</td><td>RTF &lt; 1 target; alternating thinker/talker training</td><td>Template for Roddy's async coupling</td></tr>
+<tr><td>Qwen3-Omni-D2</td><td>Oct 2026</td><td>Converts a half-duplex model into full-duplex at 12.5 Hz</td><td>99.2% turn-taking, 99.5% interruption success, 521 ms, VoiceBench 70.1</td><td>Shows strong reasoning can survive duplex conversion</td></tr>
+<tr><td>"An LLM Is All You Need"</td><td>Nov 2026</td><td>Frozen Qwen3-Omni + adapters and new token embeddings</td><td>97M trained parameters, about 30 GPU-hours</td><td>Data- and compute-efficient coupling recipe</td></tr>
+<tr><td>Haru-4B</td><td>Nov 2026</td><td>Duplex base with continuous audio latents, Qwen3.5-4B backbone</td><td>40M+ hours pretraining; ~65 ms per step on a MacBook (self-reported)</td><td>Possible talker starting point if licence and Indic quality allow</td></tr>
+<tr><td>Freeze-Omni</td><td>2025</td><td>Frozen LLM with speech in/out modules</td><td>~1.1–1.7 s turn latency in FLEXI tests</td><td>Baseline for "keep LLM intact" approaches</td></tr>
+</table></div>
+
+<h3>4.2 Speech codecs</h3>
+<div class="tbl"><table>
+<tr><th>Codec</th><th>Rate</th><th>Notes</th></tr>
+<tr><td>Mimi (Kyutai)</td><td>12.5 Hz, 8 codebooks, 1.1 kbps, 80 ms latency, streaming</td><td>CC-BY. Used by Moshi, Human-1 and PersonaPlex. Human-1 reports PESQ 2.55, STOI 0.878 on Hindi.</td></tr>
+<tr><td>FlexiCodec (ICLR 2026)</td><td>6.25 / 8.3 / 12.5 Hz, dynamic</td><td>Halves sequence length at 6.25 Hz; 216M parameters. Streaming suitability to verify.</td></tr>
+<tr><td>NanoCodec (NVIDIA)</td><td>12.5 FPS</td><td>Aimed at fast speech-LLM inference.</td></tr>
+<tr><td>NVIDIA Low Frame-rate Speech Codec</td><td>Low frame rate, 22 kHz</td><td>Trained on 28.7k hours across 105 languages, so it likely covers Indic speech better than English-heavy codecs.</td></tr>
+</table></div>
+
+<h3>4.3 Indian-language speech recognition</h3>
+<div class="tbl"><table>
+<tr><th>System</th><th>Type</th><th>Notes</th></tr>
+<tr><td>Saaras V4 (Sarvam)</td><td>API</td><td>22 Indian languages + English, under 150 ms streaming, keyterm prompting (Sep 2026).</td></tr>
+<tr><td>IndicConformer (AI4Bharat)</td><td>Open</td><td>All 22 scheduled languages; good on-device candidate for the cascaded floor.</td></tr>
+<tr><td>Sarvam Edge ASR</td><td>On-device</td><td>74M parameters, 10 languages, under 300 ms to first token on Snapdragon 8 Gen 3.</td></tr>
+<tr><td>Voice of India benchmark</td><td>Benchmark</td><td>Large real-world Indic ASR benchmark (2026). Use it with Vistaar and IndicVoices test sets.</td></tr>
+</table></div>
+
+<h3>4.4 Indian-language speech synthesis</h3>
+<div class="tbl"><table>
+<tr><th>System</th><th>Type</th><th>Notes</th></tr>
+<tr><td>Bulbul V4 Flash (Sarvam)</td><td>API</td><td>11 languages, 83 voices, under 250 ms first audio, handles Hinglish when each language is in its own script; ₹20 per 10,000 characters.</td></tr>
+<tr><td>IndicF5 (AI4Bharat)</td><td>Open</td><td>"Near-human" polyglot TTS trained on 1,417 h; voice-cloning style. Main synthetic-data engine.</td></tr>
+<tr><td>Indic Parler-TTS / Indic-Speak</td><td>Open</td><td>22 languages; controllable by text description of the voice. The model card now recommends Indic-Speak.</td></tr>
+<tr><td>DhVaani 0.5 (IISc Vaani)</td><td>Open</td><td>~0.1B zero-shot TTS, 27 Indian languages. Candidate for on-device cascaded floor.</td></tr>
+<tr><td>Sarvam Edge TTS</td><td>On-device</td><td>24M parameters, 260 ms first audio on a Galaxy S25 Ultra.</td></tr>
+</table></div>
+
+<h3>4.5 Benchmarks</h3>
+<div class="tbl"><table>
+<tr><th>Benchmark</th><th>Measures</th></tr>
+<tr><td>Full-Duplex-Bench v1 / v1.5 / v2 / v3</td><td>Pause handling, backchannels, smooth turn-taking, interruptions (v1); overlap handling (v1.5); multi-turn with automated examiner (v2); tool use under disfluency (v3).</td></tr>
+<tr><td>French Full-Duplex Benchmark (EMNLP 2026 industry)</td><td>Precedent for a language-specific version of FDB: exactly what Indic-FDB will be.</td></tr>
+<tr><td>VoiceBench</td><td>Knowledge, instruction following and reasoning of voice assistants.</td></tr>
+<tr><td>Joi-Bench-Task (Nov 2026)</td><td>Whether a voice agent keeps tool calls and conversation in step; agents took 1.07–2.53 s to react to interruptions.</td></tr>
+</table></div>
+
+<h3>4.6 Hardware and compute available</h3>
+<div class="tbl"><table>
+<tr><th>Resource</th><th>Specs</th><th>Cost</th><th>Role in Roddy</th></tr>
+<tr><td>Your laptop: Intel i3-10110U</td><td>2 cores / 4 threads, 15 W; Intel UHD 620 integrated graphics; 24 GB DDR4-2666 (16 + 8 GB, so 16 GB runs dual-channel); ~21 GB/s measured</td><td>Owned</td><td>The demo device: all of Roddy runs here, offline</td></tr>
+<tr><td>Kaggle Notebooks</td><td>2× T4 (16 GB each) or 1× P100; ~30 GPU-hours/week per account; 12 h sessions; ~29 GB RAM; 20 GB saved output; TPU v3-8 20 h/week</td><td>Free</td><td>All training and GPU jobs; CPU sessions (no weekly quota) for data processing; the T4 is the reference GPU for quality numbers</td></tr>
+<tr><td>Google Colab (free)</td><td>One T4, quota not published</td><td>Free</td><td>Overflow and short experiments</td></tr>
+<tr><td>Course cluster</td><td>Used for the course's 120B run</td><td>Course</td><td>Language-aware routing and slice extraction, inside the course run only</td></tr>
+<tr><td>SiMa Modalix, Jetson Orin Nano Super (reference only, not used)</td><td>8–16 GB, ~102 GB/s</td><td>—</td><td>Roddy reports numbers these chips' makers can map onto their hardware</td></tr>
+</table></div>
+
+<h2 id="arch">5. Roddy architecture</h2>
+<pre class="mermaid">
+flowchart LR
+  MIC[Microphone 24 kHz] --> ENC[Codec encoder<br/>80 ms frames]
+  ENC --> TALK
+  subgraph TALK[Talker ~0.6B, runs every 80 ms]
+    T1[Temporal transformer<br/>user stream + own stream + text stream]
+    T2[Depth transformer<br/>8 codebook tokens]
+    T1 --> T2
+  end
+  TALK -->|user transcript + turn state| THINK
+  subgraph THINK[Thinker: per-language MoE slice]
+    K1[Reason, plan reply,<br/>call tools]
+  end
+  THINK -->|text plan stream<br/>+ projected hidden states| TALK
+  T2 --> DEC[Codec decoder] --> SPK[Speaker]
+  THINK <--> TOOLS[Local tools:<br/>timers, device control, RAG]
+</pre>
+<h3>How a turn flows</h3>
+<ol>
+<li>Every 80 ms the talker reads one frame of user audio and one frame of its own previous output, and writes one frame of output (which may be silence).</li>
+<li>The talker also writes a running transcript of the user (an ASR-like text stream) and a turn-state signal: <i>user speaking</i>, <i>user paused</i>, <i>user finished</i>, <i>user interrupting</i>.</li>
+<li>The thinker receives the transcript continuously. It starts drafting while the user is still talking (speculative start) and commits when the talker signals a likely turn end.</li>
+<li>The thinker streams its reply as text tokens plus projected hidden states into the talker's inner-monologue slot. The talker speaks them with natural prosody and timing.</li>
+<li>If the thinker is late, the talker covers the gap with natural fillers ("haan, ek second…") rather than dead air; this is learned behaviour, not a hard-coded rule.</li>
+<li>If the user interrupts, the talker stops within a few frames and tells the thinker to discard the rest of the plan.</li>
+</ol>
+
+<h2 id="budgets">6. Latency, memory and bandwidth budgets</h2>
+<p>These are planning estimates from public specs and standard arithmetic. Stage 0 and Stage 7 replace them with measurements.</p>
+
+<h3>6.1 Latency budget for one reply</h3>
+<div class="tbl"><table>
+<tr><th>Step</th><th>Budget</th><th>Notes</th></tr>
+<tr><td>Codec frame (encoder)</td><td>80 ms</td><td>Fixed by the 12.5 Hz frame</td></tr>
+<tr><td>Turn-end decision by talker</td><td>80–160 ms</td><td>1–2 frames after the user stops</td></tr>
+<tr><td>Thinker first tokens</td><td>0–150 ms</td><td>Near zero if the speculative draft started during the user's turn</td></tr>
+<tr><td>Talker first output frame + depth steps</td><td>≤ 80 ms</td><td>Must finish inside one frame</td></tr>
+<tr><td>Codec decoder + audio buffer</td><td>80 ms</td><td>Acoustic delay, as in Moshi</td></tr>
+<tr><td><b>Total target</b></td><td><b>≈ 320–550 ms</b></td><td>Target p50 ≤ 500 ms</td></tr>
+</table></div>
+
+<h3>6.2 Memory and placement on the i3 laptop</h3>
+<div class="tbl"><table>
+<tr><th>Component</th><th>Runs on</th><th>Memory</th></tr>
+<tr><td>Thinker: Sarvam 30B (2.4B active) or the sliced course 120B, ~3.5-bit average weights</td><td>Both CPU cores</td><td>~8–14 GB (all experts stay in RAM; only the active ones are read per token)</td></tr>
+<tr><td>Talker 0.6B (int4) + depth transformer ~50M (int4)</td><td>iGPU (OpenVINO)</td><td>~0.4 GB</td></tr>
+<tr><td>Codec encoder + decoder (int8)</td><td>iGPU</td><td>~0.1 GB</td></tr>
+<tr><td>KV caches</td><td>Both</td><td>0.5–1 GB</td></tr>
+<tr><td>Windows, audio, other apps</td><td>CPU</td><td>~5–6 GB</td></tr>
+<tr><td><b>Total</b></td><td></td><td><b>≈ 14–22 GB</b> of 24 GB</td></tr>
+</table></div>
+<p>RAM size is not the limit: 24 GB holds a whole 30B MoE. Bandwidth is. That is exactly the case MoE is built for: a large model in total, a small part active per token. One catch: with a 16 GB and an 8 GB stick, only 16 GB runs dual-channel and the rest at half speed. Optional fix for ₹2–3k: replace the 8 GB stick with a 16 GB one.</p>
+
+<h3>6.3 Bandwidth and compute budget</h3>
+<p>At batch size 1, every decoding step reads the active weights from RAM once. Measured on this laptop: <b>~21 GB/s</b> (a memory copy; 43 GB/s theoretical for dual-channel DDR4-2666). Plan to use ≤ 15 GB/s, about 70%.</p>
+<div class="callout"><p><b>The thinker only has to keep up with speech, not with a reader.</b> People speak Hindi at roughly 2.5–3 words per second. With an Indic-efficient tokenizer (BrahmicTokenizer-131K, Sarvam's) that is about 4–6 tokens per second, to be measured in Stage 0. So the thinker's target is ~5 tokens/s, not the 20+ expected from chat models.</p></div>
+<div class="tbl"><table>
+<tr><th>Component</th><th>Arithmetic</th><th>GB/s</th></tr>
+<tr><td>Talker temporal transformer (0.6B, int4)</td><td>0.35 GB × 12.5 steps/s</td><td>~4.4</td></tr>
+<tr><td>Depth transformer (~50M, int4)</td><td>0.025 GB × 8 codebooks × 12.5</td><td>~2.5</td></tr>
+<tr><td>Codec encode + decode</td><td>~0.1 GB × 2 × 12.5</td><td>~2.5</td></tr>
+<tr><td>Thinker (2.4B active, ~3.5-bit)</td><td>~1.05 GB × 5 tokens/s</td><td>~5.3</td></tr>
+<tr><td><b>Total</b></td><td></td><td><b>≈ 15 GB/s</b> (≈ 70% of measured)</td></tr>
+</table></div>
+<p><b>Compute is the second limit.</b> One 80 ms talker frame needs roughly 1.5–2 GFLOP (talker + depth + codec). The UHD 620 peaks at a few hundred GFLOPS in fp16, so that is about 10–20 ms if OpenVINO reaches a fair share of peak. The thinker needs ~5 GFLOP per token, ~25 GFLOP/s at 5 tokens/s, which the two AVX2 CPU cores can supply because the talker is not using them. Stage 0 measures both before anything is trained.</p>
+<div class="callout warn"><p><b>Consequence:</b> a 7B Moshi-size talker would need ~44 GB/s at int4, twice this laptop's total bandwidth, and a dense 8B thinker at 5 tokens/s would need ~20 GB/s on its own. Hence a ~0.6B talker on the iGPU and an MoE thinker with ≤ 2.5B active parameters on the CPU. The course 120B (5.93B active, top-12 routing) is too heavy as it stands; Stage 5 tests slicing it by language and cutting routing to top-4 (roughly 2–3B active) with a short healing fine-tune.</p></div>
+
+<h3>6.4 Reporting that edge-chip makers can use</h3>
+<p>Roddy does not run on a Modalix or a Jetson. It runs on something weaker: a 2-core i3 with about a fifth of their memory bandwidth, splitting work between CPU and integrated GPU much as an edge chip splits it between CPU and accelerator. Every result is reported in units that carry over. To make that easy for SiMa.ai and other chip makers to see:</p>
+<ul>
+<li>Report every component's needs in hardware-neutral units (bytes read per 80 ms frame, GB/s, operations per frame, peak memory) next to measured latency and watts.</li>
+<li><b>Bandwidth sweep:</b> run with 1, 2 and 4 CPU threads and with the iGPU on and off, measure the GB/s actually used, and plot latency against bandwidth, so a chip maker can read off where their chip would land.</li>
+<li>Publish a small budget calculator: given a device's memory, bandwidth and power, it says which talker and thinker sizes fit.</li>
+<li>Use only standard operators (transformer blocks, convolutions, int4/int8 weights) and export to ONNX so any vendor's compiler can try Roddy.</li>
+<li>Show the real-time pattern edge runtimes are built for: a hard-deadline model (the talker, every 80 ms) sharing one device with a best-effort model (the thinker), with measured priority behaviour.</li>
+<li>Show MoE expert slicing as the way to fit a big model on a small device, the same direction as Palette 3.0's MoE support.</li>
+</ul>
+
+<h2 id="decisions">7. Design decisions</h2>
+<div class="tbl"><table>
+<tr><th>Decision</th><th>Choice</th><th>Why</th><th>Revisit if</th></tr>
+<tr><td>Overall architecture</td><td>Thinker–talker, talker owns timing</td><td>Native duplex models are fluent but weak; a separate thinker keeps reasoning strong (D2, DuplexOmni, Qwen-Omni)</td><td>A single small duplex model reaches the reply-quality targets</td></tr>
+<tr><td>Codec</td><td>Start with Mimi (12.5 Hz, CC-BY); compare with NVIDIA's 105-language codec</td><td>Proven in duplex models; Human-1 already measured it on Hindi</td><td>Stage 2 shows poor quality on Dravidian languages or retroflex consonants</td></tr>
+<tr><td>Talker size and initialisation</td><td>~0.6B, from a small open multilingual LM (e.g. Qwen3-0.6B, Apache-2.0); test swapping in BrahmicTokenizer-131K</td><td>A 2B talker cannot be fully trained on 16 GB T4s (its optimiser states alone are ~32 GB); 0.6B trains on one T4 and, at int4, fits the i3's bandwidth budget</td><td>The course grants cluster time: then initialise a 1–2B talker from the LightningLM 2B seed</td></tr>
+<tr><td>Thinker</td><td>Ladder: 1–2B dense Indic-capable model at int4 (works on day 1) → Sarvam 30B (2.4B active) at ~3.5 bits, whole model in RAM → course 120B sliced by language, routing cut from top-12 to top-4 (~2–3B active)</td><td>On this laptop RAM is plentiful (24 GB) and bandwidth is scarce, which is exactly where MoE wins: large in total, small when active. The course slice is the research contribution</td><td>A slice cannot reach its size target without large quality loss</td></tr>
+<tr><td>Coupling interface</td><td>Text plan stream + projected hidden states into the inner-monologue slot; adapters trained, thinker frozen</td><td>Mirrors DuplexOmni and the 97M-adapter recipe; cheap to train</td><td>Prosody or timing is poor; then fine-tune the talker more deeply</td></tr>
+<tr><td>Languages</td><td>Hindi, Bengali, Marathi, Tamil, Telugu + Hinglish</td><td>Covers Indo-Aryan and Dravidian families and the largest speaker bases; all have IndicVoices data</td><td>Data quality for one language is too thin</td></tr>
+<tr><td>Hardware and compute</td><td>The i3 laptop runs everything (talker and codec on the iGPU, thinker on the CPU); Kaggle for all training and the T4 reference; course cluster only for the 120B run</td><td>Zero cost; a device weaker than any edge chip makes the result transfer upward</td><td>Stage 0 shows the i3 cannot hold the 80 ms frame even with the iGPU</td></tr>
+<tr><td>Runtime</td><td>OpenVINO (int4/int8 on CPU and iGPU) for talker and codec; llama.cpp or OpenVINO GenAI for the thinker</td><td>OpenVINO is the practical way to use the UHD 620; llama.cpp has mature int4 MoE support on CPU</td><td>One runtime proves faster for both</td></tr>
+</table></div>
+
+<h2 id="data">8. Data plan (built first)</h2>
+<p>Data comes first: every later stage trains on it, and it is where a small team can lead. Sarvam's speech data is private; no open recipe for Indian conversational speech exists. Roddy publishes its sources, filters, splitter and statistics so anyone can rebuild them.</p>
+
+<h3>8.1 What each part needs</h3>
+<div class="tbl"><table>
+<tr><th>Part</th><th>Data</th><th>Target</th><th>Why this much</th></tr>
+<tr><td>Talker: voice</td><td>Single-speaker speech with transcripts, 5 languages + Hinglish</td><td>5,000–10,000 h</td><td>A 600M Moshi-style model trained on ~100 h of dialogue learned the text side quickly, but its fine acoustic codebooks stayed under-trained and the audio did not decode cleanly (edwixx, Sep 2026). Voice quality needs thousands of hours before dialogue.</td></tr>
+<tr><td>Talker: timing</td><td>Two-channel conversations</td><td>≥ 1,000 h real (split per speaker) + 1,000–2,000 h synthetic</td><td>Turn-taking, backchannels, overlap and interruptions</td></tr>
+<tr><td>Talker: own voice</td><td>Clean, expressive studio-grade speech</td><td>500–1,700 h</td><td>The agent channel must sound clean even when training audio is noisy</td></tr>
+<tr><td>Thinker</td><td>Spoken-style instructions, dialogues and tool calls</td><td>50k+ examples per language</td><td>Short, speakable answers with spoken numbers and code-mixing</td></tr>
+<tr><td>Evaluation</td><td>Real, consented conversations, never trained on</td><td>≥ 300 scored items per language</td><td>Indic-FDB and the Sarvam head-to-head</td></tr>
+</table></div>
+
+<h3>8.2 Sources</h3>
+<div class="tbl"><table>
+<tr><th>Corpus</th><th>Size</th><th>Use in Roddy</th></tr>
+<tr><td>IndicVoices (AI4Bharat)</td><td>~12,000 h, 22 languages: 8% read, 76% extempore, 15% conversational; 11,200 h transcribed</td><td>Main voice set; conversational part for splitting and timing statistics</td></tr>
+<tr><td>Nirantar (AI4Bharat)</td><td>3,240 h human-transcribed conversational and extempore speech, 208 districts</td><td>Conversation timing, backchannel inventory, evaluation material</td></tr>
+<tr><td>IndicVoices-R</td><td>1,704 h of TTS-quality speech, 10,496 speakers</td><td>Talker's own voice; speaker prompts for synthetic data</td></tr>
+<tr><td>Rasa (AI4Bharat)</td><td>Expressive speech with emotion labels (verify size and licence)</td><td>Expressive range for the talker's voice</td></tr>
+<tr><td>Kathbath</td><td>1,684 h labelled, 12 languages</td><td>Voice set</td></tr>
+<tr><td>MUCS 2021 code-switched sets</td><td>Hindi–English and Bengali–English (verify size and licence)</td><td>Hinglish and code-mix coverage</td></tr>
+<tr><td>IndicST (Krutrim)</td><td>10.8k h training + 1.13k h eval for speech LLMs</td><td>Speech-instruction data</td></tr>
+<tr><td>MahaDhwani / Dhwani</td><td>279k h / 17k h raw audio</td><td>Extra voice data after pseudo-labelling; filter hard</td></tr>
+<tr><td>Project Vaani (IISc, ARTPARK)</td><td>60+ languages and dialects</td><td>Dialect robustness tests</td></tr>
+<tr><td>Indic-Transcribe (Bodhan AI + AI4Bharat, Sep 2026)</td><td>Open ASR models; Core reports 8.9 WER; gated, attribution required</td><td>Pseudo-labeller, cross-checked against IndicConformer</td></tr>
+</table></div>
+<p class="mono" style="font-size:12px;color:var(--muted)">No source is used before its licence is recorded in a data card (phase D0).</p>
+
+<h3>8.3 The data factory</h3>
+<ol>
+<li><b>Fetch:</b> stream each source from the Hugging Face Hub or its official mirror, one shard at a time; never keep raw audio beyond the shard being processed.</li>
+<li><b>Clean:</b> mono, resample to 24 kHz (Mimi's rate), normalise loudness, reject clipped files.</li>
+<li><b>Segment:</b> voice-activity detection into 2–30 s clips; keep conversational sessions whole for timing statistics.</li>
+<li><b>Identify:</b> language ID per clip; mark code-mixed clips from word-level script and language tags on the transcript.</li>
+<li><b>Label:</b> keep human transcripts; pseudo-label the rest with Indic-Transcribe and IndicConformer and keep clips where they agree.</li>
+<li><b>Score:</b> signal-to-noise ratio, agreement CER, speaking rate, speaker ID.</li>
+<li><b>Tokenise:</b> Mimi, 8 codebooks at 12.5 Hz (~7 GB per 10,000 h).</li>
+<li><b>Shard:</b> tokens + text + metadata into Parquet shards on a private Hugging Face dataset.</li>
+<li><b>Card:</b> one data card per source: licence, hours per language, speakers, every filter and how many clips it removed.</li>
+</ol>
+<p>Where it runs: code is written and tested on 10-minute samples on the laptop; steps 1–4 and 6 run in Kaggle CPU sessions (no weekly quota); steps 5 and 7 use Kaggle T4s.</p>
+<pre class="mono" style="font-size:12.5px;overflow-x:auto;background:var(--bg-2);padding:14px 16px;border-radius:10px">{"id": "iv-hi-000123-07", "source": "IndicVoices", "licence": "CC-BY-4.0", "lang": "hi", "codemix": false,
+ "dur_s": 11.4, "speaker": "iv-hi-s0451", "snr_db": 22.8, "transcript": "…", "pseudo": "…", "agree_cer": 0.06,
+ "lid_conf": 0.98, "split": "train", "tokens": "shard-0042.parquet#123"}</pre>
+
+<h3>8.4 Quality gates</h3>
+<div class="tbl"><table>
+<tr><th>Check</th><th>Threshold</th><th>Applies to</th></tr>
+<tr><td>Language-ID confidence</td><td>≥ 0.9 (code-mixed clips exempt but tagged)</td><td>All clips</td></tr>
+<tr><td>Signal-to-noise ratio</td><td>≥ 15 dB; ≥ 25 dB for the talker's own-voice set</td><td>All clips</td></tr>
+<tr><td>Agreement between two recognisers</td><td>CER ≤ 15%</td><td>Pseudo-labelled clips</td></tr>
+<tr><td>Clip length</td><td>2–30 s</td><td>Voice set</td></tr>
+<tr><td>Duplicates</td><td>Drop repeated audio or transcripts</td><td>All sources</td></tr>
+<tr><td>Personal data</td><td>Phone numbers and IDs masked in transcripts</td><td>Conversational data</td></tr>
+<tr><td>Test isolation</td><td>Speaker-disjoint test and validation sets</td><td>All splits</td></tr>
+</table></div>
+
+<h3>8.5 Data phases (weeks 1–10)</h3>
+<div class="tbl"><table>
+<tr><th>Phase</th><th>Weeks</th><th>Work</th><th>Exit gate</th></tr>
+<tr><td>D0 Inventory and licences</td><td>1</td><td>List every source with licence, hours per language and access terms; manifest schema; Kaggle template with checkpoint and resume</td><td>Licence table complete; no source without a data card</td></tr>
+<tr><td>D1 Pilot</td><td>1–2</td><td>10 h per language through every factory step end to end; measure throughput per step</td><td>Pilot shards on the Hub; T4-hours and CPU-hours per 1,000 h known</td></tr>
+<tr><td>D2 Voice set at scale</td><td>2–5</td><td>Run the factory over IndicVoices, Kathbath, IndicVoices-R, MUCS and filtered MahaDhwani</td><td>≥ 5,000 h tokenised and filtered; no language below half of the largest</td></tr>
+<tr><td>D3 Conversation statistics</td><td>3–4</td><td>Gaps, overlaps, backchannel rate and forms per language from Nirantar and IndicVoices conversations</td><td>Statistics report and backchannel inventory per language</td></tr>
+<tr><td>D4 Indic speaker splitter</td><td>4–7</td><td>Kezek-style mono-to-two-channel splitter, trained on synthetic mixes of known speakers</td><td>≤ 10% speaker-attribution error on a hand-checked set; ≥ 1,000 h of real conversation split</td></tr>
+<tr><td>D5 Synthetic duplex dialogues</td><td>5–9</td><td>Scripts from the thinker LLM, voices from IndicF5 / Indic-Speak, timing drawn from D3, real-world noise</td><td>1,000–2,000 h; native-speaker naturalness ≥ 3.5/5</td></tr>
+<tr><td>D6 Thinker text</td><td>4–10</td><td>Spoken-style SFT, tool calls and code-mixed dialogues per language</td><td>50k+ examples per language passing a spoken-style checker</td></tr>
+<tr><td>D7 Held-out test conversations</td><td>3–10</td><td>Consented real conversations, at least two speakers per language, quiet and noisy versions</td><td>≥ 300 items per language; never used in training</td></tr>
+</table></div>
+
+<h2 id="stages">9. Stages</h2>
+<p>Each stage has an exit gate. A stage that fails its gate drops to its fallback so the project always has something shippable. Week numbers assume a 24-week course; scale proportionally if yours is shorter.</p>
+
+<div class="stage" id="s0">
+<h3>Stage 0 · Foundations <span class="wk">weeks 1–2</span> <span class="tag t-acc">all</span></h3>
+<dl>
+<dt>Goal</dt><dd>Lock scope, tooling and baselines so later stages are measured against facts.</dd>
+<dt>Tasks</dt><dd><ul>
+<li>Monorepo with training, data, eval and edge folders; experiment tracking; data-card template.</li>
+<li>Licence audit for every corpus and model in sections 4 and 8.</li>
+<li>Laptop is known: i3-10110U, UHD 620, 24 GB DDR4-2666, ~21 GB/s measured copy. Set up OpenVINO (CPU + iGPU) and llama.cpp; run Sarvam 30B and a 1–2B dense model at int4 and record tokens/s; time one 80 ms frame of a dummy 0.6B transformer + Mimi on the iGPU.</li>
+<li>Kaggle template notebook: checkpoint every 30 minutes, resume after the 12-hour cut-off, data and checkpoints on the Hugging Face Hub, runs as a background commit.</li>
+<li>Build the evaluation harness skeleton: latency probes, ASR round-trip CER, Full-Duplex-Bench v1 runner.</li>
+<li>Measure baselines on 50 Indic test clips: Moshi, MiniCPM-o 4.5, Human-1 (if weights are available), cascaded IndicConformer → LLM → IndicF5 (large ones on a Kaggle T4).</li>
+</ul></dd>
+<dt>Deliverables</dt><dd>Repo, licence table, baseline numbers, confirmed targets for section 1.</dd>
+<dt>Exit gate</dt><dd>A dummy talker frame runs in ≤ 40 ms on the iGPU while the thinker decodes ≥ 5 tokens/s on the CPU; a Kaggle job survives a forced restart; baseline table filled.</dd>
+<dt>If it fails</dt><dd>Frame too slow: cut the depth transformer to 4–6 codebooks or the talker to 0.3B. Thinker too slow: use the 1–2B dense thinker. Both too slow: the i3 runs the half-duplex Stage 1 floor and full Roddy is shown on a T4.</dd>
+</dl></div>
+
+<div class="stage" id="s1">
+<h3>Stage 1 · Cascaded floor on the laptop <span class="wk">weeks 2–5</span> <span class="tag t-ok">guaranteed result</span></h3>
+<dl>
+<dt>Goal</dt><dd>An offline Indian-language voice assistant on the laptop using a cascaded pipeline. This alone already goes beyond Sarvam Edge, which has no on-device LLM.</dd>
+<dt>Tasks</dt><dd><ul>
+<li>Streaming VAD + semantic turn detector (text-based end-of-turn classifier on partial transcripts).</li>
+<li>IndicConformer (or Sarvam Edge-class) streaming ASR.</li>
+<li>Thinker v0: a 1–2B Indic-capable LLM at int4 (Sarvam 30B if Stage 0 shows it keeps up), prompted for spoken style.</li>
+<li>Streaming TTS: DhVaani (~0.1B; Indic Parler at ~0.9B is too slow for the i3), sentence-chunked.</li>
+<li>Barge-in: stop TTS on detected user speech.</li>
+<li>Measure end-to-end latency, power and memory.</li>
+</ul></dd>
+<dt>Deliverables</dt><dd>Demo video; latency/power report; the baseline every later stage must beat.</dd>
+<dt>Exit gate</dt><dd>≤ 1.5 s p50 response latency on the i3, 5 languages working.</dd>
+<dt>If it fails</dt><dd>Reduce to Hindi + Hinglish; use a smaller thinker.</dd>
+</dl></div>
+
+<div class="stage" id="s2">
+<h3>Stage 2 · Speech tokenizer <span class="wk">weeks 3–6</span> <span class="tag t-acc">speech</span></h3>
+<dl>
+<dt>Goal</dt><dd>Pick and, if needed, adapt the codec for Indian languages.</dd>
+<dt>Tasks</dt><dd><ul>
+<li>Evaluate Mimi and NVIDIA's 105-language codec per language: PESQ, STOI, speaker similarity, and ASR round-trip CER on IndicVoices-R test audio.</li>
+<li>Specific checks: retroflex vs dental consonants, aspiration, gemination, vowel length.</li>
+<li>No codec training by default. Only if one language is clearly worse, fine-tune just the Mimi decoder on IndicVoices-R, capped at ~30 T4-hours.</li>
+<li>Tokenise all training audio to Mimi tokens on Kaggle once; measure throughput in week 3 and store shards on the Hugging Face Hub.</li>
+<li>Check that the codec runs within budget on the i3's iGPU.</li>
+</ul></dd>
+<dt>Deliverables</dt><dd>Codec decision memo with per-language numbers; fine-tuned weights if needed.</dd>
+<dt>Exit gate</dt><dd>ASR round-trip CER on resynthesised audio within 2 points of the original for every language.</dd>
+<dt>If it fails</dt><dd>Use the better codec per language family, or accept a higher bitrate (more codebooks).</dd>
+</dl></div>
+
+<div class="stage" id="s3">
+<h3>Stage 3 · Data factory <span class="wk">weeks 3–10</span> <span class="tag t-warn">largest risk</span></h3>
+<dl>
+<dt>Goal</dt><dd>Run data phases D0–D7 (section 8.5) and pass their gates.</dd>
+<dt>Tasks</dt><dd><ol>
+<li>Assemble and clean the audio-text pretraining set; pseudo-label raw audio with the best available ASR; filter.</li>
+<li>Measure real Indic conversation statistics (gaps, overlaps, backchannel rates and forms per language) from Nirantar and IndicVoices conversational audio.</li>
+<li>Build and validate the Indic mono-to-stereo splitter; report its error rate on a hand-checked set.</li>
+<li>Build the synthetic dialogue generator using those statistics; generate in batches with diversity checks.</li>
+<li>Human spot-check: 2 native speakers per language rate 100 random clips for naturalness.</li>
+<li>Freeze train/validation/test splits with speaker-disjoint test sets.</li>
+</ol></dd>
+<dt>Deliverables</dt><dd>Datasets with data cards; conversation-statistics report; splitter tool.</dd>
+<dt>Exit gate</dt><dd>≥ 5k h pretraining audio (as tokens); ≥ 1k h two-channel dialogue; spot-check naturalness ≥ 3.5/5.</dd>
+<dt>If it fails</dt><dd>Cut to 3 languages; increase synthetic share; buy or record a small real Hindi conversation set for fine-tuning.</dd>
+</dl></div>
+
+<div class="stage" id="s4">
+<h3>Stage 4 · Talker <span class="wk">weeks 6–12</span> <span class="tag t-acc">speech</span></h3>
+<dl>
+<dt>Goal</dt><dd>A ~0.6B duplex talker that hears and speaks Indian languages with natural timing, trained entirely on Kaggle T4s.</dd>
+<dt>Tasks</dt><dd><ol>
+<li><b>4a Audio-text pretraining:</b> initialise the temporal transformer from a ~0.6B open LM; add Mimi-token embeddings and a ~100M depth transformer; train on interleaved audio and text with an inner-monologue text stream. fp16 mixed precision (T4 has no bf16), DDP across the two T4s, gradient checkpointing, checkpoint every 30 minutes.</li>
+<li><b>4b Duplex fine-tuning:</b> train on two-channel data (split real + synthetic) with separate user and assistant streams, as in Moshi.</li>
+<li><b>4c Behaviour tuning:</b> preference or RL tuning for pause handling, backchannel timing and interruption response, following PersonaPlex's RL post-training on Seamless Interaction.</li>
+<li>Ablate talker size (0.3B / 0.6B) against the bandwidth budget; 1B only with LoRA or course-cluster time.</li>
+<li>Budget: ~150–250 T4-hours for 4a–4c (section 11.2).</li>
+</ol></dd>
+<dt>Deliverables</dt><dd>Talker checkpoints; Full-Duplex-Bench-style timing numbers on Indic test clips.</dd>
+<dt>Exit gate</dt><dd>Turn-taking and interruption takeover rates ≥ 0.9 on held-out Indic clips; speech CER ≤ 15%.</dd>
+<dt>If it fails</dt><dd>Use the talker only as a turn-taking and backchannel controller over the Stage 1 TTS (a "semi-duplex" system).</dd>
+</dl></div>
+
+<div class="stage" id="s5">
+<h3>Stage 5 · Thinker <span class="wk">weeks 4–12, in parallel</span> <span class="tag t-acc">LLM · course link</span></h3>
+<dl>
+<dt>Goal</dt><dd>A strong Indian-language reasoning model that fits in ~14 GB of RAM and decodes ≥ 5 tokens/s (speaking speed) on the i3's two CPU cores while the talker runs.</dd>
+<dt>Tasks</dt><dd><ol>
+<li>Baseline: a 1–2B Indic-capable dense model at int4; measure Indic quality.</li>
+<li>Sarvam 30B (128 experts, 2.4B active): log expert routing on text from each target language; prune rarely used experts; measure quality loss (on a Kaggle 2× T4 with the model loaded in 4-bit).</li>
+<li>Course 120B: add language-aware routing during the course run so experts specialise by language family; extract per-language slices (MeLt-style). This is the research link between Roddy and the course project. Then cut routing from top-12 to top-4 and heal with a short QLoRA fine-tune on Kaggle, so active parameters fall from ~5.9B to roughly 2–3B. The open question: how much quality survives.</li>
+<li>Spoken-style SFT with QLoRA on Kaggle: short replies, spoken numbers, code-mixing on demand, tool-call format.</li>
+<li>Incremental prefill: feed the user's transcript into the thinker as it arrives, so the i3's slow prompt processing stays off the critical path.</li>
+<li>Speculative decoding draft head (EAGLE3-style) for the chosen thinker.</li>
+</ol></dd>
+<dt>Deliverables</dt><dd>Thinker slices with size/quality table per language; draft heads.</dd>
+<dt>Exit gate</dt><dd>Fits ≤ 14 GB; ≥ 5 tokens/s on the i3 alongside the talker; Indic QA within 10% of the unpruned model.</dd>
+<dt>If it fails</dt><dd>Ship with the dense baseline; keep the slicing work as a separate paper.</dd>
+</dl></div>
+
+<div class="stage" id="s6">
+<h3>Stage 6 · Coupling thinker and talker <span class="wk">weeks 12–16</span> <span class="tag t-acc">core novelty</span></h3>
+<dl>
+<dt>Goal</dt><dd>Make the talker speak the thinker's content naturally, in real time, with interruptions and fillers.</dd>
+<dt>Tasks</dt><dd><ol>
+<li>Projection adapters (~100M) from thinker hidden states into the talker's inner-monologue slot; thinker frozen in 4-bit on one T4, talker on the other, as in the 97M-adapter recipe (~100–200 T4-hours).</li>
+<li>Asynchronous, time-sliced runtime: talker at 12.5 Hz, thinker streaming on its own clock (DuplexOmni pattern).</li>
+<li>Speculative start: thinker drafts while the user speaks; commit or discard on the talker's turn-state signal.</li>
+<li>Gap handling: train the talker to produce natural fillers when the plan stream is late.</li>
+<li>Interruption protocol: talker stops, thinker receives the cut-off point and the new user speech.</li>
+<li>Tool calls: timers, device controls and local retrieval, tested with Full-Duplex-Bench v3-style scenarios.</li>
+</ol></dd>
+<dt>Deliverables</dt><dd>Coupled model running on a T4 and the laptop GPU; ablation of text-only vs text + hidden-state coupling.</dd>
+<dt>Exit gate</dt><dd>On a GPU: ≥ 80% complete replies, ≥ 75% prompt-following, p50 latency ≤ 400 ms.</dd>
+<dt>If it fails</dt><dd>Text-only coupling (thinker text → talker inner monologue), which is simpler and still duplex.</dd>
+</dl></div>
+
+<div class="stage" id="s7">
+<h3>Stage 7 · Laptop port and edge-class optimisation <span class="wk">weeks 14–20</span> <span class="tag t-acc">systems</span></h3>
+<dl>
+<dt>Goal</dt><dd>Roddy running offline on the i3 laptop, within the budgets of section 6.</dd>
+<dt>Tasks</dt><dd><ol>
+<li>Export talker, codec and thinker using standard operators (OpenVINO for the iGPU; llama.cpp or OpenVINO for the CPU); int4 weights, 16-bit or 8-bit activations; check accuracy after each quantisation step.</li>
+<li>Scheduler: talker and codec on the iGPU as the hard-deadline lane; thinker on the CPU cores, best-effort, with speculative decoding; audio I/O at high priority.</li>
+<li>Memory map and KV-cache limits; sliding-window talker context.</li>
+<li>Bandwidth sweep (1, 2, 4 threads; iGPU on and off): latency against measured GB/s, as in section 6.4.</li>
+<li>Power and thermal soak: 30-minute continuous conversation at room and high ambient temperature.</li>
+<li>Robustness: far-field mic, noise, low-volume speakers.</li>
+</ol></dd>
+<dt>Deliverables</dt><dd>On-device build; latency, power and memory report; demo videos per language.</dd>
+<dt>Exit gate</dt><dd>p50 ≤ 800 ms on the i3, fits in 24 GB RAM, software-measured power reported, no dropped frames in a 30-minute soak.</dd>
+<dt>If it fails</dt><dd>Shrink the talker or its codebooks; use the 1–2B thinker; or ship the i3 half-duplex floor plus full Roddy on a T4.</dd>
+</dl></div>
+
+<div class="stage" id="s8">
+<h3>Stage 8 · Indic-FDB benchmark <span class="wk">weeks 8–22</span> <span class="tag t-acc">evaluation</span></h3>
+<dl>
+<dt>Goal</dt><dd>The first open full-duplex benchmark for Indian languages.</dd>
+<dt>Tasks</dt><dd><ol>
+<li>Port Full-Duplex-Bench v1 dimensions (pause handling, backchannels, smooth turn-taking, interruptions) to 5 languages + Hinglish, following the French FDB precedent.</li>
+<li>Add Indic-specific dimensions: code-switching mid-turn, culturally typical backchannels, honorific/register consistency, spoken numbers and Indian names.</li>
+<li>Record real test conversations with consenting native speakers; noisy-environment variants.</li>
+<li>Automated examiner (FDB v2 style) for multi-turn quality; human MOS protocol with native raters.</li>
+<li>Run Roddy, Human-1, Moshi, MiniCPM-o and the cascaded floor.</li>
+</ol></dd>
+<dt>Deliverables</dt><dd>Benchmark release (audio, scripts, leaderboard table, paper section).</dd>
+<dt>Exit gate</dt><dd>≥ 300 scored items per language; inter-rater agreement reported.</dd>
+<dt>If it fails</dt><dd>Release a smaller Hindi + Hinglish + Tamil version.</dd>
+</dl></div>
+
+<div class="stage" id="s9">
+<h3>Stage 9 · Release and outreach <span class="wk">weeks 20–24</span> <span class="tag t-acc">all</span></h3>
+<dl>
+<dt>Goal</dt><dd>Make the work usable and visible.</dd>
+<dt>Tasks</dt><dd><ul>
+<li>Release weights, data recipes, splitter, Indic-FDB and the laptop build scripts and Kaggle notebooks with licences and model cards.</li>
+<li>Paper: architecture, data recipe, edge results, benchmark.</li>
+<li>Demo videos: one per language, real devices, unedited latency.</li>
+<li>Outreach: share the hardware-neutral budget report with edge-chip makers (SiMa.ai developer forum, NVIDIA Jetson community) and offer Roddy as a reference workload; Sarvam (fills the on-device LLM and speech-to-speech gap in Sarvam Edge); course showcase.</li>
+</ul></dd>
+<dt>Deliverables</dt><dd>Public release, paper draft, demo reel.</dd>
+<dt>Exit gate</dt><dd>A stranger can reproduce the Stage 1 floor and run Roddy from the README.</dd>
+</dl></div>
+
+<h2 id="timeline">10. Timeline</h2>
+<pre class="mermaid">
+gantt
+  dateFormat  X
+  axisFormat  w%s
+  section Shared
+  S0 Foundations          :0, 2
+  S9 Release              :20, 24
+  section Systems
+  S1 Cascaded floor       :2, 5
+  S7 Edge port            :14, 20
+  section Speech
+  S2 Tokenizer            :3, 6
+  S4 Talker               :6, 12
+  section Data
+  S3 Data factory         :3, 10
+  section LLM
+  S5 Thinker              :4, 12
+  S6 Coupling             :12, 16
+  section Eval
+  S8 Indic-FDB            :8, 22
+</pre>
+<div class="tbl"><table>
+<tr><th>Milestone</th><th>Week</th><th>Proof</th></tr>
+<tr><td>M1: Offline Indic assistant on the laptop (cascaded)</td><td>5</td><td>Demo video + latency report</td></tr>
+<tr><td>M2: Data factory complete</td><td>10</td><td>Data cards + spot-check scores</td></tr>
+<tr><td>M3: Duplex talker speaks Hindi</td><td>12</td><td>Timing metrics on held-out clips</td></tr>
+<tr><td>M4: Coupled Roddy on GPU</td><td>16</td><td>Reply-quality and latency numbers</td></tr>
+<tr><td>M5: Roddy on the i3 laptop</td><td>20</td><td>Laptop report with bandwidth sweep</td></tr>
+<tr><td>M6: Public release</td><td>24</td><td>Repo, weights, benchmark, paper</td></tr>
+</table></div>
+
+<h2 id="team">11. Team and compute</h2>
+<h3>11.1 Roles for a team of five</h3>
+<div class="tbl"><table>
+<tr><th>Role</th><th>Owns</th></tr>
+<tr><td>Data lead</td><td>Stage 3, data cards, licences, human spot-checks</td></tr>
+<tr><td>Speech modelling</td><td>Stages 2 and 4 (codec, talker)</td></tr>
+<tr><td>LLM / course link</td><td>Stage 5 and the course 120B language routing; Stage 6 adapters with speech modelling</td></tr>
+<tr><td>Edge systems</td><td>Stages 1 and 7, laptop runtime, scheduler, power, bandwidth sweep</td></tr>
+<tr><td>Evaluation and product</td><td>Stage 8, eval harness, demos, outreach (Stage 9)</td></tr>
+</table></div>
+<p>With three people, merge data with evaluation and speech with LLM; drop to 3 languages.</p>
+
+<h3>11.2 Compute budget in Kaggle T4-hours (planning only)</h3>
+<div class="tbl"><table>
+<tr><th>Job</th><th>T4-hours</th><th>Basis</th></tr>
+<tr><td>Tokenise ~10k h of audio to Mimi tokens</td><td>~20–50</td><td>Measure in week 3</td></tr>
+<tr><td>ASR pseudo-labelling ~5k h</td><td>~50</td><td>Assumes ~100× real-time ASR on a T4</td></tr>
+<tr><td>Synthetic dialogue TTS ~1–2k h</td><td>~200–400</td><td>Assumes RTF ~0.2 on a T4; the biggest data cost, so measure first</td></tr>
+<tr><td>Indic splitter: build + run on ~2k h</td><td>~50–100</td><td>Kezek reports ~230 h per GPU-hour on a stronger GPU</td></tr>
+<tr><td>Talker 4a–4c (0.6B, ~10k h, ~3 epochs + duplex and behaviour tuning)</td><td>~150–250</td><td>≈ 4×10¹⁸ FLOPs per epoch (temporal + depth) at ~20 TFLOPs effective per T4 ≈ 55 T4-hours per epoch</td></tr>
+<tr><td>Thinker: QLoRA SFT, draft head, Sarvam routing logs</td><td>~60–90</td><td>Course 120B slicing happens on the course cluster</td></tr>
+<tr><td>Coupling adapters (~100M)</td><td>~100–200</td><td>Precedent: 97M parameters in ~30 GPU-hours on bigger GPUs</td></tr>
+<tr><td>Evaluation (baselines, Indic-FDB runs)</td><td>~50</td><td></td></tr>
+<tr><td><b>Total</b></td><td><b>≈ 700–1,200</b></td><td></td></tr>
+</table></div>
+<p><b>Capacity:</b> one Kaggle account gives ~30 session-hours a week on 2× T4, about 60 T4-hours, or ~1,400 over 24 weeks. That fits the budget with little room for re-runs. Three accounts owned by three teammates give ~180 T4-hours a week, which is comfortable.</p>
+<div class="callout warn"><p><b>Kaggle allows one account per person.</b> Three accounts are fine if they belong to three teammates, each running their own notebooks. Three accounts held by one person to stretch the free quota break Kaggle's terms and risk all of them being banned mid-project, with their notebooks and outputs. The budget above is planned to fit on a single account.</p></div>
+<p><b>Working within Kaggle:</b> 12-hour sessions, so checkpoint every 30 minutes and resume automatically; 20 GB of saved output, so keep data and checkpoints on the Hugging Face Hub; run long jobs as background commits; train in fp16 (no bf16 on T4); prefer 2× T4 over the P100; leave the TPU unused, since it would need a JAX/XLA port; use free Colab for overflow; do data cleaning and filtering in Kaggle CPU sessions, which have no weekly quota.</p>
+<p><b>Cost:</b> zero. Laptop already owned (optional ₹2–3k: swap the 8 GB stick for 16 GB to make all 32 GB dual-channel); Kaggle and Colab are free; the course cluster is used only inside the course run. Optional: a USB microphone for far-field tests, and API credit only if Bulbul V4 Flash is used for a synthetic-data quality slice.</p>
+
+<h2 id="eval">12. Evaluation plan</h2>
+<div class="tbl"><table>
+<tr><th>Area</th><th>Metric</th><th>Tool</th></tr>
+<tr><td>Timing</td><td>Takeover rate for pauses, turn ends, interruptions; backchannel frequency and timing divergence; response and stop latency</td><td>Indic-FDB (FDB v1/v1.5 method)</td></tr>
+<tr><td>Content</td><td>Prompt-following, completeness, factual QA, instruction following</td><td>Indic-FDB examiner, translated VoiceBench subset, Human-1's rubric for comparison</td></tr>
+<tr><td>Speech quality</td><td>CER via ASR round trip, MOS naturalness, speaker consistency</td><td>IndicConformer / Saaras, native raters</td></tr>
+<tr><td>Code-mixing</td><td>Correct script and pronunciation of switched words; switch-point naturalness</td><td>Indic-FDB code-switch set</td></tr>
+<tr><td>Tools</td><td>Tool-call success while conversation continues</td><td>FDB v3-style scenarios, Joi-Bench-Task style</td></tr>
+<tr><td>Device</td><td>p50/p95 latency, watts, memory, dropped frames, thermal throttling</td><td>On-device probes, power meter</td></tr>
+<tr><td>Robustness</td><td>All above under noise, far-field and dialect shift</td><td>Noisy Indic-FDB variants, Vaani dialect clips</td></tr>
+</table></div>
+
+<h2 id="speed">13. Speed playbook</h2>
+<ol>
+<li><b>Bandwidth first.</b> On the i3 (~21 GB/s) and on 100 GB/s-class edge chips (Modalix, Jetson, phones), tokens per second are bounded by bytes streamed per step. Keep the talker ≤ 0.6B and the thinker's active parameters ≤ 2.5B, both at about 4 bits.</li>
+<li><b>Speaking-speed thinker.</b> The thinker needs only ~5 tokens/s to keep up with speech; spend the rest of the budget on the talker's frame deadline.</li>
+<li><b>Use the iGPU.</b> Put the talker and codec on the UHD 620 so the hard-deadline loop never competes with the thinker for CPU cores.</li>
+<li><b>Speculative start.</b> Let the thinker draft during the user's turn; most of its latency then disappears from the critical path.</li>
+<li><b>Speculative decoding</b> for the thinker with an EAGLE3-style draft head (SiMa reports up to 3.5× tokens/s from EAGLE3/DFlash on its chip).</li>
+<li><b>Priorities.</b> The talker's 80 ms loop must never wait on the thinker. Run them as separate processes or streams with the talker at higher priority, and keep the codec on its own lane.</li>
+<li><b>Short depth transformer.</b> Predict fewer codebooks for early frames (coarse first) if the frame deadline is at risk.</li>
+<li><b>Sliding contexts.</b> Cap the talker KV cache (a few minutes at 12.5 Hz); summarise older dialogue into the thinker's context.</li>
+<li><b>Lower frame rate experiments.</b> Try a 6.25 Hz codec (FlexiCodec) to halve talker steps if quality holds.</li>
+<li><b>Measure p95, not just p50.</b> Long-tail stalls are what users notice.</li>
+</ol>
+
+<h2 id="quality">14. Quality playbook</h2>
+<ol>
+<li><b>Intelligence lives in the thinker.</b> Do not try to make the talker smart; make it a good listener and a good speaker.</li>
+<li><b>Real statistics for synthetic data.</b> Overlap, gap and backchannel distributions must come from real Indic conversations.</li>
+<li><b>Native-speaker review at every stage gate,</b> per language, with a written rubric.</li>
+<li><b>Spoken-style thinker.</b> Short sentences, spoken numbers and dates, Indian names pronounced correctly, no lists or markdown.</li>
+<li><b>Code-mixing by design.</b> Include Hinglish (and Tanglish where data allows) in every data stream, written in each language's own script.</li>
+<li><b>Behaviour tuning after SFT</b> for pause handling and backchannels, as PersonaPlex did.</li>
+<li><b>Safety.</b> No voice cloning of real people without consent; refusal behaviour in all languages; on-device by default for privacy.</li>
+</ol>
+
+<h2 id="risks">15. Risk register</h2>
+<div class="tbl"><table>
+<tr><th>Risk</th><th>Likelihood</th><th>Impact</th><th>Mitigation</th></tr>
+<tr><td>Synthetic dialogues sound robotic; talker learns unnatural timing</td><td><span class="tag t-bad">High</span></td><td>High</td><td>Real-statistics timing; Indic splitter for real conversations; behaviour tuning; small real fine-tune set</td></tr>
+<tr><td>Talker misses the 80 ms deadline on the i3</td><td><span class="tag t-bad">High</span></td><td>High</td><td>Stage 0 timing test before training; iGPU; fewer codebooks; 6.25 Hz codec; T4 fallback for the full demo</td></tr>
+<tr><td>Kaggle quota or session limits stall training</td><td><span class="tag t-warn">Medium</span></td><td>High</td><td>Budget fits one account; checkpoint every 30 minutes; store tokens, not audio; Colab as overflow</td></tr>
+<tr><td>The 15 W laptop throttles in long conversations</td><td><span class="tag t-warn">Medium</span></td><td>Medium</td><td>30-minute soak in Stage 7; cooling stand; report throttled numbers honestly</td></tr>
+<tr><td>Thinker slice loses too much Indic quality</td><td><span class="tag t-warn">Medium</span></td><td>Medium</td><td>Thinker ladder; dense 1–2B fallback</td></tr>
+<tr><td>Codec quality poor for some languages</td><td><span class="tag t-warn">Medium</span></td><td>Medium</td><td>Stage 2 fine-tuning; alternative 105-language codec</td></tr>
+<tr><td>Edge runtime lacks an operator the talker needs (depth-transformer loop, codec convolutions)</td><td><span class="tag t-warn">Medium</span></td><td>High</td><td>Export a toy talker in week 2; keep to standard operators</td></tr>
+<tr><td>Licence blocks a corpus or model</td><td><span class="tag t-warn">Medium</span></td><td>Medium</td><td>Stage 0 audit; alternatives listed per component</td></tr>
+<tr><td>A big lab releases an Indic duplex model mid-project</td><td><span class="tag t-warn">Medium</span></td><td>Medium</td><td>Roddy's edge deployment, benchmark and data recipe stay distinct; use the new model as a baseline</td></tr>
+<tr><td>Scope too large for the course timeline</td><td><span class="tag t-bad">High</span></td><td>High</td><td>Stage gates with fallbacks; Stage 1 floor is shippable by week 5</td></tr>
+</table></div>
+
+<h2 id="open">16. Open questions to resolve in Stage 0</h2>
+<ul>
+<li>Are Human-1 weights released, and under what licence?</li>
+<li>Haru-4B and MiniCPM-o 4.5 licences, Indic quality, and whether either can serve as a talker starting point.</li>
+<li>Which languages Qwen3-Omni's speech output supports (not checked for this plan).</li>
+<li>Multi-threaded bandwidth on the i3 with llama.cpp and OpenVINO running (the ~21 GB/s figure is a single-threaded copy).</li>
+<li>Real fp16 throughput of the UHD 620 under OpenVINO, and whether Mimi's convolutions run well on it.</li>
+<li>Hindi tokens per second of natural speech under BrahmicTokenizer-131K and Sarvam's tokenizer (sets the thinker's speed target).</li>
+<li>Whether the course will give any cluster hours beyond the 120B run (would allow a 1–2B talker).</li>
+<li>Licences of IndicVoices, Nirantar, IndicST and MahaDhwani for model release.</li>
+<li>How many weeks the course actually runs, and how much of the course 120B schedule can include language-aware routing.</li>
+</ul>
+
+<h2 id="sources">17. Sources</h2>
+<ul class="src">
+<li>Human-1 (Josh Talks): <a href="https://arxiv.org/abs/2604.23295">arXiv:2604.23295</a></li>
+<li>Moshi and Mimi: <a href="https://arxiv.org/abs/2410.00037">arXiv:2410.00037</a>, <a href="https://github.com/kyutai-labs/moshi">github.com/kyutai-labs/moshi</a>, <a href="https://huggingface.co/kyutai/mimi">huggingface.co/kyutai/mimi</a></li>
+<li>D2 (Qwen3-Omni-D2): <a href="https://arxiv.org/abs/2610.17124">arXiv:2610.17124</a></li>
+<li>DuplexOmni: <a href="https://arxiv.org/abs/2606.09186">arXiv:2606.09186</a></li>
+<li>Qwen3-Omni: <a href="https://huggingface.co/papers/2509.17765">arXiv:2509.17765</a></li>
+<li>MiniCPM-o 4.5: <a href="https://arxiv.org/abs/2604.27393">arXiv:2604.27393</a>, <a href="https://huggingface.co/openbmb/MiniCPM-o-4_5">HF model</a></li>
+<li>PersonaPlex: <a href="https://research.nvidia.com/labs/adlr/personaplex/">NVIDIA research page</a></li>
+<li>Full-duplex collection: <a href="https://huggingface.co/collections/wrice/full-duplex-speech-models">HF collection</a>; tracker <a href="https://www.fullduplex.ai/signals/2026-W47">fullduplex.ai W47</a> (AI-generated digest; covers "An LLM Is All You Need" arXiv:2611.14774, Kezek arXiv:2611.16933, Joi-Bench-Task arXiv:2611.12118, Haru-4B)</li>
+<li>Full-Duplex-Bench v1–v3: <a href="https://github.com/DanielLin94144/Full-Duplex-Bench">github.com/DanielLin94144/Full-Duplex-Bench</a>; French FDB: <a href="https://aclanthology.org/2026.emnlp-industry.137.pdf">EMNLP 2026 industry</a></li>
+<li>FlexiCodec: <a href="https://arxiv.org/abs/2510.00981">arXiv:2510.00981</a>; NVIDIA low-frame-rate codec: <a href="https://huggingface.co/nvidia/low-frame-rate-speech-codec-22khz">HF model card</a></li>
+<li>IndicVoices: <a href="https://huggingface.co/datasets/ai4bharat/IndicVoices">HF dataset</a>; AI4Bharat ASR resources (Nirantar, MahaDhwani, Kathbath, Dhwani): <a href="https://ai4bharat.iitm.ac.in/areas/asr/">ai4bharat.iitm.ac.in</a>; IndicVoices-R: <a href="https://arxiv.org/abs/2409.05356">arXiv:2409.05356</a></li>
+<li>IndicF5: <a href="https://ai4bharat.iitm.ac.in/areas/tts/">AI4Bharat TTS</a>; Indic Parler-TTS: <a href="https://huggingface.co/ai4bharat/indic-parler-tts">HF model</a>; Bulbul V4 Flash: <a href="https://www.sarvam.ai/apis/text-to-speech">Sarvam TTS API</a>; DhVaani: <a href="https://vaani.iisc.ac.in/models">Project Vaani</a>; IndicST: <a href="https://ai-labs.olakrutrim.com/models/IndicST-Dataset">Krutrim</a></li>
+<li>Saaras V4: <a href="https://www.marktechpost.com/2026/09/26/sarvam-ai-releases-saaras-v4-a-speech-to-text-model-for-all-22-indian-languages-and-global-english/">MarkTechPost</a>; Voice of India benchmark: <a href="https://arxiv.org/abs/2604.19151">arXiv:2604.19151</a></li>
+<li>Sarvam Edge: <a href="https://www.sarvam.ai/blogs/sarvam-edge">blog</a>; Sarvam 30B/105B: <a href="https://www.sarvam.ai/blogs/sarvam-30b-105b">blog</a></li>
+<li>SiMa.ai Palette 3.0: <a href="https://sima.ai/press-release/industry-first-agentic-software-suite-palette-3-0/">press release</a>; hardware docs: <a href="https://developer.sima.ai/hardware">developer.sima.ai</a>; Modalix brief (102 GB/s): <a href="https://sima.ai/wp-content/uploads/2024/12/SiMa_MLSoC_Modalix_Product-Brief.pdf">PDF</a>; DevKit price: <a href="https://venturebeat.com/infrastructure/local-and-offline-edge-ai-gets-a-boost-as-sima-ai-launches-palette-3-0-with-3-5x-faster-text-generation-and-a-new-model-browser">VentureBeat</a>; LLiMa: <a href="https://www.edge-ai-vision.com/2025/09/llima-sima-ais-automated-code-generation-framework-for-llms-and-vlms-for/">Edge AI and Vision Alliance</a></li>
+<li>NVIDIA Jetson Orin Nano Super ($249, 8 GB, 102 GB/s, 7–25 W): <a href="https://developer.nvidia.com/blog/nvidia-jetson-orin-nano-developer-kit-gets-a-super-boost/">NVIDIA blog</a></li>
+<li>OpenVINO (CPU and integrated-GPU inference): <a href="https://docs.openvino.ai/">docs.openvino.ai</a></li>
+<li>Kaggle Notebooks limits: <a href="https://www.kaggle.com/docs/notebooks">kaggle.com/docs/notebooks</a>; Qwen3-0.6B: <a href="https://huggingface.co/Qwen/Qwen3-0.6B">HF model</a></li>
+<li>Sarvam 2026 lineup (Saaras V4, Bulbul V4, open 30B/105B, Edge): <a href="https://entrepreneurloop.com/sarvam-ai-epoch-2026-sovereign-ai-infrastructure-roadmap/">Epoch 2026 report</a>, <a href="https://techcrunch.com/2026/02/18/indias-sarvam-wants-to-bring-its-ai-models-to-feature-phones-cars-and-smart-glasses/">TechCrunch</a></li>
+<li>600M Moshi-style duplex model on Qwen3-0.6B (lessons on acoustic codebooks): <a href="https://huggingface.co/blog/edwixx/shrinking-full-duplex-speech-training-a-600m-moshi">HF blog, Sep 2026</a></li>
+<li>Indic-Transcribe (Bodhan AI + AI4Bharat): <a href="https://huggingface.co/bodhan-ai/indic-transcribe-flex">HF model</a></li>
+<li>LightningLM (previous cohort): <a href="https://lightninglm.theschoolofai.in/">lightninglm.theschoolofai.in</a></li>
+<li>Language-specific expert extraction (MeLt): <a href="https://dl.acm.org/doi/full/10.1145/3803730.3803762">ACM 2026</a></li>
+</ul>
+<p style="color:var(--muted);font-size:13px">Most sources were read as search summaries, not full papers. Figures are the sources' own claims. Budgets in section 6 and T4-hours in section 11 are planning estimates to be replaced by measurements.</p>
+</main>
+</div>

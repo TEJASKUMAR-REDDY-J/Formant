@@ -1,0 +1,405 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nyquist Build Plan</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap">
+<style>
+/* LightningLM colour scale: white page, near-black ink, grey hairlines, one blue accent; red = critical path, amber = soft dependency, green = done-when. */
+:root{
+  --bg:#FFFFFF; --alt:#FAFAFA; --ink:#111111; --body:#1A1A1A; --muted:#555555; --faint:#888888;
+  --line:#E8E8E8; --line-2:#D0D0D0; --accent:#2563EB; --accent-soft:rgba(37,99,235,.08);
+  --red:#DC2626; --green:#16A34A; --amber:#D97706; --highlight:#FEF3C7;
+  --display:"Bricolage Grotesque","Segoe UI",ui-sans-serif,system-ui,sans-serif;
+  --font:"Geist",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"Geist Mono",ui-monospace,Consolas,monospace;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html{background:var(--bg);scroll-behavior:smooth;scroll-padding-top:64px}
+body{margin:0;background:var(--bg);color:var(--body);font:400 16.5px/1.6 var(--font);-webkit-font-smoothing:antialiased}
+a{color:var(--accent)}
+h1,h2,h3,h4{font-family:var(--display);color:var(--ink);margin:0;letter-spacing:-.02em;text-wrap:balance}
+p{margin:0}
+.wrap{max-width:1080px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.mono{font-family:var(--mono)}
+nav{position:sticky;top:0;z-index:5;background:rgba(255,255,255,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+nav .wrap{display:flex;gap:20px;align-items:center;height:52px;overflow-x:auto;scrollbar-width:none;font-size:13.5px;white-space:nowrap}
+nav .wrap::-webkit-scrollbar{display:none}
+nav b{font:700 16px var(--display);color:var(--ink)}
+nav a{color:var(--muted);text-decoration:none}
+nav a:hover{color:var(--ink)}
+header{padding:64px 0 40px;border-bottom:1px solid var(--line)}
+.eyebrow{font:500 12px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+header h1{font-size:clamp(40px,6vw,68px);line-height:1;font-weight:800;margin-top:14px}
+.lede{font-size:19px;color:var(--muted);margin-top:18px;max-width:44em}
+.meta{font:400 13px var(--mono);color:var(--faint);margin-top:18px}
+section{padding:56px 0;border-bottom:1px solid var(--line)}
+.kicker{font:500 12px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--faint)}
+section>.wrap>h2{font-size:clamp(28px,3.6vw,40px);font-weight:800;margin-top:8px}
+.sub{color:var(--muted);margin-top:12px;max-width:46em}
+ul.plain{margin:16px 0 0;padding-left:20px;max-width:52em}
+ul.plain li{margin:6px 0}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 40px}
+.kv{border-top:1px solid var(--line);padding:14px 0}
+.kv h4{font-size:16px}
+.kv p{color:var(--muted);font-size:15px;margin-top:4px}
+/* legend + chips */
+.legend{display:flex;flex-wrap:wrap;gap:8px 22px;margin-top:20px;font-size:13.5px;color:var(--muted)}
+.chip{display:inline-block;font:500 12px var(--mono);padding:2px 7px;border:1px solid var(--line-2);color:var(--ink);text-decoration:none;white-space:nowrap}
+.chip.soft{border-style:dashed;border-color:var(--amber);color:var(--amber)}
+.chip.ext{border-color:var(--ink);background:var(--ink);color:#fff}
+.chip.crit{border-color:var(--red);color:var(--red)}
+/* timeline */
+.tl{margin-top:28px;overflow-x:auto;border:1px solid var(--line)}
+.tl-in{min-width:820px;padding:12px 16px 16px}
+.tl-row{display:grid;grid-template-columns:150px 1fr;align-items:center;min-height:30px;border-bottom:1px solid var(--line)}
+.tl-row:last-child{border-bottom:0}
+.tl-row .nm{font-size:13.5px;font-weight:500;color:var(--ink)}
+.tl-track{position:relative;height:30px;background:repeating-linear-gradient(90deg,var(--line) 0 1px,transparent 1px calc(100%/24))}
+.tl-bar{position:absolute;top:7px;height:16px;background:var(--line-2);font:500 10.5px/16px var(--mono);color:var(--ink);padding-left:4px;overflow:hidden;white-space:nowrap;text-decoration:none}
+.tl-bar.crit{background:var(--red);color:#fff}
+.tl-head{font:400 11px var(--mono);color:var(--faint)}
+.tl-head .tl-track{background:none;height:18px}
+.tl-head span{position:absolute;transform:translateX(-50%)}
+/* section blocks */
+.sec{padding:56px 0;border-bottom:1px solid var(--line)}
+.sec-h{display:flex;gap:16px;align-items:baseline;flex-wrap:wrap}
+.sec-h .code{font:500 13px var(--mono);color:var(--accent)}
+.sec-h h2{font-size:clamp(28px,3.6vw,40px);font-weight:800}
+.sec-h .tagx{font:500 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--amber);border:1px solid var(--amber);padding:2px 7px}
+.means{font-size:18px;color:var(--ink);margin-top:14px;max-width:46em}
+.facts{display:grid;grid-template-columns:repeat(3,1fr);gap:0 32px;margin-top:22px}
+.facts .kv ul{margin:6px 0 0;padding-left:18px;color:var(--muted);font-size:15px}
+.facts .kv li{margin:3px 0}
+.phases{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-top:26px;border-top:2px solid var(--ink)}
+.ph{padding:16px 16px 18px 0;display:flex;flex-direction:column;gap:8px;min-width:0}
+.ph+.ph{padding-left:16px;border-left:1px solid var(--line)}
+.ph .top{display:flex;justify-content:space-between;gap:8px;font:500 12px var(--mono)}
+.ph .id{color:var(--accent)}
+.ph .id.crit{color:var(--red)}
+.ph .wk{color:var(--faint)}
+.ph h4{font-size:17px;line-height:1.25}
+.ph p{font-size:14px;color:var(--muted)}
+.ph .done{font-size:13.5px;color:var(--body);border-top:1px solid var(--line);padding-top:8px;margin-top:auto}
+.ph .done b{display:block;font:500 10.5px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--green);margin-bottom:2px}
+.ph .needs{display:flex;flex-wrap:wrap;gap:5px;align-items:center;font:500 10.5px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--faint)}
+.ph .gpu{font:400 12px var(--mono);color:var(--faint)}
+/* lists */
+.rows{border-top:1px solid var(--line);margin-top:22px}
+.rows>div{padding:14px 0;border-bottom:1px solid var(--line);display:grid;grid-template-columns:220px 1fr;gap:4px 24px}
+.rows b{font:600 15.5px var(--font);color:var(--ink)}
+.rows span{color:var(--muted);font-size:15px}
+footer{padding:36px 0 56px;font-size:13.5px;color:var(--faint)}
+@media (max-width:900px){.phases{grid-template-columns:1fr 1fr}.ph:nth-child(3){padding-left:0;border-left:0}.ph:nth-child(n+3){border-top:1px solid var(--line)}.facts{grid-template-columns:1fr}}
+@media (max-width:640px){.phases,.grid2{grid-template-columns:1fr}.ph,.ph+.ph{padding-left:0;border-left:0}.ph+.ph{border-top:1px solid var(--line)}.rows>div{grid-template-columns:1fr}header{padding-top:40px}}
+</style>
+
+<nav aria-label="Plan sections"><div class="wrap" id="nav"><b>Nyquist plan</b><a href="#read">Your list</a><a href="#timeline">Timeline</a></div></nav>
+
+<header>
+  <div class="wrap">
+    <div class="eyebrow">Plan v8 · sections and phases</div>
+    <h1>Nyquist build plan</h1>
+    <p class="lede">An offline, full-duplex voice agent for Hindi, Bengali, Marathi, Tamil, Telugu and Hinglish. A ~0.6B talker runs on the laptop's built-in graphics and an MoE thinker runs on its CPU cores. It is trained on free Kaggle T4s and runs on one Intel i3-10110U with no GPU. The work is split into 13 sections of 4 phases each, every phase has a week slot, and every dependency is written on the phase that needs it.</p>
+    <p class="meta">Plan v8 · 20 Nov 2026 · 24 weeks · replaces the stage layout of v7</p>
+  </div>
+</header>
+
+<section id="read">
+  <div class="wrap">
+    <div class="kicker">Reading your list</div>
+    <h2>What each of your sections means for Nyquist</h2>
+    <p class="sub">Your twelve sections come from training one large text model, like the course's LightningLM. Nyquist is several models (talker, depth transformer, codec, thinker) plus a real-time program on a laptop, so some sections change meaning, one is thin, and one is missing.</p>
+    <div class="rows" id="readlist"></div>
+    <div class="legend">
+      <span><span class="chip">TK4</span> hard dependency: that phase must finish first</span>
+      <span><span class="chip soft">~QZ2</span> soft: needs early results only, can overlap</span>
+      <span><span class="chip ext">COURSE</span> outside this project</span>
+      <span><span class="chip crit">TR2</span> on the critical path</span>
+    </div>
+  </div>
+</section>
+
+<section id="timeline">
+  <div class="wrap">
+    <div class="kicker">Timeline</div>
+    <h2>52 phases over 24 weeks</h2>
+    <p class="sub">The red phases are the critical path. Each one waits on the one before it, so a slip in any of them moves the release. All other phases have some slack.</p>
+    <div class="tl"><div class="tl-in" id="tl"></div></div>
+    <p class="sub" id="crit"></p>
+  </div>
+</section>
+
+<div id="secs"></div>
+
+<section id="compute">
+  <div class="wrap">
+    <div class="kicker">Compute</div>
+    <h2>GPU budget by phase</h2>
+    <p class="sub">Measured in T4-hours. One Kaggle session hour on 2× T4 counts as two T4-hours. One account gives about 60 T4-hours a week, which is about 1,440 over 24 weeks.</p>
+    <div class="rows" id="gpu"></div>
+    <ul class="plain">
+      <li><b>Honest read:</b> the plan needs about 760–1,370 T4-hours, and one account supplies about 1,440. That leaves almost no room for re-runs. Synthetic dialogue speech (DA4) is the largest single cost, so measure its speed in week 6 before committing to it.</li>
+      <li>Kaggle allows one account per person. Three accounts are fine only if three teammates own them; stretching one person's quota across three accounts breaks Kaggle's terms and risks losing every notebook mid-project.</li>
+      <li>Course 120B slicing runs on the course cluster, not on Kaggle.</li>
+    </ul>
+  </div>
+</section>
+
+<section id="risks">
+  <div class="wrap">
+    <div class="kicker">Risks</div>
+    <h2>What is most likely to go wrong</h2>
+    <div class="rows" id="risklist"></div>
+  </div>
+</section>
+
+<section id="changes">
+  <div class="wrap">
+    <div class="kicker">From v7</div>
+    <h2>Where the old stages went</h2>
+    <div class="rows" id="movelist"></div>
+  </div>
+</section>
+
+<footer><div class="wrap">Nyquist · plan v8 · 20 Nov 2026 · Every target is a plan, not a result.</div></footer>
+
+<script>
+(() => {
+// [id, name, start week, end week, goal, done-when, deps ("~" = soft, CAPS word = external), T4-hours or ""]
+const S = [
+ { code:'DA', name:'Data', tag:'',
+   means:'All audio and text every model learns from: licensed sources, quality filters, speaker splitting, conversation statistics, synthetic dialogues and held-out tests. Phases D0–D7 from v7 fold into four.',
+   scope:['5k–10k h single-speaker speech, stored as codec tokens','≥ 1k h two-channel dialogue (split real + synthetic)','Thinker text for spoken-style tuning','Out: buying data, recording new conversations unless the fallback triggers'],
+   expect:['Hindi will be strongest; Tamil and Telugu have fewer clean hours','Real two-party Indic conversation is scarce, so synthetic speech carries most of the duplex signal','This is the largest schedule risk in the plan'],
+   deps:['Tokenizer must freeze before mass tokenising','Evaluation reserves test speakers first','Release owns the licence ledger'],
+   ph:[
+   ['DA1','Licences and pilot',1,2,'Licence ledger for every source. Run 10 h per language through every step: fetch, language ID, SNR, 2–30 s segmenting, two-recogniser CER agreement, PII masking, manifest.','Pilot shards on the Hub; pass rate and cost per 1,000 h known for each step.',['IN1','~RL1'],''],
+   ['DA2','Voice set ≥ 5k h',3,8,'Scale ingest to ≥ 5k h of clean single-speaker speech, at least 800 h per language. Pseudo-label untranscribed audio. Tokenise to frozen codec tokens.','≥ 5k h as tokens, gates passed (LID ≥ 0.9, SNR ≥ 15 dB, CER agreement ≤ 15%).',['DA1','EV1','~TK4'],'70–100'],
+   ['DA3','Conversations and splitter',3,6,'Measure gaps, overlaps and backchannels per language from Nirantar and IndicVoices conversational audio. Build the mono-to-two-channel speaker splitter and hand-check its error rate.','Timing report and backchannel list per language; splitter error rate on a checked set.',['DA1'],'50–100'],
+   ['DA4','Synthetic dialogues, thinker text, test sets',6,10,'Write dialogue scripts with an open LLM and render them with an open Indic TTS, using DA3 timings for pauses, overlaps and backchannels. Build spoken-style Q&A text for the thinker. Freeze the speaker-disjoint test sets.','1–2k h two-channel dialogue; naturalness spot-check ≥ 3.5/5 from 2 native raters per language.',['DA3','EV1','~SV1'],'200–400']]},
+ { code:'TK', name:'Tokenizer', tag:'',
+   means:'Two tokenizers. The audio codec (Mimi: 12.5 frames a second, 8 codebooks) turns speech into tokens and back. The text tokenizer feeds the talker\'s inner-monologue stream and the thinker.',
+   scope:['Codec check per language; decoder-only fine-tune if one fails','Text vocabulary extension for Indic scripts','Freeze and version both','Out: training a new codec from scratch'],
+   expect:['Mimi was trained mostly on English. Retroflex, aspirated and geminate consonants are the likely weak spots','Qwen3\'s tokenizer splits Tamil and Telugu into many pieces. At 12.5 frames a second the text stream holds about one token per frame, so too many pieces per word means the text cannot keep up with the speech','Key trick: freeze the codec encoder and only fine-tune its decoder, so tokens made early stay valid'],
+   deps:['Pilot clips from DA1','Data waits for the freeze before mass tokenising','Embedding builds on the final vocabulary'],
+   ph:[
+   ['TK1','Audit',1,2,'Run 50 clips per language through Mimi and NVIDIA\'s 105-language codec and back; score CER, speaker similarity and PESQ/STOI. Count tokens per word and per second of speech for the Qwen3, Sarvam and Gemma tokenizers.','Round-trip table and fertility table per language.',['~DA1'],'5'],
+   ['TK2','Text vocabulary',2,3,'Train Indic BPE merges on Indic text and add about 16–24k tokens to the talker vocabulary, or switch to an Indic-friendly tokenizer.','≤ 2 tokens per word in every language; text rate stays under the frame rate at normal speaking speed.',['TK1'],''],
+   ['TK3','Codec decision',2,4,'Keep Mimi if it passes. If a language fails, fine-tune only the decoder on IndicVoices-R; the encoder stays frozen, so tokens do not change.','Round-trip CER within 2 points of the original audio for every language.',['TK1'],'0–30'],
+   ['TK4','Freeze and version',4,4,'Hash and version both tokenizers; write a tokenizer card with both tables.','Versioned tokenizers on the Hub; no change after this point without a re-tokenise decision.',['TK2','TK3'],'']]},
+ { code:'EM', name:'Embedding', tag:'small section',
+   means:'The input and output tables: text-token embeddings and output head, the 2 × 8 audio codebook tables (user stream and own stream), and language and speaker tags. In LightningLM this section means Kronecker embeddings; here the real lever is memory bandwidth.',
+   scope:['Trim and extend the vocabulary','Initialise new rows','Audio and conditioning tables','Short warm-up run'],
+   expect:['Qwen3-0.6B\'s 151,936 × 1,024 output head is ~156M parameters. At 8 bits it reads ~1.9 GB/s at 12.5 Hz, about 44% of the talker\'s 4.4 GB/s budget','Trimming to ~40k tokens cuts that to ~0.5 GB/s, the cheapest speed win in the project','Kronecker-factored tables save storage, not bandwidth (lookups read single rows), so skip them','About 2 weeks of work in total'],
+   deps:['Needs the frozen vocabulary (TK4)','Needs the depth-transformer layout (AR2)','Gates the start of speech pre-training'],
+   ph:[
+   ['EM1','Parameter and bandwidth ledger',3,3,'Count each table\'s share of parameters and of bytes read per frame.','Ledger in the plan; trim target set.',['AR1','TK2'],''],
+   ['EM2','Trim and extend vocabulary',5,5,'Keep tokens used in Indic + English text (~32–48k), add TK2\'s Indic tokens, initialise each new row as the mean of its old sub-pieces.','Head ≤ 50M parameters; tokenised text round-trips exactly.',['TK4','EM1'],''],
+   ['EM3','Audio and tag tables',5,5,'Sixteen 2,048-entry codebook tables summed into the frame input; language and speaker tags; acoustic delay pattern.','Shapes fixed and unit-tested.',['AR2'],''],
+   ['EM4','Embedding warm-up',6,6,'Freeze the body, train only new tables and head on text plus pilot audio for a few hours.','Hindi text loss within 5% of the original model; English not degraded.',['EM2','EM3','IN2'],'10']]},
+ { code:'AR', name:'Architecture', tag:'',
+   means:'The shapes of every model and how they talk: the talker\'s temporal transformer, its depth transformer, which thinker to use, and the interface between thinker and talker.',
+   scope:['Talker spec: Qwen3-0.6B over 80 ms frames, user and own audio streams, inner-monologue text','Depth transformer (~100M) for the 8 codebooks','Thinker: Sarvam 30B vs a course-120B slice','Coupling: text-only first, hidden-state adapters as the upgrade'],
+   expect:['Talker shape is well trodden (Moshi pattern) and low risk','Thinker choice depends on the course run\'s timing, which this project does not control','Coupling is the research novelty and the biggest design risk'],
+   deps:['Measured budgets from PF1','Codec decision from TK3','Thinker choice needs QZ2 speed numbers and EV2 quality numbers'],
+   ph:[
+   ['AR1','Talker spec',2,3,'Fix layers, width, context (3–5 min with a sliding window), stream layout, and bytes and FLOPs per frame.','Spec sheet fits the talker\'s 4.4 GB/s share.',['~PF1'],''],
+   ['AR2','Depth transformer',4,5,'~100M depth transformer predicting 8 codebooks per frame; plan the 0.3B vs 0.6B talker ablation; option of fewer codebooks for the own voice if bandwidth is short.','Design frozen; ablation plan in TR1.',['AR1','TK3'],''],
+   ['AR3','Thinker choice',4,8,'Compare Sarvam 30B (2.4B active) at ~3.5 bits with a language-sliced course 120B cut from top-12 to top-4 routing, on speed with the talker running, Indic quality, and licence.','Choice made: fits ≤ 14 GB, ≥ 5 tokens/s on the i3, Indic QA within 10% of the unpruned model.',['~QZ2','~EV2','COURSE'],''],
+   ['AR4','Coupling interface',8,12,'Thinker streams its reply plan as text into the talker\'s monologue slot; turn-state signals (user speaking, end-of-turn, barge-in) go back. Thinker drafts while the user is still talking.','Protocol spec and a working loop on a T4 with text-only coupling.',['AR1','AR3','DA3'],'']]},
+ { code:'TR', name:'Training', tag:'added: missing from your list',
+   means:'Pre-training the talker. Your list has post-training but no training, and this is the largest GPU cost in the project, so it gets its own section.',
+   scope:['Smoke runs on a small model','Speech pre-training on the voice set','Two-stream dialogue training','Noise, crosstalk and long-session robustness'],
+   expect:['About 55 T4-hours per epoch over 10k h (≈ 4×10¹⁸ FLOPs at ~20 TFLOPS effective per T4); real efficiency on T4s may be half that','fp16 only (T4 has no bf16), so loss scaling must be watched','Expect clear, intelligible speech; expressiveness below Sarvam\'s Bulbul V4'],
+   deps:['Frozen tokens (TK4), warmed embeddings (EM4), depth transformer (AR2)','Voice set (DA2) and dialogues (DA4)','Runner (IN2) and dashboards (MO1)'],
+   ph:[
+   ['TR1','Smoke runs',5,6,'~50M-parameter talker on the 100 h pilot; check fp16 stability, loss per codebook, and whether audio sounds like speech after a day.','Loss falls on every codebook; no fp16 overflow storms; size ablation started.',['TK4','IN2','MO1'],'15'],
+   ['TR2','Speech pre-training',7,11,'0.6B talker on ≥ 5k h single-speaker speech with interleaved text, 2–3 epochs.','Probe CER ≤ 25% in every language; speaker similarity stable.',['EM4','AR2','~DA2','PF2'],'110–165'],
+   ['TR3','Dialogue training',12,14,'Two streams, user and own, on split real conversations plus synthetic dialogues.','Turn-taking takeover rate ≥ 0.8 on held-out clips.',['TR2','DA4'],'40–60'],
+   ['TR4','Robustness',15,16,'Add noise, far-field, crosstalk and echo-like leakage; extend to 5-minute sessions.','Noisy test CER within 5 points of clean.',['TR3'],'20']]},
+ { code:'PF', name:'Performance', tag:'two meanings',
+   means:'Two separate things. Training speed on T4s (tokens per second, GPU utilisation), and real-time speed on the i3 (an 80 ms frame deadline, ≥ 5 thinker tokens a second).',
+   scope:['Baselines on both machines','Training speed-ups','Inference work: OpenVINO talker, llama.cpp thinker, EAGLE3 draft head, incremental prefill','Both models running together'],
+   expect:['T4 has no FlashAttention-2 (Turing), so use PyTorch SDPA; aim for ~1.5–2× over the naive baseline','The iGPU and CPU share one DDR4 bus, measured at 20.8 GB/s. Running both models together, not either one alone, is the real limit','Laptop heat and throttling will show up in 30-minute runs'],
+   deps:['Shapes from AR1 and AR2','Quantised weights from QZ3','Live loop from SV2'],
+   ph:[
+   ['PF1','Baselines',1,2,'Bandwidth (done: 20.8 GB/s). OpenVINO fp16/int8 step time for a 0.6B model on the UHD 620; llama.cpp tokens/s for Sarvam 30B at Q4 and Q3; T4 training tokens/s for Qwen3-0.6B.','Baseline sheet that every later number is compared to.',['IN1'],'5'],
+   ['PF2','Training speed',5,7,'Sequence packing, SDPA, chunked cross-entropy over the vocabulary, gradient checkpointing, DDP on 2× T4, 8-bit AdamW.','≥ 1.5× PF1 tokens/s with an unchanged loss curve.',['~TR1'],'10'],
+   ['PF3','Inference speed',13,17,'Talker int8/int4 in OpenVINO with static shapes and KV cache on the iGPU; depth transformer and codec within the frame; thinker threads pinned, EAGLE3-style draft head, incremental prefill.','Talker + depth + codec ≤ 60 ms per 80 ms frame alone; thinker ≥ 5 tokens/s alone.',['AR2','AR3','~QZ3'],'15'],
+   ['PF4','Together, sustained',18,20,'Both models live at once; throttle the thinker to protect the frame deadline; 30-minute soak; measure thermal throttling.','< 1% missed frames over 30 minutes with the thinker ≥ 5 tokens/s.',['~SV2','PF3'],'']]},
+ { code:'IN', name:'Infrastructure', tag:'',
+   means:'Everything that keeps 12-hour Kaggle sessions, the Hugging Face Hub and the laptop working as one pipeline.',
+   scope:['Repo, pinned environments, storage layout','Resumable Kaggle runner','Data jobs','Export and laptop toolchain'],
+   expect:['Kaggle sessions end after 12 h and keep only 20 GB of output, so the Hub is the real disk','Resume logic is boring and decides whether long runs survive'],
+   deps:['Most phases depend on IN1 or IN2'],
+   ph:[
+   ['IN1','Repo and storage',1,1,'One repo; pinned Kaggle and laptop environments; private Hub repos for shards and checkpoints; manifest schema.','Fresh clone reproduces the environment on both.',[],''],
+   ['IN2','Resumable runner',2,3,'Checkpoint to the Hub every 30–45 min; auto-resume; stream shards from the Hub; fixed seeds.','A run killed mid-session resumes with the same loss curve.',['IN1'],'5'],
+   ['IN3','Data jobs',3,8,'GPU jobs for codec tokenising and pseudo-labelling; CPU jobs for filters and language ID; a job ledger.','Every shard traceable to its source, filter version and tokenizer hash.',['IN2','~TK4'],''],
+   ['IN4','Export toolchain',9,13,'Export to OpenVINO IR and GGUF; laptop benchmark scripts; versioned runtime bundles.','One command exports and benchmarks a checkpoint.',['QZ1'],'']]},
+ { code:'MO', name:'Monitoring', tag:'',
+   means:'Watching training runs, data quality and the live laptop runtime, so problems are caught in hours, not weeks.',
+   scope:['Training metrics','Automatic alarms and rollback','Listening probes during training','Runtime telemetry on the laptop'],
+   expect:['Codebook collapse and fp16 overflow are the two silent killers for this talker','Free tiers (W&B or TensorBoard on the Hub) are enough'],
+   deps:['Needs the runner (IN2), the harness (EV2) and the live loop (SV2)'],
+   ph:[
+   ['MO1','Training metrics',3,4,'Loss per codebook, text loss, loss per language, grad norm, fp16 loss scale and overflows, tokens/s, memory.','Every run logs the same metric set.',['IN2'],''],
+   ['MO2','Alarms',5,6,'Auto-stop on NaN, loss spikes and falling codebook entropy; roll back to the last good checkpoint.','A deliberately broken run is stopped automatically.',['MO1','~TR1'],''],
+   ['MO3','Listening probes',7,14,'Every N steps, generate 10 fixed prompts per language; automatic CER and speaker similarity; audio on the dashboard. Thinker: expert-routing histograms after slicing.','Probe trends visible for TR2 and TR3.',['EV2','MO1'],'10'],
+   ['MO4','Runtime telemetry',17,20,'On the laptop: missed frames, latency p50/p95, memory bandwidth, CPU clock and temperature, leftover echo.','Telemetry recorded for every demo session.',['~SV2'],'']]},
+ { code:'EV', name:'Evaluation', tag:'',
+   means:'How we know it works: automatic metrics, Indic-FDB (the first Indian-language full-duplex benchmark), human ratings, and the blind test against Sarvam.',
+   scope:['Metrics and held-out speakers defined before any data is ingested','Automatic harness','Indic-FDB v0','Human evaluation and the Sarvam head-to-head'],
+   expect:['Automatic MOS predictors are not validated for Indian languages; use them only to compare our own versions','Human panels are small (2–3 raters per language), so results are directional'],
+   deps:['Test speakers must be reserved before DA2','The head-to-head needs the full system (SV3) and final weights (QZ4)'],
+   ph:[
+   ['EV1','Metrics and test speakers',1,2,'Define every metric; reserve speaker-disjoint test speakers per language before ingest.','Metric spec and frozen test-speaker lists.',['~DA1'],''],
+   ['EV2','Automatic harness',3,6,'CER from two recognisers, speaker similarity, relative MOS, thinker completeness by LLM judge with human checks, latency logs.','One command scores any checkpoint.',['EV1'],'10'],
+   ['EV3','Indic-FDB v0',8,14,'Scripted duplex scenarios per language: pauses, backchannels, barge-in, code-switching, noise. Metrics: takeover rates, response and stop latency.','Benchmark runs end to end on the cascade and the first duplex talker.',['EV2','DA3'],'25'],
+   ['EV4','Human evaluation and Sarvam test',21,22,'Native speakers hold the same conversations with Nyquist and Sarvam\'s cloud stack and pick the more natural one; MOS ratings.','Preferred in ≥ 50% of pairs on turn-taking, with answers rated as complete.',['SV3','~QZ4'],'15']]},
+ { code:'PT', name:'Post-training', tag:'',
+   means:'Turning trained models into the product: healing and spoken-style tuning for the thinker, one consistent voice for the talker, coupled behaviour, and timing preferences.',
+   scope:['Thinker QLoRA healing and spoken-style tuning','Own-voice fine-tune','Coupled duplex fine-tune','Preference or RL tuning for timing (stretch)'],
+   expect:['Thinker spoken-style tuning is routine and low risk','The voice needs ≥ 500 h from one consenting speaker at ≥ 25 dB SNR','Preference tuning for speech timing is research-grade and may be cut'],
+   deps:['Thinker choice (AR3)','Talker after TR3','Coupling spec (AR4)','Consent from RL1'],
+   ph:[
+   ['PT1','Thinker healing and style',6,10,'QLoRA on 2× T4 after slicing and quantising: short replies, spoken numbers, code-mixing on demand, tool-call format.','Indic QA recovers to within 10% of unpruned; replies under ~3 spoken sentences.',['~AR3','~DA4'],'60–90'],
+   ['PT2','Own voice',15,17,'Fine-tune the talker on 500–1,700 h of one consenting voice.','Speaker similarity ≥ 0.85 to the reference voice across languages.',['TR3','RL1','DA2'],'15–30'],
+   ['PT3','Coupled fine-tune',15,18,'Teach the talker to speak the thinker\'s plan with natural fillers when the plan is late; ~100M hidden-state adapters if text-only coupling falls short.','≥ 80% complete replies and p50 latency ≤ 400 ms on a GPU.',['TR3','AR4','PT1'],'20–200'],
+   ['PT4','Timing preferences (stretch)',19,20,'Preference or RL tuning on good-vs-bad timing pairs: pauses, backchannels, interruptions.','Takeover rate ≥ 0.9 on held-out clips, or the phase is dropped.',['PT3','EV3'],'30']]},
+ { code:'QZ', name:'Quantization', tag:'',
+   means:'Shrinking every model to fit the laptop\'s RAM and bandwidth while measuring what each step costs in quality.',
+   scope:['fp16 references for every part','Thinker GGUF sweep','Talker and codec in OpenVINO','Full-system check and healing'],
+   expect:['Talker int8 is close to free; int4 may hurt audio and must be tested per language','Thinker at ~3.5 bits loses some quality; Indic calibration text matters','Expect one round of healing'],
+   deps:['Harness (EV2) for every comparison','Final talker weights (TR3) and coupled weights (PT3)'],
+   ph:[
+   ['QZ1','References and budgets',5,6,'Save fp16 reference outputs for every component; set byte budgets per component from PF1.','Reference set and budget sheet.',['PF1','~EV2'],''],
+   ['QZ2','Thinker sweep',3,7,'Q4_K_M, Q3_K_M and IQ3 for Sarvam 30B (and the course slice when ready), with an Indic importance matrix; tokens/s on the i3 and Indic quality.','Speed–quality curve; one setting chosen for AR3.',['PF1','~EV2'],'5'],
+   ['QZ3','Talker and codec',15,17,'NNCF int8 (int4 where it holds) for talker and depth transformer; codec decoder in fp16 on the iGPU; Indic calibration audio.','CER within 2 points of fp16 in every language.',['TR3','QZ1'],'5'],
+   ['QZ4','System check and heal',19,21,'Run the full quantised system against the references; heal with QLoRA if any language drops more than 2 CER points.','Release-ready quantised bundle.',['QZ3','PT3'],'10']]},
+ { code:'RL', name:'Release', tag:'',
+   means:'What goes public and under what terms: weights, tokenizers, the data recipe, Indic-FDB, model cards and the report.',
+   scope:['Licence and consent ledger, starting in week 1','Alpha demo (cascade)','Beta: weights, benchmark, cards','v1: report, demo, reproduction guide'],
+   expect:['Some sources may not allow sharing derived codec tokens; publish scripts and manifests, not audio','Licences of Qwen3, Mimi and the thinker set what can ship together'],
+   deps:['DA1 shares the licence work','Beta needs EV3 and QZ4'],
+   ph:[
+   ['RL1','Licences and consent',1,2,'Ledger of every dataset and model licence; written consent for the voice; PII policy.','Every source tagged train-only, shareable or excluded.',[],''],
+   ['RL2','Alpha',5,5,'Cascaded offline demo on the laptop with a latency report.','Video and report out.',['SV1'],''],
+   ['RL3','Beta',22,22,'Quantised talker, tokenizers, data recipe, Indic-FDB and model cards with limitations.','Repos public; a stranger can run the demo.',['EV3','QZ4'],''],
+   ['RL4','v1',23,24,'Technical report, demo video, reproduction guide.','Report and v1 tag out.',['EV4','RL3'],'']]},
+ { code:'SV', name:'Serving', tag:'on-device, not a server',
+   means:'There is no server. Serving is the real-time program on the laptop: audio in and out every 80 ms, echo cancellation, the talker on the iGPU, the thinker on the CPU, and packaging.',
+   scope:['Cascaded floor (recogniser → thinker → TTS)','Duplex loop with echo cancellation','Coupled agent with barge-in','Installer and hardening'],
+   expect:['Echo is the biggest unknown: in full duplex the laptop hears its own speakers. Use WebRTC AEC3; fall back to a headset for demos','The cascade is the safety net and the baseline every later version must beat'],
+   deps:['Quantised talker (QZ3) and inference work (PF3)','Coupling (AR4, PT3)'],
+   ph:[
+   ['SV1','Cascaded floor',1,5,'Offline recogniser → thinker in llama.cpp → Indic TTS on the laptop, push-to-talk.','≤ 1.5 s p50 response latency on the i3, 5 languages working.',['~PF1','~QZ2'],''],
+   ['SV2','Duplex loop',15,18,'Audio I/O at 80 ms frames, WebRTC AEC3, frame clock, talker and codec on the iGPU.','Talks and listens at once on laptop speakers without hearing itself.',['TR3','~QZ3'],''],
+   ['SV3','Coupled agent',18,20,'Thinker streams into the talker; barge-in stops speech within 300 ms; falls back to the cascade if deadlines slip.','Full conversation offline on the i3.',['~SV2','AR4','~PT3'],''],
+   ['SV4','Package and harden',21,23,'One Windows installer, model download, crash recovery, 30-minute soak test.','A clean laptop goes from install to talking in under 10 minutes.',['SV3','PF4'],'']]}
+];
+
+const reading = [
+ ['Data','Same meaning, much bigger: audio, two-channel dialogue and text.'],
+ ['Tokenizer','Two tokenizers: the audio codec and the text vocabulary.'],
+ ['Embedding','Thin on its own. Its real value here is a smaller output head and less memory traffic.'],
+ ['Architecture','Four models plus the link between thinker and talker.'],
+ ['Training (added)','Missing from your list; it is the largest GPU cost.'],
+ ['Performance','Two meanings: training speed on T4s and real-time speed on the i3.'],
+ ['Infrastructure','Kaggle, the Hugging Face Hub and the laptop working as one pipeline.'],
+ ['Monitoring','Training health, listening probes and laptop telemetry.'],
+ ['Evaluation','Includes Indic-FDB, our own benchmark, and the blind test against Sarvam.'],
+ ['Post-training','Thinker healing, one voice, coupled behaviour, timing preferences.'],
+ ['Quantization','Every model, measured per language.'],
+ ['Release','Starts in week 1 because licences decide what can ship.'],
+ ['Serving','On-device runtime, not a cloud server.']
+];
+const crit = ['IN1','DA1','TK1','TK3','TK4','EM2','EM4','TR2','TR3','PT3','QZ4','EV4','RL4'];
+const risks = [
+ ['Codec on Indian languages','Mimi may smear retroflex and aspirated sounds. Caught in TK1 by week 2; fix is a decoder-only fine-tune that keeps tokens valid.'],
+ ['Too little clean conversation','Real two-party Indic audio is scarce. Synthetic dialogues cover the gap; fallback is a small recorded Hindi set.'],
+ ['GPU budget','760–1,370 of ~1,440 T4-hours on one account. Synthetic TTS is the swing cost; measure in week 6 and cut to 1k h if slow.'],
+ ['Echo on laptop speakers','Full duplex hears itself. AEC3 in SV2; headset fallback for demos.'],
+ ['Shared memory bus','iGPU and CPU share 20.8 GB/s. PF4 throttles the thinker to protect the talker\'s frame.'],
+ ['Course 120B timing','Outside this project. Sarvam 30B is the default thinker so nothing waits on it.'],
+ ['Coupling quality','Text-only coupling first; ~100M adapters only if it falls short. Fallback: talker as a timing controller over the cascade TTS.'],
+ ['Kaggle terms','One account per person. Using three accounts alone risks losing all of them.']
+];
+const moves = [
+ ['Stage 0 · Foundations','IN1, IN2, PF1, EV1, RL1'],
+ ['Stage 1 · Cascaded floor','SV1, RL2'],
+ ['Stage 2 · Speech tokenizer','TK1–TK4'],
+ ['Stage 3 · Data factory (D0–D7)','DA1–DA4, EV1, RL1'],
+ ['Stage 4 · Talker (4a, 4b, 4c)','TR2, TR3, PT4; size ablation in TR1'],
+ ['Stage 5 · Thinker','AR3, QZ2, PT1, PF3 (draft head, incremental prefill)'],
+ ['Stage 6 · Coupling','AR4, PT3, SV3'],
+ ['Stage 7 · Laptop port','QZ3, QZ4, PF3, PF4, SV2, SV4'],
+ ['Stage 8 · Evaluation','EV2–EV4, MO3'],
+ ['Stage 9 · Release','RL3, RL4']
+];
+
+const all = {}; S.forEach(s => s.ph.forEach(p => all[p[0]] = p));
+const esc = t => String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;');
+const chip = d => {
+  if (/^[A-Z]+$/.test(d)) return `<span class="chip ext" title="Outside this project">${d}</span>`;
+  const soft = d[0] === '~', id = soft ? d.slice(1) : d, p = all[id];
+  return `<a class="chip${soft ? ' soft' : ''}" href="#${id}" title="${esc(p ? p[1] + ' · weeks ' + p[2] + '–' + p[3] : id)}">${d}</a>`;
+};
+const wk = p => p[2] === p[3] ? `w${p[2]}` : `w${p[2]}–${p[3]}`;
+
+// dependency check: a hard dependency must end no later than the week its dependent starts
+S.forEach(s => s.ph.forEach(p => p[6].forEach(d => {
+  if (d[0] === '~' || /^[A-Z]+$/.test(d)) return;
+  const q = all[d]; console.assert(q, 'unknown dep ' + d);
+  if (q && q[3] > p[2]) console.warn(`${p[0]} starts w${p[2]} but hard dep ${d} ends w${q[3]}`);
+})));
+
+document.getElementById('readlist').innerHTML = reading.map(([a,b]) => `<div><b>${a}</b><span>${b}</span></div>`).join('');
+document.getElementById('risklist').innerHTML = risks.map(([a,b]) => `<div><b>${a}</b><span>${esc(b)}</span></div>`).join('');
+document.getElementById('movelist').innerHTML = moves.map(([a,b]) => `<div><b>${a}</b><span>${b}</span></div>`).join('');
+document.getElementById('nav').insertAdjacentHTML('beforeend', S.map(s => `<a href="#${s.code}">${s.name}</a>`).join('') + '<a href="#compute">Compute</a><a href="#risks">Risks</a>');
+
+// timeline
+let tl = '<div class="tl-row tl-head"><div></div><div class="tl-track">' +
+  [1,4,8,12,16,20,24].map(w => `<span style="left:${(w - .5) / 24 * 100}%">w${w}</span>`).join('') + '</div></div>';
+for (const s of S) {
+  tl += `<div class="tl-row"><div class="nm">${s.name}</div><div class="tl-track">` + s.ph.map(p =>
+    `<a class="tl-bar${crit.includes(p[0]) ? ' crit' : ''}" href="#${p[0]}" style="left:${(p[2]-1)/24*100}%;width:calc(${(p[3]-p[2]+1)/24*100}% - 2px)" title="${esc(p[1])} · ${wk(p)}">${p[0]}</a>`).join('') + '</div></div>';
+}
+document.getElementById('tl').innerHTML = tl;
+document.getElementById('crit').innerHTML = 'Critical path: ' + crit.map(c => `<span class="chip crit">${c}</span>`).join(' → ');
+
+// sections
+const li = a => '<ul>' + a.map(x => `<li>${esc(x)}</li>`).join('') + '</ul>';
+document.getElementById('secs').innerHTML = S.map(s => `
+<section class="sec" id="${s.code}"><div class="wrap">
+  <div class="sec-h"><span class="code">${s.code}</span><h2>${s.name}</h2>${s.tag ? `<span class="tagx">${s.tag}</span>` : ''}</div>
+  <p class="means">${esc(s.means)}</p>
+  <div class="facts">
+    <div class="kv"><h4>Scope</h4>${li(s.scope)}</div>
+    <div class="kv"><h4>What to expect</h4>${li(s.expect)}</div>
+    <div class="kv"><h4>Depends on</h4>${li(s.deps)}</div>
+  </div>
+  <div class="phases">${s.ph.map(p => `
+    <div class="ph" id="${p[0]}">
+      <div class="top"><span class="id${crit.includes(p[0]) ? ' crit' : ''}">${p[0]}</span><span class="wk">${wk(p)}</span></div>
+      <h4>${esc(p[1])}</h4>
+      <p>${esc(p[4])}</p>
+      <div class="needs">${p[6].length ? 'Needs ' + p[6].map(chip).join('') : 'No dependencies'}</div>
+      ${p[7] ? `<div class="gpu">${p[7]} T4-h</div>` : ''}
+      <div class="done"><b>Done when</b>${esc(p[5])}</div>
+    </div>`).join('')}
+  </div>
+</div></section>`).join('');
+
+// compute list
+const g = []; let lo = 0, hi = 0;
+S.forEach(s => s.ph.forEach(p => { if (!p[7]) return; const [a, b = a] = p[7].split('–').map(Number); lo += a; hi += b; g.push([`${p[0]} · ${p[1]}`, p[7]]); }));
+document.getElementById('gpu').innerHTML = g.map(([a,b]) => `<div><b>${esc(a)}</b><span>${b} T4-hours</span></div>`).join('') +
+  `<div><b>Total</b><span>${lo.toLocaleString()}–${hi.toLocaleString()} T4-hours</span></div>`;
+})();
+</script>

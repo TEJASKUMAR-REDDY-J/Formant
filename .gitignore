@@ -1,0 +1,38 @@
+# Large files live on the Hugging Face Hub, not in git
+data/
+checkpoints/
+runs/
+exports/
+*.wav
+*.flac
+*.mp3
+*.opus
+*.npy
+*.npz
+*.pt
+*.pth
+*.ckpt
+*.safetensors
+*.gguf
+*.bin
+*.onnx
+*.parquet
+*.arrow
+
+# Tools and environments
+.venv/
+venv/
+__pycache__/
+.ipynb_checkpoints/
+wandb/
+node_modules/
+.vercel/
+
+# Secrets
+.env
+*.env
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini

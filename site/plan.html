@@ -1,0 +1,370 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Formant Plan</title>
+<meta name="description" content="Formant v0.1 plan: twelve sections running in parallel over four one-week phases, with scope, dependencies and status.">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap">
+<style>
+/* LightningLM colour scale: white, near-black ink, grey hairlines, one blue accent.
+   Amber = what the selected phase needs, blue = what needs it, red = critical path, green = done. */
+:root{
+  --bg:#FFFFFF; --alt:#FAFAFA; --ink:#111111; --body:#1A1A1A; --muted:#555555; --faint:#888888;
+  --line:#E8E8E8; --line-2:#D0D0D0; --accent:#2563EB; --accent-soft:rgba(37,99,235,.08);
+  --red:#DC2626; --green:#16A34A; --amber:#D97706; --amber-soft:#FEF3C7;
+  --display:"Bricolage Grotesque","Segoe UI",ui-sans-serif,system-ui,sans-serif;
+  --font:"Geist",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"Geist Mono",ui-monospace,Consolas,monospace;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html{background:var(--bg);scroll-behavior:smooth;scroll-padding-top:60px}
+body{margin:0;background:var(--bg);color:var(--body);font:400 16px/1.6 var(--font);-webkit-font-smoothing:antialiased}
+a{color:var(--accent)}
+h1,h2,h3,h4{font-family:var(--display);color:var(--ink);margin:0;letter-spacing:-.02em;text-wrap:balance}
+p{margin:0}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.wrap{max-width:1180px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+nav{position:sticky;top:0;z-index:10;background:rgba(255,255,255,.94);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+nav .wrap{display:flex;gap:20px;align-items:center;height:52px;overflow-x:auto;scrollbar-width:none;font-size:13.5px;white-space:nowrap}
+nav .wrap::-webkit-scrollbar{display:none}
+nav b{font:700 16px var(--display);color:var(--ink)}
+nav a{color:var(--muted);text-decoration:none}
+nav a:hover{color:var(--ink)}
+header{padding:56px 0 36px;border-bottom:1px solid var(--line)}
+.eyebrow,.kicker{font:500 12px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+.kicker{color:var(--faint)}
+header h1{font-size:clamp(38px,6vw,64px);line-height:1;font-weight:800;margin-top:12px}
+.lede{font-size:19px;color:var(--ink);margin-top:16px;max-width:46em}
+.cons{margin:18px 0 0;padding-left:18px;color:var(--muted);font-size:15px;max-width:52em}
+.cons li{margin:4px 0}
+.meta{font:400 13px var(--mono);color:var(--faint);margin-top:16px}
+section{padding:48px 0;border-bottom:1px solid var(--line)}
+section h2{font-size:clamp(26px,3.4vw,36px);font-weight:800;margin-top:6px}
+.sub{color:var(--muted);margin-top:10px;max-width:48em}
+/* phase strip */
+.weeks{display:grid;grid-template-columns:repeat(4,1fr);border-top:2px solid var(--ink);margin-top:22px}
+.weeks>div{padding:14px 16px 14px 0}
+.weeks>div+div{padding-left:16px;border-left:1px solid var(--line)}
+.weeks .w{font:500 12px var(--mono);color:var(--accent)}
+.weeks h3{font-size:20px;margin-top:2px}
+.weeks p{font-size:14px;color:var(--muted);margin-top:4px}
+.weeks .bar{height:4px;background:var(--line);margin-top:10px}
+.weeks .bar i{display:block;height:100%;background:var(--green)}
+.weeks .cnt{font:400 12px var(--mono);color:var(--faint);margin-top:4px}
+/* controls */
+.controls{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;margin-top:22px}
+.seg{display:inline-flex;border:1px solid var(--line-2)}
+.seg button{padding:7px 12px;font-size:13.5px;color:var(--muted);border-left:1px solid var(--line-2)}
+.seg button:first-child{border-left:0}
+.seg button[aria-pressed="true"]{background:var(--ink);color:#fff}
+.tog{display:inline-flex;gap:7px;align-items:center;font-size:13.5px;color:var(--muted);cursor:pointer}
+.tog input{accent-color:var(--accent);width:15px;height:15px;margin:0}
+/* matrix */
+.mx{margin-top:18px;overflow-x:auto;border:1px solid var(--line)}
+.mx-in{display:grid;grid-template-columns:170px repeat(4,minmax(130px,1fr));min-width:700px}
+.mx-h{font:500 12px var(--mono);color:var(--faint);padding:10px 12px;border-bottom:1px solid var(--line-2);text-align:left}
+.mx-h.wk{cursor:pointer}
+.mx-h.wk:hover,.mx-h.wk.on{color:var(--accent)}
+.mx-r{padding:9px 12px;border-bottom:1px solid var(--line);font-size:13.5px;font-weight:600;color:var(--ink);text-align:left;display:flex;gap:8px;align-items:baseline}
+.mx-r span{font:400 11px var(--mono);color:var(--faint)}
+.mx-r:hover,.mx-r.on{color:var(--accent)}
+.cell{position:relative;padding:9px 12px 9px 14px;border-bottom:1px solid var(--line);border-left:1px solid var(--line);text-align:left;font-size:13px;line-height:1.35;color:var(--body);min-height:44px}
+.cell b{display:block;font:500 11px var(--mono);color:var(--faint)}
+.cell:hover{background:var(--alt)}
+.cell::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:transparent}
+.cell.s-doing::before{background:var(--accent)}
+.cell.s-done::before{background:var(--green)}
+.cell.s-cut{color:var(--faint);text-decoration:line-through}
+.cell.sel{background:var(--ink);color:#fff}
+.cell.sel b{color:#fff}
+.cell.dep{background:var(--amber-soft)}
+.cell.dep b{color:var(--amber)}
+.cell.rdep{background:var(--accent-soft)}
+.cell.rdep b{color:var(--accent)}
+.crit .cell.crit{box-shadow:inset 0 0 0 2px var(--red)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 18px;margin-top:12px;font-size:13px;color:var(--muted)}
+.legend i{display:inline-block;width:12px;height:12px;vertical-align:-1px;margin-right:6px;border:1px solid var(--line-2)}
+/* detail */
+.detail{margin-top:30px}
+.tabs{display:flex;gap:0;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--line-2)}
+.tabs::-webkit-scrollbar{display:none}
+.tabs button{padding:10px 14px;font-size:14px;color:var(--muted);white-space:nowrap;border-bottom:2px solid transparent;margin-bottom:-1px}
+.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--ink);font-weight:600}
+.panel-h{display:flex;gap:14px;align-items:baseline;flex-wrap:wrap;margin-top:24px}
+.panel-h .code{font:500 13px var(--mono);color:var(--accent)}
+.panel-h h3{font-size:clamp(24px,3vw,32px);font-weight:800}
+.panel-h .path{font:400 13px var(--mono);color:var(--faint)}
+.note{margin-top:10px;font-size:14px;color:var(--amber)}
+.means{font-size:17px;color:var(--ink);margin-top:12px;max-width:50em}
+.facts{display:grid;grid-template-columns:repeat(3,1fr);gap:0 28px;margin-top:18px}
+.kv{border-top:1px solid var(--line);padding:12px 0}
+.kv h4{font-size:15px}
+.kv ul{margin:6px 0 0;padding-left:18px;color:var(--muted);font-size:14.5px}
+.kv li{margin:3px 0}
+.cards{display:grid;grid-template-columns:repeat(4,1fr);margin-top:22px;border-top:2px solid var(--ink)}
+.cards.three{grid-template-columns:repeat(3,1fr)}
+.card{padding:16px 16px 18px;border-bottom:1px solid var(--line);border-left:1px solid var(--line);display:flex;flex-direction:column;gap:8px;min-width:0;scroll-margin-top:70px}
+.cards .card:nth-child(4n+1){border-left:0;padding-left:0}
+.cards.three .card:nth-child(4n+1){border-left:1px solid var(--line);padding-left:16px}
+.cards.three .card:nth-child(3n+1){border-left:0;padding-left:0}
+.card.hl{background:var(--amber-soft)}
+.card .top{display:flex;justify-content:space-between;gap:8px;font:500 12px var(--mono)}
+.card .id{color:var(--accent)}
+.card .sec{color:var(--faint)}
+.card h4{font-size:17px;line-height:1.25}
+.card p{font-size:14px;color:var(--muted)}
+.card .done{font-size:13.5px;color:var(--body);border-top:1px solid var(--line);padding-top:8px;margin-top:auto}
+.card .done b{display:block;font:500 10.5px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--green);margin-bottom:2px}
+.needs{display:flex;flex-wrap:wrap;gap:5px;align-items:center;font:500 10.5px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--faint)}
+.chip{display:inline-block;font:500 11.5px var(--mono);padding:2px 7px;border:1px solid var(--line-2);color:var(--ink);letter-spacing:0;text-transform:none}
+.chip:hover{border-color:var(--ink)}
+.chip.soft{border-style:dashed;border-color:var(--amber);color:var(--amber)}
+.st{font:500 10.5px var(--mono);letter-spacing:.06em;text-transform:uppercase;padding:1px 6px;border:1px solid var(--line-2);color:var(--faint)}
+.st.doing{border-color:var(--accent);color:var(--accent)}
+.st.done{border-color:var(--green);color:var(--green)}
+.gpu{font:400 12px var(--mono);color:var(--faint)}
+/* lists */
+.rows{border-top:1px solid var(--line);margin-top:20px}
+.rows>div{padding:13px 0;border-bottom:1px solid var(--line);display:grid;grid-template-columns:240px 1fr;gap:4px 24px}
+.rows b{font-weight:600;color:var(--ink);font-size:15px}
+.rows small{display:block;font:400 12px var(--mono);color:var(--faint);margin-top:2px}
+.rows span{color:var(--muted);font-size:14.5px}
+.rows em{display:block;font-style:normal;color:var(--ink);font-size:14.5px;margin-top:4px}
+.tree{font:400 13.5px/1.75 var(--mono);color:var(--body);background:var(--alt);border:1px solid var(--line);padding:18px 20px;overflow-x:auto;margin:18px 0 0;white-space:pre}
+.tree i{font-style:normal;color:var(--faint)}
+ul.plain{margin:14px 0 0;padding-left:20px;max-width:52em}
+ul.plain li{margin:5px 0}
+footer{padding:32px 0 56px;font-size:13.5px;color:var(--faint)}
+@media (max-width:980px){.cards{grid-template-columns:1fr 1fr}.cards .card:nth-child(4n+1){border-left:1px solid var(--line);padding-left:16px}.cards .card:nth-child(2n+1){border-left:0;padding-left:0}.cards.three{grid-template-columns:1fr 1fr}.cards.three .card:nth-child(3n+1){border-left:1px solid var(--line);padding-left:16px}.cards.three .card:nth-child(2n+1){border-left:0;padding-left:0}.facts{grid-template-columns:1fr}}
+@media (max-width:700px){.weeks{grid-template-columns:1fr 1fr}.weeks>div:nth-child(3){border-left:0;padding-left:0}.weeks>div:nth-child(n+3){border-top:1px solid var(--line)}}
+@media (max-width:600px){.cards,.cards.three{grid-template-columns:1fr}.card,.cards .card:nth-child(n){border-left:0;padding-left:0}.rows>div{grid-template-columns:1fr}header{padding-top:36px}}
+</style>
+</head>
+<body>
+<nav aria-label="Plan sections"><div class="wrap"><b>Formant plan</b><a href="#overview">Overview</a><a href="#board">Board</a><a href="#research">Research</a><a href="#compute">Compute</a><a href="#risks">Risks</a><a href="#later">After v0.1</a><a href="#repo">Repo</a><a href="index.html">Project site</a><a href="https://github.com/TEJASKUMAR-REDDY-J/Formant" target="_blank" rel="noopener">GitHub</a></div></nav>
+
+<header id="overview">
+  <div class="wrap">
+    <div class="eyebrow" id="ver"></div>
+    <h1>Four weeks to Formant v0.1</h1>
+    <p class="lede" id="goal"></p>
+    <ul class="cons" id="cons"></ul>
+    <div class="weeks" id="weeks"></div>
+    <p class="meta" id="meta"></p>
+  </div>
+</header>
+
+<section id="board">
+  <div class="wrap">
+    <div class="kicker">Board</div>
+    <h2>Twelve sections, four weeks</h2>
+    <p class="sub">Each column is one week, and every section works in parallel inside it. Click a phase to see what it needs (amber) and what waits on it (blue). Click a week or a section to open it below.</p>
+    <div class="controls">
+      <div class="seg" role="group" aria-label="Detail view">
+        <button type="button" data-view="week" aria-pressed="true">By week</button>
+        <button type="button" data-view="section" aria-pressed="false">By section</button>
+      </div>
+      <label class="tog"><input type="checkbox" id="critT"> Critical path</label>
+      <label class="tog"><input type="checkbox" id="openT"> Open phases only</label>
+    </div>
+    <div class="mx" id="mxWrap"><div class="mx-in" id="mx"></div></div>
+    <div class="legend">
+      <span><i style="background:var(--amber-soft)"></i>needed by selected</span>
+      <span><i style="background:var(--accent-soft)"></i>waits on selected</span>
+      <span><i style="border:2px solid var(--red)"></i>critical path</span>
+      <span><i style="background:var(--accent);border-color:var(--accent)"></i>in progress</span>
+      <span><i style="background:var(--green);border-color:var(--green)"></i>done</span>
+      <span><span class="chip soft">~TK2</span> same-week handoff</span>
+    </div>
+    <div class="detail">
+      <div class="tabs" role="tablist" id="tabs"></div>
+      <div id="panel"></div>
+    </div>
+  </div>
+</section>
+
+<section id="research">
+  <div class="wrap">
+    <div class="kicker">Research watchlist · Nov 2026</div>
+    <h2>What is new, and what the plan does with it</h2>
+    <p class="sub">Figures are as reported by each source and are checked in week 1 before anything depends on them.</p>
+    <div class="rows" id="sota"></div>
+  </div>
+</section>
+
+<section id="compute">
+  <div class="wrap">
+    <div class="kicker">Compute</div>
+    <h2>GPU budget</h2>
+    <p class="sub">In T4-hours. One Kaggle session hour on 2× T4 is two T4-hours; one account gives about 60 a week.</p>
+    <div class="rows" id="gpu"></div>
+    <ul class="plain">
+      <li>One account supplies about 240 T4-hours in four weeks, below the plan's need. Two teammates' accounts cover it with room for one re-run.</li>
+      <li>Kaggle allows one account per person. Several accounts held by one person break its terms and risk losing every notebook.</li>
+    </ul>
+  </div>
+</section>
+
+<section id="risks">
+  <div class="wrap">
+    <div class="kicker">Risks</div>
+    <h2>What is most likely to go wrong</h2>
+    <div class="rows" id="risk"></div>
+  </div>
+</section>
+
+<section id="later">
+  <div class="wrap">
+    <div class="kicker">After v0.1</div>
+    <h2>Deliberately left for v0.2</h2>
+    <ul class="plain" id="backlog"></ul>
+  </div>
+</section>
+
+<section id="repo">
+  <div class="wrap">
+    <div class="kicker">Repository</div>
+    <h2>One folder per section</h2>
+    <p class="sub">Each folder owns its section's code, configs and reports. Rules are in <code>GUIDELINES.md</code>; this plan's data lives in <code>site/plan-data.js</code>.</p>
+    <pre class="tree" id="tree"></pre>
+  </div>
+</section>
+
+<footer><div class="wrap" id="foot"></div></footer>
+
+<script src="plan-data.js"></script>
+<script>
+(() => {
+const P = window.PLAN, S = P.sections, all = {}, secOf = {}, wkOf = {};
+S.forEach(s => s.cells.forEach((c, i) => { all[c.id] = c; secOf[c.id] = s; wkOf[c.id] = i + 1; }));
+const esc = t => String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;');
+const bare = d => d.replace(/^~/, '');
+// reverse dependencies
+const rdeps = {}; Object.keys(all).forEach(k => rdeps[k] = []);
+Object.values(all).forEach(c => c.needs.forEach(d => rdeps[bare(d)] && rdeps[bare(d)].push(c.id)));
+// rule check: hard needs come from earlier weeks, soft needs from the same or earlier week
+Object.values(all).forEach(c => c.needs.forEach(d => {
+  const q = bare(d); if (!all[q]) return console.warn(c.id + ': unknown need ' + d);
+  if (d[0] === '~' ? wkOf[q] > wkOf[c.id] : wkOf[q] >= wkOf[c.id]) console.warn(`${c.id} (w${wkOf[c.id]}) needs ${d} (w${wkOf[q]})`);
+}));
+
+let st = { view: 'week', week: 1, sec: 'DA', sel: null };
+try { const h = new URLSearchParams(location.hash.slice(1)); if (h.get('view')) st.view = h.get('view'); if (h.get('week')) st.week = +h.get('week'); if (h.get('section')) st.sec = h.get('section'); if (h.get('phase') && all[h.get('phase')]) st.sel = h.get('phase'); } catch (e) {}
+
+// header
+document.getElementById('ver').textContent = `Plan ${P.version} · updated ${P.updated}`;
+document.getElementById('goal').textContent = P.goal;
+document.getElementById('cons').innerHTML = P.constraints.map(c => `<li>${esc(c)}</li>`).join('');
+document.getElementById('weeks').innerHTML = P.phases.map(p => {
+  const cs = S.map(s => s.cells[p.n - 1]), d = cs.filter(c => c.status === 'done').length;
+  return `<div><div class="w">${p.week} · P${p.n}</div><h3>${p.title}</h3><p>${esc(p.theme)}</p><div class="bar"><i style="width:${d / cs.length * 100}%"></i></div><div class="cnt">${d} of ${cs.length} done</div></div>`;
+}).join('');
+document.getElementById('meta').textContent = `${S.length} sections × ${P.phases.length} phases = ${Object.keys(all).length} deliverables`;
+
+const chip = d => `<button type="button" class="chip${d[0] === '~' ? ' soft' : ''}" data-go="${bare(d)}" title="${esc(all[bare(d)] ? all[bare(d)].title : '')}">${d}</button>`;
+const card = (c, showSec) => `
+  <div class="card" id="c-${c.id}">
+    <div class="top"><span class="id">${c.id}</span><span class="${showSec ? 'sec' : 'sec'}">${showSec ? esc(secOf[c.id].name) : P.phases[wkOf[c.id] - 1].week}</span></div>
+    <h4>${esc(c.title)}</h4>
+    <p>${esc(c.goal)}</p>
+    <div class="needs">${c.needs.length ? 'Needs ' + c.needs.map(chip).join('') : 'Needs nothing'}</div>
+    <div class="needs"><span class="st ${c.status}">${c.status}</span>${c.gpu ? `<span class="gpu">${c.gpu} T4-h</span>` : ''}</div>
+    <div class="done"><b>Done when</b>${esc(c.done)}</div>
+  </div>`;
+
+function matrix() {
+  let h = '<div class="mx-h">Section</div>' + P.phases.map(p => `<button type="button" class="mx-h wk${st.view === 'week' && st.week === p.n ? ' on' : ''}" data-week="${p.n}">${p.week} · ${p.title}</button>`).join('');
+  const open = document.getElementById('openT').checked;
+  for (const s of S) {
+    h += `<button type="button" class="mx-r${st.view === 'section' && st.sec === s.code ? ' on' : ''}" data-sec="${s.code}"><span>${s.num}</span>${esc(s.name)}</button>`;
+    h += s.cells.map(c => {
+      const cls = ['cell', 's-' + c.status];
+      if (P.critical.includes(c.id)) cls.push('crit');
+      if (st.sel === c.id) cls.push('sel');
+      else if (st.sel && all[st.sel].needs.map(bare).includes(c.id)) cls.push('dep');
+      else if (st.sel && rdeps[st.sel].includes(c.id)) cls.push('rdep');
+      const hide = open && c.status === 'done';
+      return `<button type="button" class="${cls.join(' ')}" data-cell="${c.id}" ${hide ? 'style="opacity:.25"' : ''}><b>${c.id}</b>${esc(c.title)}</button>`;
+    }).join('');
+  }
+  document.getElementById('mx').innerHTML = h;
+  document.getElementById('mxWrap').classList.toggle('crit', document.getElementById('critT').checked);
+}
+
+function tabs() {
+  const t = st.view === 'week'
+    ? P.phases.map(p => `<button type="button" role="tab" aria-selected="${st.week === p.n}" data-week="${p.n}">${p.week} · ${p.title}</button>`)
+    : S.map(s => `<button type="button" role="tab" aria-selected="${st.sec === s.code}" data-sec="${s.code}">${s.num} ${esc(s.name)}</button>`);
+  document.getElementById('tabs').innerHTML = t.join('');
+  document.querySelectorAll('[data-view]').forEach(b => b.setAttribute('aria-pressed', b.dataset.view === st.view));
+}
+
+function panel() {
+  const open = document.getElementById('openT').checked, keep = c => !open || c.status !== 'done';
+  let h;
+  if (st.view === 'week') {
+    const p = P.phases[st.week - 1];
+    h = `<div class="panel-h"><span class="code">P${p.n}</span><h3>${p.week}: ${p.title}</h3></div><p class="means">${esc(p.theme)}</p>
+      <div class="cards three">${S.map(s => s.cells[p.n - 1]).filter(keep).map(c => card(c, true)).join('')}</div>`;
+  } else {
+    const s = S.find(x => x.code === st.sec), li = a => '<ul>' + a.map(x => `<li>${esc(x)}</li>`).join('') + '</ul>';
+    h = `<div class="panel-h"><span class="code">${s.num} · ${s.code}</span><h3>${esc(s.name)}</h3><span class="path">${s.folder}/</span></div>
+      ${s.merged ? `<p class="note">${esc(s.merged)}</p>` : ''}
+      <p class="means">${esc(s.means)}</p>
+      <div class="facts">
+        <div class="kv"><h4>In scope for v0.1</h4>${li(s.scope)}<h4 style="margin-top:12px">Not in v0.1</h4>${li(s.out)}</div>
+        <div class="kv"><h4>What to expect</h4>${li(s.expect)}</div>
+        <div class="kv"><h4>Takes in</h4>${li(s.inputs)}<h4 style="margin-top:12px">Hands over</h4>${li(s.outputs)}</div>
+      </div>
+      <div class="cards">${s.cells.filter(keep).map(c => card(c, false)).join('')}</div>`;
+  }
+  document.getElementById('panel').innerHTML = h;
+  if (st.sel) { const el = document.getElementById('c-' + st.sel); if (el) el.classList.add('hl'); }
+}
+
+function render(scroll) {
+  matrix(); tabs(); panel();
+  const q = new URLSearchParams({ view: st.view, [st.view === 'week' ? 'week' : 'section']: st.view === 'week' ? st.week : st.sec });
+  if (st.sel) q.set('phase', st.sel);
+  try { history.replaceState(null, '', '#' + q); } catch (e) {}
+  if (scroll && st.sel) { const el = document.getElementById('c-' + st.sel); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+}
+
+document.addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  if (b.dataset.view) { st.view = b.dataset.view; render(); }
+  else if (b.dataset.week) { st.view = 'week'; st.week = +b.dataset.week; render(); }
+  else if (b.dataset.sec) { st.view = 'section'; st.sec = b.dataset.sec; render(); }
+  else if (b.dataset.cell) { const id = b.dataset.cell; st.sel = st.sel === id ? null : id; if (st.sel) { st.week = wkOf[id]; st.sec = secOf[id].code; } render(); }
+  else if (b.dataset.go) { const id = b.dataset.go; st.sel = id; st.week = wkOf[id]; st.sec = secOf[id].code; render(true); }
+});
+document.getElementById('critT').addEventListener('change', render.bind(null, false));
+document.getElementById('openT').addEventListener('change', render.bind(null, false));
+
+// lists
+document.getElementById('sota').innerHTML = P.sota.map(x => `<div><b>${esc(x.name)}<small>${esc(x.who)}</small></b><span>${esc(x.what)}<em>${esc(x.use)}</em></span></div>`).join('');
+document.getElementById('risk').innerHTML = P.risks.map(([a, b]) => `<div><b>${esc(a)}</b><span>${esc(b)}</span></div>`).join('');
+document.getElementById('backlog').innerHTML = P.backlog.map(x => `<li>${esc(x)}</li>`).join('');
+let lo = 0, hi = 0; const perWeek = [0, 0, 0, 0].map(() => [0, 0]);
+Object.values(all).forEach(c => { if (!c.gpu) return; const [a, b = a] = c.gpu.split('–').map(Number); lo += a; hi += b; perWeek[wkOf[c.id] - 1][0] += a; perWeek[wkOf[c.id] - 1][1] += b; });
+document.getElementById('gpu').innerHTML = P.phases.map((p, i) => `<div><b>${p.week} · ${p.title}</b><span>${perWeek[i][0]}–${perWeek[i][1]} T4-hours: ${Object.values(all).filter(c => c.gpu && wkOf[c.id] === p.n).map(c => `${c.id} ${c.gpu}`).join(', ')}</span></div>`).join('') +
+  `<div><b>Total</b><span>${lo}–${hi} T4-hours</span></div>`;
+document.getElementById('tree').innerHTML = `formant/
+├── README.md            <i>what this is, how to start</i>
+├── GUIDELINES.md        <i>how we work: branches, data, runs, reviews</i>
+├── site/                <i>this plan and the project site (Vercel)</i>
+├── docs/                <i>decisions, reports, archived plans</i>
+` + S.map((s, i) => `${i === S.length - 1 ? '└' : '├'}── ${(s.folder + '/').padEnd(21)}<i>${esc(s.name)}</i>`).join('\n');
+document.getElementById('foot').textContent = `${P.name} · plan ${P.version} · ${P.updated} · Targets are plans, not results.`;
+
+render(!!st.sel);
+})();
+</script>
+</body>
+</html>

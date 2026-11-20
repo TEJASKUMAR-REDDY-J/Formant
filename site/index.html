@@ -1,0 +1,830 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Formant</title>
+<meta name="description" content="Formant: an offline, full-duplex voice agent for Indian languages that runs on a budget laptop.">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: white page, near-black ink, grey hairlines, one blue accent (LightningLM colour scale). Blue = talker, amber = thinker, green = you, red = key results. */
+:root{
+  --bg:#FFFFFF; --bg-2:#FAFAFA; --surface:#FFFFFF; --surface-2:#FAFAFA;
+  --ink:#111111; --body:#1A1A1A; --muted:#555555; --faint:#888888;
+  --line:#E8E8E8; --line-2:#D0D0D0;
+  --accent:#2563EB; --accent-ink:#1D4ED8; --accent-soft:rgba(37,99,235,.08);
+  --amber:#D97706; --red:#DC2626; --green:#16A34A; --highlight:#FEF3C7;
+  --display:"Bricolage Grotesque","Segoe UI",ui-sans-serif,system-ui,sans-serif;
+  --font:"Geist",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"Geist Mono",ui-monospace,"SF Mono",Consolas,monospace;
+  --maxw:1160px;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:72px;background:var(--bg)}
+body{background:var(--bg);color:var(--body);font:400 17.5px/1.62 var(--font);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;overflow-x:hidden}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--bg)}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:40;opacity:.07;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+a{color:inherit}
+::selection{background:var(--accent);color:#fff}
+:focus-visible{outline:2px solid var(--amber);outline-offset:3px;border-radius:6px}
+.wrap{max-width:var(--maxw);margin:0 auto;padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px));position:relative}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+h1,h2,h3,h4{font-family:var(--display);color:var(--ink);text-wrap:balance;margin:0;font-optical-sizing:auto}
+p{margin:0}
+.fire{background:var(--accent);-webkit-background-clip:text;background-clip:text;color:transparent;padding-block:.06em .14em;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+
+/* nav */
+.nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:25;background:rgba(255,255,255,.88);backdrop-filter:saturate(1.4) blur(20px);-webkit-backdrop-filter:saturate(1.4) blur(20px);border-bottom:1px solid var(--line)}
+.nav .wrap{display:flex;align-items:center;gap:26px;height:56px}
+.brand{display:flex;align-items:center;gap:9px;text-decoration:none;flex:none;font:700 19px/1 var(--display);color:var(--ink);letter-spacing:-.02em}
+.brand svg{width:22px;height:22px}
+.links{display:flex;gap:24px;overflow-x:auto;scrollbar-width:none;font-size:13.5px;color:var(--muted);min-width:0}
+.links::-webkit-scrollbar{display:none}
+.links a{text-decoration:none;white-space:nowrap;padding:6px 0;transition:color .2s;position:relative}
+.links a:hover{color:var(--ink)}
+.links a.on{color:var(--ink)}
+.links a.on::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:2px;border-radius:2px;background:var(--accent)}
+.pill{margin-left:auto;flex:none;font:500 12px var(--mono);padding:6px 12px;border-radius:999px;color:var(--ink);border:1px solid var(--line-2);background:var(--accent-soft)}
+.pill b{color:var(--amber);font-weight:500}
+
+/* hero */
+.hero{position:relative;padding-block:84px 56px;overflow:hidden}
+.hero::before{content:"";position:absolute;width:900px;height:900px;right:-220px;top:-160px;border-radius:50%;pointer-events:none;
+  background:radial-gradient(closest-side,rgba(255,122,26,.30),rgba(255,59,43,.12) 45%,transparent 72%)}
+.hero::after{content:"";position:absolute;width:700px;height:500px;left:-260px;bottom:-260px;border-radius:50%;pointer-events:none;
+  background:radial-gradient(closest-side,rgba(255,200,58,.10),transparent 70%)}
+.hero .wrap{display:grid;grid-template-columns:1.08fr .92fr;gap:36px;align-items:center;z-index:1}
+.eyebrow{display:inline-flex;align-items:center;gap:10px;font:500 12.5px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--ink);padding:7px 14px 7px 10px;border-radius:999px;border:1px solid var(--line-2);background:rgba(255,255,255,.02)}
+.spark{width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 3px rgba(255,122,26,.18),0 0 14px 2px rgba(255,122,26,.8);animation:pulse 2.4s ease-in-out infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 6px rgba(255,122,26,.06),0 0 22px 4px rgba(255,122,26,.9)}}
+.hero h1{font-size:clamp(52px,8vw,112px);line-height:.92;font-weight:800;letter-spacing:-.045em;margin-top:24px;font-variation-settings:"opsz" 96}
+.hero h1 .l2{display:block;padding-bottom:.12em;margin-bottom:-.12em}
+.lede{font-size:clamp(19px,2vw,22px);line-height:1.5;color:var(--body);margin-top:28px;max-width:30em}
+.lede b{color:var(--ink);font-weight:600}
+.cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:34px}
+.btn{display:inline-flex;align-items:center;gap:10px;padding:13px 20px;border-radius:999px;font:600 15px var(--font);text-decoration:none;transition:transform .2s,box-shadow .2s}
+.btn.primary{background:var(--accent);color:#fff;box-shadow:0 8px 30px rgba(255,90,30,.35)}
+.btn.primary:hover{transform:translateY(-1px);box-shadow:0 12px 40px rgba(255,90,30,.5)}
+.btn.ghost{border:1px solid var(--line-2);color:var(--ink);background:rgba(255,255,255,.02)}
+.btn.ghost:hover{border-color:var(--ink)}
+.spiral-box{position:relative;aspect-ratio:1/1;width:100%;max-width:560px;justify-self:center}
+.spiral-box::before{content:"";position:absolute;inset:14%;border-radius:50%;background:radial-gradient(closest-side,rgba(255,140,30,.35),rgba(255,59,43,.10) 60%,transparent);filter:blur(30px)}
+#spiral{position:relative;width:100%;height:100%;display:block}
+.legend-mini{position:absolute;left:0;right:0;bottom:-4px;display:flex;justify-content:center;gap:20px;font:500 12px var(--mono);color:var(--muted)}
+.legend-mini span::before{content:"";display:inline-block;width:20px;height:4px;border-radius:2px;margin-right:8px;vertical-align:3px;background:var(--accent)}
+.legend-mini span.u::before{background:var(--green);height:2px}
+
+/* stat strip */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);margin-top:64px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.stat{padding:26px 22px;display:flex;flex-direction:column;gap:4px;min-width:0}
+.stat+.stat{border-left:1px solid var(--line)}
+.stat .v{font:800 clamp(34px,4vw,48px)/1 var(--display);letter-spacing:-.04em;font-variant-numeric:tabular-nums}
+.stat .v small{font-size:.45em;font-weight:600;color:var(--muted);margin-left:4px;letter-spacing:-.01em}
+.stat .k{font-size:14px;color:var(--muted)}
+
+/* sections */
+section{padding-block:120px;position:relative;overflow-x:clip}
+.glow-l::before,.glow-r::before{content:"";position:absolute;width:760px;height:760px;border-radius:50%;pointer-events:none;top:40px;
+  background:radial-gradient(closest-side,rgba(255,122,26,.10),transparent 70%)}
+.glow-l::before{left:-380px}.glow-r::before{right:-380px}
+.kicker{display:inline-flex;align-items:center;gap:10px;font:500 12.5px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
+.kicker::before{content:"";width:22px;height:2px;border-radius:2px;background:var(--accent)}
+.h2{font-size:clamp(38px,5.6vw,72px);line-height:1;font-weight:800;letter-spacing:-.042em;margin-top:18px;max-width:15em;font-variation-settings:"opsz" 96}
+.h2 .dim{color:var(--faint)}
+.sub{font-size:clamp(18px,1.8vw,21px);color:var(--body);margin-top:24px;max-width:36em;line-height:1.55}
+.sub b{color:var(--ink);font-weight:600}
+.mt-l{margin-top:60px}
+.note{font-size:13px;color:var(--faint);margin-top:16px}
+
+/* glow card: gradient hairline border + pointer-follow glow */
+.gcard{position:relative;border-radius:24px;background:linear-gradient(180deg,var(--surface-2),var(--surface));border:1px solid var(--line);overflow:hidden;isolation:isolate}
+.gcard::before{content:"";position:absolute;inset:0;z-index:-1;opacity:0;transition:opacity .35s;
+  background:radial-gradient(420px circle at var(--mx,50%) var(--my,0%),rgba(255,140,40,.16),transparent 60%)}
+.gcard:hover::before{opacity:1}
+.gcard::after{content:"";position:absolute;inset:0;border-radius:inherit;padding:1px;pointer-events:none;
+  background:linear-gradient(160deg,rgba(255,200,58,.35),rgba(255,122,26,.0) 30%,rgba(255,59,43,0) 70%,rgba(255,59,43,.25));
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude}
+
+/* four needs */
+.four{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.four .gcard{padding:30px 26px 32px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.ico{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;background:none;border:1px solid var(--line-2)}
+.ico svg{width:22px;height:22px;stroke:var(--amber);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.four h3{font-size:22px;font-weight:700;letter-spacing:-.02em;line-height:1.15}
+.four p{font-size:15.5px;color:var(--muted);line-height:1.55}
+
+.dot{display:inline-flex;align-items:center;gap:9px;color:var(--muted);font-size:14.5px}
+.dot::before{content:"";width:12px;height:12px;border-radius:50%;flex:none;border:1.5px solid var(--faint)}
+.dot.y{color:var(--body)}
+.dot.y::before{background:var(--ink);border-color:var(--ink)}
+.dot.h::before{background:linear-gradient(90deg,var(--ink) 50%,transparent 50%);border-color:var(--ink)}
+.us .dot.y{color:var(--ink)}
+.us .dot.y::before{background:var(--accent);border-color:var(--accent);box-shadow:0 0 10px rgba(255,122,26,.7)}
+
+/* conversation */
+.convo{padding:30px 26px 24px}
+.convo-inner{min-width:780px;position:relative}
+.lane{display:grid;grid-template-columns:86px 1fr;align-items:center;gap:14px;margin-bottom:14px}
+.lane .who{font:500 13px var(--mono)}
+.lane .who.u{color:var(--green)} .lane .who.j{color:var(--accent)}
+.track{position:relative;height:52px;border-radius:12px;background:repeating-linear-gradient(90deg,var(--line) 0 1px,transparent 1px calc(100%/40));background-color:rgba(255,255,255,.015);border:1px solid var(--line)}
+.seg{position:absolute;top:7px;bottom:7px;border-radius:9px;display:flex;align-items:center;padding:0 12px;font-size:13.5px;font-weight:600;white-space:nowrap;overflow:hidden}
+.seg.u{background:linear-gradient(90deg,#2f9e5c,var(--green));color:#fff;box-shadow:0 0 20px rgba(95,216,142,.25)}
+.seg.j{background:var(--accent);color:#fff;box-shadow:0 0 24px rgba(255,100,30,.35)}
+.seg.bc{background:var(--highlight);border:1.5px dashed var(--amber);color:var(--amber);justify-content:center;padding:0}
+.seg.cut{-webkit-mask:linear-gradient(90deg,#000 62%,rgba(0,0,0,.25));mask:linear-gradient(90deg,#000 62%,rgba(0,0,0,.25))}
+.ruler{display:grid;grid-template-columns:86px 1fr;gap:14px;margin-top:4px}
+.ticks{position:relative;height:18px;font:400 11px var(--mono);color:var(--faint)}
+.ticks span{position:absolute;transform:translateX(-50%)}
+.playhead{position:absolute;top:-8px;bottom:26px;left:100px;width:2px;background:var(--amber);border-radius:2px;pointer-events:none;box-shadow:0 0 12px 1px rgba(255,200,58,.8);animation:play 3.2s linear infinite}
+.playhead::before{content:"";position:absolute;top:-5px;left:-5px;width:12px;height:12px;border-radius:50%;background:var(--amber);box-shadow:0 0 14px var(--amber)}
+@keyframes play{to{transform:translateX(var(--run,600px))}}
+.events{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:18px}
+.events .gcard{padding:24px 22px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.ev-t{font:500 12px var(--mono);color:var(--amber)}
+.events h4{font-size:19px;font-weight:700;letter-spacing:-.015em}
+.events p{font-size:15px;color:var(--muted)}
+
+/* architecture */
+.arch{padding:26px}
+.arch svg{display:block;width:100%;min-width:780px;height:auto}
+.arch .box{fill:#fff;stroke:var(--line-2);stroke-width:1.2}
+.arch .hot{fill:var(--accent-soft);stroke:var(--accent);stroke-width:2}
+.arch .thk{fill:var(--highlight);stroke:var(--amber);stroke-width:1.6}
+.arch .t{fill:var(--ink);font:700 18px var(--display)}
+.arch .s{fill:var(--muted);font:400 12.5px var(--mono)}
+.arch .lab{fill:var(--ink);font:500 12px var(--mono);opacity:.85}
+.arch .ln{stroke:var(--line-2);stroke-width:1.6;fill:none}
+.arch .lnhot{stroke:var(--accent);stroke-width:2;fill:none}
+.arch .lny{stroke:var(--amber);stroke-width:2;fill:none}
+.arch .flow{stroke-dasharray:4 7;animation:flow 1.2s linear infinite}
+@keyframes flow{to{stroke-dashoffset:-22}}
+.arch .mk{fill:var(--faint)} .arch .mkhot{fill:var(--accent)} .arch .mky{fill:var(--amber)}
+.duo{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.duo .gcard{padding:34px 30px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.tag{font:500 12px var(--mono);letter-spacing:.1em;text-transform:uppercase}
+.duo h3{font-size:clamp(30px,3.4vw,40px);font-weight:800;letter-spacing:-.035em;line-height:1}
+.duo p{color:var(--body);font-size:16.5px}
+.duo ul{margin:6px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:10px;font-size:15.5px;color:var(--muted)}
+.duo li{display:flex;gap:12px}
+.duo li::before{content:"";width:7px;height:7px;border-radius:50%;margin-top:9px;flex:none;background:currentColor;box-shadow:0 0 8px currentColor}
+.duo .t-or li::before{color:var(--accent)} .duo .t-ye li::before{color:var(--amber)}
+.steps{margin:0;padding:0;list-style:none;counter-reset:s;display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.steps li{counter-increment:s;display:flex;flex-direction:column;gap:8px;min-width:0;padding:24px 22px;border-radius:20px;border:1px solid var(--line);background:rgba(255,255,255,.012)}
+.steps li::before{content:"0" counter(s);font:600 13px var(--mono);color:#fff;background:var(--accent);width:fit-content;padding:3px 9px;border-radius:999px}
+.steps b{font:700 19px var(--display);color:var(--ink);letter-spacing:-.015em}
+.steps span{font-size:15px;color:var(--muted)}
+
+/* specs */
+.specs{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.spec{padding:30px 28px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.spec .big{font:800 clamp(46px,5.4vw,72px)/1 var(--display);letter-spacing:-.05em;font-variant-numeric:tabular-nums}
+.spec .big small{font-size:.36em;font-weight:600;color:var(--muted);margin-left:6px;letter-spacing:-.01em;-webkit-text-fill-color:var(--muted)}
+.spec .lbl{font-weight:600;font-size:16.5px;margin-top:12px;color:var(--ink)}
+.spec .det{font-size:14.5px;color:var(--muted)}
+.bars{display:grid;gap:22px}
+.barcard{padding:28px 26px 26px}
+.bar-h{display:flex;justify-content:space-between;align-items:baseline;gap:16px;flex-wrap:wrap;margin-bottom:18px}
+.bar-h h3{font-size:24px;font-weight:700;letter-spacing:-.02em}
+.bar-h .mono{font-size:14px;color:var(--ink)}
+.bar{display:flex;height:60px;border-radius:14px;overflow:hidden;background:rgba(255,255,255,.02);border:1px solid var(--line);gap:3px;padding:3px}
+.bar div{height:100%;display:flex;align-items:center;justify-content:center;font:600 12.5px var(--mono);color:#fff;min-width:0;overflow:hidden;white-space:nowrap;border-radius:10px}
+.bar .free{color:var(--faint);background-image:repeating-linear-gradient(135deg,transparent 0 7px,var(--line) 7px 8px);font-weight:500}
+.keys{display:flex;flex-wrap:wrap;gap:10px 24px;margin-top:16px;font-size:14px;color:var(--muted)}
+.keys span{display:inline-flex;align-items:center;gap:9px}
+.keys i{width:11px;height:11px;border-radius:4px;display:inline-block}
+.keys b{color:var(--ink);font:500 13px var(--mono)}
+.c-talk{background:linear-gradient(135deg,#ff9a3a,var(--accent))}
+.c-depth{background:linear-gradient(135deg,#ff6a3a,var(--red));color:#fff!important}
+.c-codec{background:linear-gradient(135deg,#fff3dd,var(--ink))}
+.c-think{background:linear-gradient(135deg,#ffe07a,var(--amber))}
+.c-cache{background:linear-gradient(135deg,#ff6a3a,var(--red));color:#fff!important}
+.c-os{background:var(--line);color:var(--muted)!important}
+
+/* languages */
+.langs{display:grid;grid-template-columns:repeat(6,1fr);gap:14px}
+.lang{padding:28px 18px 22px;display:flex;flex-direction:column;gap:12px;min-width:0;text-align:left}
+.lang h3{font-size:24px;font-weight:700;letter-spacing:-.02em}
+.lang .name{font-size:14px;color:var(--muted)}
+.lang .fam{font:500 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--green)}
+
+/* targets */
+.targets{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.tg{padding:30px 26px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.tg .v{font:800 clamp(40px,4.2vw,54px)/1.05 var(--display);letter-spacing:-.045em;font-variant-numeric:tabular-nums}
+.tg .k{font-weight:600;color:var(--ink);font-size:17px;margin-top:6px}
+.tg .r{font-size:14.5px;color:var(--muted)}
+
+/* roadmap */
+.road{padding:28px 26px}
+.road-inner{min-width:780px}
+.rhead,.rrow{display:grid;grid-template-columns:220px 1fr;gap:18px}
+.rhead{font:400 11px var(--mono);color:var(--faint);padding-bottom:8px}
+.rhead .wk{position:relative;height:14px}
+.rhead .wk span{position:absolute;transform:translateX(-50%)}
+.rrow{align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+.rrow:last-child{border-bottom:0}
+.rrow .nm{font-size:15.5px;font-weight:500;color:var(--ink);display:flex;gap:12px;align-items:baseline}
+.rrow .nm .mono{font-size:12px;color:var(--faint)}
+.rtrack{position:relative;height:28px;background:repeating-linear-gradient(90deg,var(--line) 0 1px,transparent 1px calc(100%/24))}
+.rbar{position:absolute;top:6px;bottom:6px;border-radius:7px;background:linear-gradient(90deg,rgba(255,200,58,.28),rgba(255,122,26,.28))}
+.rbar.next{background:var(--accent);box-shadow:0 0 18px rgba(255,110,30,.6)}
+.rbar.key{background:linear-gradient(90deg,rgba(255,122,26,.7),rgba(255,59,43,.7))}
+.rbar.ev{background:linear-gradient(90deg,rgba(95,216,142,.45),rgba(95,216,142,.25))}
+.rlegend{display:flex;flex-wrap:wrap;gap:8px 22px;margin-top:18px;font-size:13.5px;color:var(--muted)}
+.rlegend span{display:inline-flex;gap:8px;align-items:center}
+.rlegend i{width:22px;height:8px;border-radius:4px;display:inline-block}
+.ms{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.ms .gcard{display:flex;flex-direction:column;gap:6px;padding:24px 22px;min-width:0}
+.ms .mono{font-size:12px;color:var(--amber)}
+.ms b{font:700 19px var(--display);color:var(--ink);letter-spacing:-.015em}
+.ms span{font-size:14.5px;color:var(--muted)}
+
+
+/* scoreboard */
+.verdict{font:600 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;padding:5px 11px;border-radius:999px;display:inline-block;white-space:nowrap}
+.v-beat{background:var(--accent);color:#fff;box-shadow:0 0 16px rgba(255,110,30,.35)}
+.v-close{color:var(--amber);border:1px solid var(--amber);background:var(--highlight)}
+.v-trail{color:var(--muted);border:1px solid var(--line-2)}
+table.m.sb td:nth-child(3){color:var(--ink)}
+.tally{display:flex;gap:12px;flex-wrap:wrap;margin-top:30px;align-items:center}
+.tally .n{font:800 34px/1 var(--display);letter-spacing:-.04em;margin-right:6px}
+.tally>div{display:flex;align-items:center;gap:8px;padding:12px 18px;border-radius:16px;border:1px solid var(--line);background:rgba(255,255,255,.015)}
+.h2h{display:grid;grid-template-columns:1.15fr .85fr;gap:32px;padding:38px 34px;align-items:center}
+.h2h h3{font-size:clamp(28px,3.2vw,38px);font-weight:800;letter-spacing:-.035em;line-height:1.05}
+.h2h p{margin-top:14px;color:var(--body)}
+.versus{display:grid;grid-template-columns:1fr auto 1fr;gap:14px;align-items:center;text-align:center}
+.versus .side{padding:22px 14px;border-radius:18px;border:1px solid var(--line);background:rgba(0,0,0,.35);display:flex;flex-direction:column;gap:6px}
+.versus .side b{font:800 24px var(--display);color:var(--ink);letter-spacing:-.02em}
+.versus .side span{font:400 12px var(--mono);color:var(--muted)}
+.versus .side.us{border-color:var(--accent);box-shadow:0 0 30px rgba(255,100,30,.18) inset}
+.versus .side.us b{background:var(--accent);-webkit-background-clip:text;background-clip:text;color:transparent}
+.versus .x{font:800 22px var(--display);color:var(--faint)}
+
+/* data */
+.hrs{padding:30px 28px;display:grid;gap:20px}
+.hrow{display:grid;grid-template-columns:250px 1fr 150px;gap:20px;align-items:center}
+.hrow .nm b{display:block;color:var(--ink);font-weight:600;font-size:16px}
+.hrow .nm span{font-size:13.5px;color:var(--muted)}
+.htrack{position:relative;height:18px;border-radius:9px;background:rgba(255,255,255,.03);border:1px solid var(--line)}
+.hmax,.hmin{position:absolute;left:0;top:0;bottom:0;border-radius:9px}
+.hmax{background:var(--accent-soft)}
+.hmin{background:var(--accent);box-shadow:0 0 14px rgba(255,110,30,.4)}
+.hmin.g{background:linear-gradient(90deg,#2f9e5c,var(--green));box-shadow:0 0 14px rgba(95,216,142,.3)}
+.hval{font:500 14px var(--mono);color:var(--ink);text-align:right}
+.lesson{display:grid;grid-template-columns:auto 1fr;gap:22px;padding:28px;align-items:start}
+.lesson .q{font:800 64px/0.8 var(--display);color:var(--accent)}
+.lesson h3{font-size:22px;font-weight:700;letter-spacing:-.02em}
+.lesson p{margin-top:8px;color:var(--muted);font-size:16px}
+.lesson a{color:var(--ink)}
+.fsteps{margin:0;padding:0;list-style:none;counter-reset:f;display:grid;grid-template-columns:repeat(9,1fr);gap:10px}
+.fsteps li{counter-increment:f;display:flex;flex-direction:column;gap:6px;padding:16px 14px;border-radius:16px;border:1px solid var(--line);background:rgba(255,255,255,.015);min-width:0;position:relative}
+.fsteps li::before{content:counter(f,decimal-leading-zero);font:600 11px var(--mono);color:var(--accent)}
+.fsteps b{font:700 16px var(--display);color:var(--ink);letter-spacing:-.01em}
+.fsteps span{font-size:13px;color:var(--muted);line-height:1.4}
+.fsteps em{font:500 10.5px var(--mono);font-style:normal;letter-spacing:.06em;text-transform:uppercase;margin-top:auto;padding-top:6px}
+.fsteps em.cpu{color:var(--green)} .fsteps em.gpu{color:var(--amber)}
+.split2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.code{font:400 13px/1.7 var(--mono);color:var(--ink);background:var(--bg-2);border:1px solid var(--line);border-radius:20px;padding:22px 24px;overflow-x:auto;margin:0;white-space:pre}
+.code .k{color:var(--accent)} .code .s{color:var(--green)} .code .n{color:var(--amber)} .code .c{color:var(--faint)}
+.gates{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.gate{padding:20px 20px;display:flex;flex-direction:column;gap:4px}
+.gate .v{font:800 28px/1.05 var(--display);letter-spacing:-.035em}
+.gate span{font-size:13.5px;color:var(--muted)}
+.phases{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.ph{padding:24px 22px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.ph .top{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.ph .id{font:600 12px var(--mono);color:#fff;background:var(--accent);padding:3px 9px;border-radius:999px}
+.ph .wk{font:500 12px var(--mono);color:var(--amber)}
+.ph h4{font-size:19px;font-weight:700;letter-spacing:-.015em}
+.ph p{font-size:14.5px;color:var(--muted)}
+.ph .gt{font-size:13.5px;color:var(--body);border-top:1px solid var(--line);padding-top:12px;margin-top:auto}
+.ph .gt b{color:var(--green);font:500 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;display:block;margin-bottom:4px}
+.srcs{display:flex;flex-wrap:wrap;gap:8px}
+.src{font:500 13px var(--mono);padding:8px 13px;border-radius:999px;border:1px solid var(--line-2);color:var(--ink);background:rgba(255,255,255,.015)}
+.src i{font-style:normal;color:var(--faint);margin-left:6px}
+@media (max-width:1100px){.fsteps{grid-template-columns:repeat(3,1fr)}}
+@media (max-width:960px){.phases{grid-template-columns:1fr 1fr}.h2h,.split2{grid-template-columns:1fr}.hrow{grid-template-columns:200px 1fr 120px}}
+@media (max-width:640px){.phases,.gates{grid-template-columns:1fr}.fsteps{grid-template-columns:1fr 1fr}.hrow{grid-template-columns:1fr;gap:8px}.hval{text-align:left}.lesson{grid-template-columns:1fr}.versus{grid-template-columns:1fr}.versus .x{display:none}}
+
+/* footer */
+footer{position:relative;overflow:hidden;padding-block:40px 64px;border-top:1px solid var(--line)}
+footer .row{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;font-size:14px;color:var(--muted)}
+footer a{color:var(--ink);text-decoration-color:var(--accent);text-underline-offset:3px}
+
+@media (max-width:960px){
+  .hero .wrap{grid-template-columns:1fr}
+  .spiral-box{max-width:440px}
+  .four{grid-template-columns:1fr 1fr}
+  .specs,.targets,.steps,.events,.ms{grid-template-columns:1fr 1fr}
+  .langs{grid-template-columns:repeat(3,1fr)}
+  .stats{grid-template-columns:1fr 1fr}
+  .stat:nth-child(3){border-left:0}
+  .stat:nth-child(n+3){border-top:1px solid var(--line)}
+}
+@media (max-width:640px){
+  section{padding-block:84px}
+  .hero{padding-block:48px 32px}
+  .four,.specs,.duo,.steps,.targets,.ms,.events{grid-template-columns:1fr}
+  .langs{grid-template-columns:1fr 1fr}
+  .pill{display:none}
+  .nav .wrap{gap:16px}
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  .playhead{display:none}
+  .spark,.arch .flow{animation:none}
+}
+
+/* sharp pass: square edges, solid colours, no glows or background gradients */
+*,*::before,*::after{border-radius:0!important;box-shadow:none!important;text-shadow:none!important}
+.dot::before,.spark,.playhead::before,.duo li::before,.keys i,.legend-mini span::before,.lesson .q{border-radius:50%!important}
+body::after,.hero::before,.hero::after,.glow-l::before,.glow-r::before,.spiral-box::before,.gcard::before,.gcard::after{display:none!important}
+.fire,.versus .side.us b{background:none!important;color:var(--accent)!important;-webkit-text-fill-color:currentColor}
+.gcard{background:var(--surface);border:1px solid var(--line-2)}
+.ico{background:none}
+.btn.primary,.steps li::before,.ph .id,.v-beat,.rbar.next,.hmin,.c-depth,.c-cache,.links a.on::after,.kicker::before{background:var(--accent)!important}
+.btn.primary{color:#fff}
+.seg.u,.hmin.g{background:var(--green)!important}
+.seg.j{background:var(--accent)!important}
+.c-talk{background:var(--accent)} .c-depth,.c-cache{background:var(--red)!important} .c-codec{background:var(--ink)} .c-think{background:var(--amber)}
+.rbar{background:var(--line-2)} .rbar.key{background:var(--red)} .rbar.ev{background:var(--green)}
+.arch .hot{stroke:var(--accent)}
+.seg.cut{-webkit-mask:none;mask:none}
+.versus .side{background:var(--bg)}
+.rows{border-top:1px solid var(--line)}
+.rows .r{display:grid;grid-template-columns:1fr auto;gap:6px 24px;padding:22px 0;border-bottom:1px solid var(--line);font-size:15.5px;color:var(--body)}
+.rows .r.h{display:none}
+.rows .c:first-child{font:700 19px var(--display);color:var(--ink);letter-spacing:-.015em}
+.rows .c:nth-child(4){grid-column:2;grid-row:1}
+.rows .c:nth-child(2),.rows .c:nth-child(3){grid-column:1/-1;max-width:52em}
+.rows .c:nth-child(3){color:var(--ink)}
+.rows .lab{font:500 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--faint);margin-right:12px}
+.rows .c:nth-child(3) .lab{color:var(--accent)}
+.rows .c:nth-child(4) .lab{display:none}
+.ms4{grid-template-columns:repeat(4,1fr)}
+@media (max-width:960px){.ms4{grid-template-columns:1fr 1fr}}
+@media (max-width:640px){.ms4{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<nav class="nav" aria-label="Sections">
+  <div class="wrap">
+    <a class="brand" href="#top" aria-label="Formant, back to top">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15" r="6" fill="none" style="stroke:var(--accent)" stroke-width="2"/><circle cx="6.6" cy="15.6" r="2.3" style="fill:var(--accent)"/><circle cx="18" cy="7" r="4.4" fill="none" style="stroke:var(--accent)" stroke-width="2"/><circle cx="18" cy="7" r="1.7" style="fill:var(--accent)"/></svg>
+      Formant
+    </a>
+    <div class="links">
+      <a href="#why">Why</a><a href="#sarvam">vs Sarvam</a><a href="#data">Data</a><a href="#conversation">Conversation</a><a href="#how">How it works</a><a href="#inside">Inside the laptop</a><a href="#languages">Languages</a><a href="#targets">Targets</a><a href="#roadmap">Roadmap</a>
+    </div>
+    <a class="pill" href="plan.html" style="text-decoration:none">plan <b>v9</b> · 4 weeks</a>
+  </div>
+</nav>
+
+<header class="hero" id="top">
+  <div class="wrap">
+    <div>
+      <span class="eyebrow"><span class="spark"></span>Full-duplex voice AI · Indian languages</span>
+      <h1>Talks while it&nbsp;listens. <span class="l2 fire">Runs on a budget laptop.</span></h1>
+      <p class="lede">Formant hears you and speaks at the same time, the way people do. It answers in <b>Hindi, Bengali, Marathi, Tamil, Telugu and Hinglish</b>, and runs fully offline on a 2019 laptop with <b>two CPU cores and no graphics card</b>.</p>
+      <div class="cta">
+        <a class="btn primary" href="#how">See how it works</a>
+        <a class="btn ghost" href="plan.html">Open the plan</a>
+      </div>
+    </div>
+    <div class="spiral-box">
+      <canvas id="spiral" role="img" aria-label="Two tabla drums seen from above, sending out rings of sound in rhythm, while green rings from the user arrive at the same time."></canvas>
+      <div class="legend-mini" aria-hidden="true"><span>Formant</span><span class="u">You</span></div>
+    </div>
+  </div>
+  <div class="wrap">
+    <div class="stats">
+      <div class="stat"><div class="v fire">80<small>ms</small></div><div class="k">One listening-and-speaking frame</div></div>
+      <div class="stat"><div class="v fire">5<small>+ Hinglish</small></div><div class="k">Indian languages</div></div>
+      <div class="stat"><div class="v fire">0<small>GPUs</small></div><div class="k">Runs on CPU and built-in graphics</div></div>
+      <div class="stat"><div class="v fire">0<small>cloud calls</small></div><div class="k">Fully offline</div></div>
+    </div>
+  </div>
+</header>
+
+<section id="why" class="glow-r">
+  <div class="wrap">
+    <div class="kicker">Why build it</div>
+    <h2 class="h2">India needs four things at once. <span class="dim">No open system does all four.</span></h2>
+    <p class="sub">Every big lab is building voice agents. The open ones each solve part of the problem. Formant is an attempt to solve all of it in one system, and to publish everything needed to reproduce it.</p>
+    <div class="four mt-l">
+      <div class="gcard"><div class="ico"><svg viewBox="0 0 24 24"><path d="M4 6h10M9 4v2M6 6c0 4 3 7 7 8M12 6c-1 4-4 7-8 8"/><path d="M13 20l4-9 4 9M14.5 17h5"/></svg></div><h3>Indian languages and code-mixing</h3><p>Five major languages plus Hinglish, with switches mid-sentence, and Indian names and numbers said the way people say them.</p></div>
+      <div class="gcard"><div class="ico"><svg viewBox="0 0 24 24"><path d="M3 12h2M7 8v8M11 5v14M15 9v6M19 11v2"/></svg></div><h3>Full-duplex conversation</h3><p>Listens while speaking. Says "haan" while you talk, waits through your pauses, and stops when you cut in.</p></div>
+      <div class="gcard"><div class="ico"><svg viewBox="0 0 24 24"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.8.8 1 1.5 1 2.5h6c0-1 .2-1.7 1-2.5A6 6 0 0 0 12 3z"/></svg></div><h3>Replies that make sense</h3><p>A separate thinker model decides what to say, so the voice is fluent and the answer is complete and on topic.</p></div>
+      <div class="gcard"><div class="ico"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="11" rx="2"/><path d="M2 19h20"/></svg></div><h3>Offline on cheap hardware</h3><p>No internet and no GPU. If it runs on a 2-core laptop, it has headroom on any edge chip or phone.</p></div>
+    </div>
+
+  </div>
+</section>
+
+<section id="sarvam" class="glow-l">
+  <div class="wrap">
+    <div class="kicker">The bar</div>
+    <h2 class="h2">Set the bar at Sarvam. <span class="fire">Beat it where a conversation is judged.</span></h2>
+    <p class="sub">Sarvam builds the strongest Indian-language voice models today. Formant takes it on axis by axis, and says plainly where it wins, where it gets close and where it does not try.</p>
+    <div class="tally">
+      <div><span class="n fire">6</span><span class="verdict v-beat">Beat</span></div>
+      <div><span class="n" style="color:var(--amber)">2</span><span class="verdict v-close">Close</span></div>
+      <div><span class="n" style="color:var(--muted)">2</span><span class="verdict v-trail">Trail</span></div>
+    </div>
+    <div class="rows mt-l" style="--n:3">
+      <div class="r h"><div class="c">Axis</div><div class="c">Sarvam today</div><div class="c">Formant target</div><div class="c">Call</div></div>
+      <div class="r"><div class="c">Natural conversation</div><div class="c"><span class="lab">Sarvam today</span>Agents chain separate recognition, language and voice models. No open full-duplex model found.</div><div class="c"><span class="lab">Formant target</span>Native full-duplex: backchannels, overlap, stops within 300 ms when you cut in</div><div class="c"><span class="lab">Call</span><span class="verdict v-beat">Beat</span></div></div>
+      <div class="r"><div class="c">Brain on the device</div><div class="c"><span class="lab">Sarvam today</span>Sarvam Edge runs recognition, voices and translation offline. No on-device LLM announced.</div><div class="c"><span class="lab">Formant target</span>The whole agent offline, thinker included</div><div class="c"><span class="lab">Call</span><span class="verdict v-beat">Beat</span></div></div>
+      <div class="r"><div class="c">Cheapest hardware</div><div class="c"><span class="lab">Sarvam today</span>Small edge models on phones and feature phones; no full agent shown</div><div class="c"><span class="lab">Formant target</span>A complete agent on a 2-core 2019 i3 with no GPU</div><div class="c"><span class="lab">Call</span><span class="verdict v-beat">Beat</span></div></div>
+      <div class="r"><div class="c">Openness</div><div class="c"><span class="lab">Sarvam today</span>Open-weight Sarvam 30B and 105B; speech models through a paid API</div><div class="c"><span class="lab">Formant target</span>Open weights for every part, plus the data recipe and benchmark</div><div class="c"><span class="lab">Call</span><span class="verdict v-beat">Beat</span></div></div>
+      <div class="r"><div class="c">Cost per minute</div><div class="c"><span class="lab">Sarvam today</span>Paid per use. Bulbul V4 Flash: ₹20 per 10,000 characters</div><div class="c"><span class="lab">Formant target</span>₹0 at runtime</div><div class="c"><span class="lab">Call</span><span class="verdict v-beat">Beat</span></div></div>
+      <div class="r"><div class="c">Duplex benchmark</div><div class="c"><span class="lab">Sarvam today</span>No public Indian-language duplex benchmark</div><div class="c"><span class="lab">Formant target</span>Indic-FDB, the first one</div><div class="c"><span class="lab">Call</span><span class="verdict v-beat">Beat</span></div></div>
+      <div class="r"><div class="c">Speech recognition</div><div class="c"><span class="lab">Sarvam today</span>Saaras V4: 22 languages, streaming under 150 ms, speaker diarisation</div><div class="c"><span class="lab">Formant target</span>Match on-device accuracy on 5 languages; within a few points of Saaras on conversational Hindi</div><div class="c"><span class="lab">Call</span><span class="verdict v-close">Close</span></div></div>
+      <div class="r"><div class="c">Voice quality</div><div class="c"><span class="lab">Sarvam today</span>Bulbul V4: expressive, with laughter and emphasis, 11 languages</div><div class="c"><span class="lab">Formant target</span>Within 0.3 MOS of Bulbul V4 Flash in conversation</div><div class="c"><span class="lab">Call</span><span class="verdict v-close">Close</span></div></div>
+      <div class="r"><div class="c">Language count</div><div class="c"><span class="lab">Sarvam today</span>22 for recognition, 11 for voice</div><div class="c"><span class="lab">Formant target</span>5 + Hinglish, built so more can be added</div><div class="c"><span class="lab">Call</span><span class="verdict v-trail">Trail</span></div></div>
+      <div class="r"><div class="c">General knowledge</div><div class="c"><span class="lab">Sarvam today</span>Sarvam 105B</div><div class="c"><span class="lab">Formant target</span>Uses Sarvam 30B or the course's 120B as its thinker</div><div class="c"><span class="lab">Call</span><span class="verdict v-trail">Trail</span></div></div>
+      </div>
+    <div class="gcard h2h mt-l">
+      <div>
+        <div class="kicker">The head-to-head</div>
+        <h3 style="margin-top:14px">Blind test against Sarvam's own cloud stack.</h3>
+        <p>Native speakers hold the same conversations with both systems and pick the one that felt more like talking to a person. Target: Formant preferred in at least half the pairs on turn-taking, with answers rated just as complete.</p>
+      </div>
+      <div class="versus">
+        <div class="side us"><b>Formant</b><span>offline · i3 laptop</span><span>one duplex system</span></div>
+        <div class="x">vs</div>
+        <div class="side"><b>Sarvam</b><span>cloud</span><span>Saaras V4 → LLM → Bulbul V4</span></div>
+      </div>
+    </div>
+    <p class="note">Sarvam figures from its 2026 announcements as reported publicly. Formant's column is a target, not a result.</p>
+  </div>
+</section>
+
+<section id="data" class="glow-r">
+  <div class="wrap">
+    <div class="kicker">Data first · weeks 1–10</div>
+    <h2 class="h2">It starts with data. <span class="fire">Thousands of hours, cleaned hard.</span></h2>
+    <p class="sub">Every model in Formant learns from this data, so it is built first. Sarvam's speech data is private. Formant's sources, filters, speaker splitter and conversation statistics will be published so anyone can rebuild them.</p>
+
+    <div class="gcard hrs mt-l" role="img" aria-label="Hours of data by purpose, on a scale of 0 to 10,000 hours.">
+      <div class="hrow"><div class="nm"><b>Voice</b><span>Single-speaker speech with text</span></div><div class="htrack"><div class="hmax" style="width:100%"></div><div class="hmin" style="width:50%"></div></div><div class="hval">5,000–10,000 h</div></div>
+      <div class="hrow"><div class="nm"><b>Synthetic conversations</b><span>Two voices, real timing</span></div><div class="htrack"><div class="hmax" style="width:20%"></div><div class="hmin" style="width:10%"></div></div><div class="hval">1,000–2,000 h</div></div>
+      <div class="hrow"><div class="nm"><b>Real conversations</b><span>Split into one track per speaker</span></div><div class="htrack"><div class="hmin g" style="width:10%"></div></div><div class="hval">≥ 1,000 h</div></div>
+      <div class="hrow"><div class="nm"><b>Formant's own voice</b><span>Clean, expressive speech</span></div><div class="htrack"><div class="hmax" style="width:17%"></div><div class="hmin" style="width:5%"></div></div><div class="hval">500–1,700 h</div></div>
+      <div class="hrow"><div class="nm"><b>Held-out tests</b><span>Consented, never trained on</span></div><div class="htrack"><div class="hmin g" style="width:1%"></div></div><div class="hval">≥ 300 / language</div></div>
+    </div>
+
+    <div class="gcard lesson mt-l">
+      <div class="q">“</div>
+      <div><h3>Why so many hours of plain speech?</h3>
+        <p>In September 2026 a developer trained a 600M Moshi-style duplex model, the same size as Formant's talker, on about 100 hours of dialogue. The text side learned fast. The voice did not: the fine acoustic detail stayed under-trained and the audio never decoded cleanly. So Formant learns to speak from thousands of hours first, and learns conversation second. <a href="https://huggingface.co/blog/edwixx/shrinking-full-duplex-speech-training-a-600m-moshi" target="_blank" rel="noopener">Read the write-up</a></p></div>
+    </div>
+
+    <h3 class="mt-l" style="font-size:26px;font-weight:700;letter-spacing:-.02em">The data factory</h3>
+    <p class="sub" style="margin-top:10px">Nine steps from raw recordings to training shards. Code is tested on 10-minute samples on the laptop, then runs on Kaggle.</p>
+    <ol class="fsteps" style="margin-top:28px">
+      <li><b>Fetch</b><span>Stream one shard at a time</span><em class="cpu">Kaggle CPU</em></li>
+      <li><b>Clean</b><span>Mono, 24 kHz, loudness</span><em class="cpu">Kaggle CPU</em></li>
+      <li><b>Segment</b><span>2–30 s clips by voice activity</span><em class="cpu">Kaggle CPU</em></li>
+      <li><b>Identify</b><span>Language and code-mix tags</span><em class="cpu">Kaggle CPU</em></li>
+      <li><b>Label</b><span>Two recognisers must agree</span><em class="gpu">Kaggle T4</em></li>
+      <li><b>Score</b><span>Noise, agreement, speaker</span><em class="cpu">Kaggle CPU</em></li>
+      <li><b>Tokenise</b><span>Mimi, 12.5 frames a second</span><em class="gpu">Kaggle T4</em></li>
+      <li><b>Shard</b><span>Parquet on Hugging Face</span><em class="cpu">Kaggle CPU</em></li>
+      <li><b>Card</b><span>Licence, hours, every filter</span><em class="cpu">Laptop</em></li>
+    </ol>
+
+    <div class="split2 mt-l">
+      <pre class="code" aria-label="Example manifest row"><span class="c">// one row per clip</span>
+{
+  <span class="k">"id"</span>: <span class="s">"iv-hi-000123-07"</span>,
+  <span class="k">"source"</span>: <span class="s">"IndicVoices"</span>,
+  <span class="k">"licence"</span>: <span class="s">"CC-BY-4.0"</span>,
+  <span class="k">"lang"</span>: <span class="s">"hi"</span>,  <span class="k">"codemix"</span>: <span class="n">false</span>,
+  <span class="k">"dur_s"</span>: <span class="n">11.4</span>,  <span class="k">"snr_db"</span>: <span class="n">22.8</span>,
+  <span class="k">"agree_cer"</span>: <span class="n">0.06</span>,  <span class="k">"lid_conf"</span>: <span class="n">0.98</span>,
+  <span class="k">"speaker"</span>: <span class="s">"iv-hi-s0451"</span>,
+  <span class="k">"split"</span>: <span class="s">"train"</span>,
+  <span class="k">"tokens"</span>: <span class="s">"shard-0042.parquet#123"</span>
+}</pre>
+      <div class="gates">
+        <div class="gcard gate"><div class="v fire">≥ 0.9</div><span>Language-ID confidence</span></div>
+        <div class="gcard gate"><div class="v fire">≥ 15 dB</div><span>Signal to noise; ≥ 25 dB for Formant's own voice</span></div>
+        <div class="gcard gate"><div class="v fire">≤ 15%</div><span>Disagreement between two recognisers</span></div>
+        <div class="gcard gate"><div class="v fire">2–30 s</div><span>Clip length</span></div>
+        <div class="gcard gate"><div class="v fire">0</div><span>Test speakers seen in training</span></div>
+        <div class="gcard gate"><div class="v fire">Masked</div><span>Phone numbers and IDs in transcripts</span></div>
+      </div>
+    </div>
+
+    <h3 class="mt-l" style="font-size:26px;font-weight:700;letter-spacing:-.02em">Eight data phases</h3>
+    <div class="phases" style="margin-top:28px">
+      <div class="gcard ph"><div class="top"><span class="id">D0</span><span class="wk">Week 1</span></div><h4>Inventory and licences</h4><p>Every source with its licence, hours per language and access terms. Manifest schema and Kaggle template.</p><div class="gt"><b>Done when</b>No source is used without a data card.</div></div>
+      <div class="gcard ph"><div class="top"><span class="id">D1</span><span class="wk">Weeks 1–2</span></div><h4>Pilot</h4><p>10 hours per language through every step, end to end. Measure each step's speed.</p><div class="gt"><b>Done when</b>Cost per 1,000 hours is known.</div></div>
+      <div class="gcard ph"><div class="top"><span class="id">D2</span><span class="wk">Weeks 2–5</span></div><h4>Voice set at scale</h4><p>IndicVoices, Kathbath, IndicVoices-R, code-switched sets and filtered MahaDhwani.</p><div class="gt"><b>Done when</b>≥ 5,000 h ready; no language below half the largest.</div></div>
+      <div class="gcard ph"><div class="top"><span class="id">D3</span><span class="wk">Weeks 3–4</span></div><h4>Conversation statistics</h4><p>Gaps, overlaps and backchannels per language, measured from real conversations.</p><div class="gt"><b>Done when</b>Timing report and backchannel list per language.</div></div>
+      <div class="gcard ph"><div class="top"><span class="id">D4</span><span class="wk">Weeks 4–7</span></div><h4>Speaker splitter</h4><p>Turns one-track recordings of two people into one track per speaker, keeping timing.</p><div class="gt"><b>Done when</b>≤ 10% errors on a hand-checked set; ≥ 1,000 h split.</div></div>
+      <div class="gcard ph"><div class="top"><span class="id">D5</span><span class="wk">Weeks 5–9</span></div><h4>Synthetic conversations</h4><p>Scripts from the thinker, Indian voices from open TTS, timing from D3, real-world noise.</p><div class="gt"><b>Done when</b>1,000–2,000 h; native speakers rate ≥ 3.5/5.</div></div>
+      <div class="gcard ph"><div class="top"><span class="id">D6</span><span class="wk">Weeks 4–10</span></div><h4>Thinker text</h4><p>Short spoken-style answers, tool calls and code-mixed dialogues per language.</p><div class="gt"><b>Done when</b>50,000+ examples per language.</div></div>
+      <div class="gcard ph"><div class="top"><span class="id">D7</span><span class="wk">Weeks 3–10</span></div><h4>Held-out tests</h4><p>Consented real conversations, two or more speakers per language, quiet and noisy.</p><div class="gt"><b>Done when</b>≥ 300 items per language.</div></div>
+    </div>
+
+    <div class="srcs mt-l" aria-label="Main data sources">
+      <span class="src">IndicVoices<i>~12k h</i></span><span class="src">Nirantar<i>3.2k h</i></span><span class="src">IndicVoices-R<i>1.7k h</i></span><span class="src">Kathbath<i>1.7k h</i></span><span class="src">IndicST<i>10.8k h</i></span><span class="src">MahaDhwani<i>279k h raw</i></span><span class="src">MUCS code-switched</span><span class="src">Rasa expressive</span><span class="src">Project Vaani</span><span class="src">Indic-Transcribe<i>labeller</i></span>
+    </div>
+    <p class="note">Every licence is checked in phase D0 before any source is used.</p>
+  </div>
+</section>
+
+<section id="conversation" class="glow-l">
+  <div class="wrap">
+    <div class="kicker">A conversation, frame by frame</div>
+    <h2 class="h2">Every 80 milliseconds, <span class="fire">Formant decides whether to speak.</span></h2>
+    <p class="sub">Speech is cut into frames of 80 ms, 12.5 per second. On every frame Formant hears one slice of your voice and writes one slice of its own, which can be silence. Below are 3.2 seconds of a target conversation, played at real speed.</p>
+    <div class="gcard convo mt-l scroll">
+      <div class="convo-inner" id="convo">
+        <div class="lane"><div class="who u">You</div><div class="track">
+          <div class="seg u" style="left:0%;width:25%">Kal Pune mein baarish…</div>
+          <div class="seg u" style="left:32.5%;width:17.5%">…shaam ko?</div>
+          <div class="seg u" style="left:80%;width:20%">Aur Mumbai?</div>
+        </div></div>
+        <div class="lane"><div class="who j">Formant</div><div class="track">
+          <div class="seg bc" style="left:26.25%;width:5%">hmm</div>
+          <div class="seg j cut" style="left:62.5%;width:25%">Haan, shaam ko halki…</div>
+        </div></div>
+        <div class="ruler"><div></div><div class="ticks">
+          <span style="left:0%">0 s</span><span style="left:25%">0.8</span><span style="left:50%">1.6</span><span style="left:75%">2.4</span><span style="left:100%">3.2</span>
+        </div></div>
+        <div class="playhead" aria-hidden="true"></div>
+      </div>
+    </div>
+    <div class="events">
+      <div class="gcard"><span class="ev-t">0.84 s</span><h4>A pause is not a turn end</h4><p>You stop mid-thought. Formant says "hmm" to show it is listening, and waits.</p></div>
+      <div class="gcard"><span class="ev-t">1.60 → 2.00 s</span><h4>Reply in 400 ms</h4><p>Your question ends. Formant answers five frames later. The thinker began drafting while you were still talking.</p></div>
+      <div class="gcard"><span class="ev-t">2.56 → 2.80 s</span><h4>Stops when you cut in</h4><p>You ask about Mumbai. Formant stops within three frames and passes your new words to the thinker.</p></div>
+    </div>
+    <p class="note">Illustration of target behaviour. Each grid column is one 80 ms frame.</p>
+  </div>
+</section>
+
+<section id="how" class="glow-r">
+  <div class="wrap">
+    <div class="kicker">How it works</div>
+    <h2 class="h2">Two models. <span class="dim">One keeps time, one does the thinking.</span></h2>
+    <p class="sub">Models that hear and speak in one network are fluent but weak at reasoning. Strong language models are too slow to keep conversational timing. Formant splits the job, and runs each half on the part of the laptop that suits it.</p>
+
+    <div class="gcard arch mt-l scroll">
+      <svg viewBox="0 0 1000 380" role="img" aria-labelledby="archT archD">
+        <title id="archT">Formant architecture</title>
+        <desc id="archD">Microphone feeds a codec encoder, which feeds the talker on the integrated GPU every 80 ms. The talker sends your words and turn state up to the thinker on the CPU, and the thinker streams its reply plan back down. The talker's output goes through the codec decoder to the speaker. The thinker can call local tools.</desc>
+        <defs>
+          <marker id="a1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="mk" d="M0,0 L10,5 L0,10 z"/></marker>
+          <marker id="a2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="mkhot" d="M0,0 L10,5 L0,10 z"/></marker>
+          <marker id="a3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="mky" d="M0,0 L10,5 L0,10 z"/></marker>
+        </defs>
+        
+        <rect class="thk" x="370" y="16" width="300" height="96" rx="16"/>
+        <text class="t" x="394" y="52">Thinker</text>
+        <text class="s" x="394" y="76">MoE · ~2.4B active · CPU cores</text>
+        <text class="s" x="394" y="96">decides what to say · ~5 tokens/s</text>
+        <rect class="box" x="760" y="36" width="200" height="56" rx="14"/>
+        <text class="t" x="784" y="61" style="font-size:16px">Local tools</text>
+        <text class="s" x="784" y="80">timers · device · search</text>
+        <path class="ln" d="M670,64 L756,64" marker-end="url(#a1)" marker-start="url(#a1)"/>
+        <path class="lny flow" d="M480,198 L480,116" marker-end="url(#a3)"/>
+        <path class="lnhot flow" d="M560,116 L560,198" marker-end="url(#a2)"/>
+        <text class="lab" x="468" y="160" text-anchor="end">your words + turn state</text>
+        <text class="lab" x="572" y="160">reply plan, streamed</text>
+        <rect class="box" x="20" y="228" width="130" height="84" rx="16"/>
+        <text class="t" x="40" y="264">Mic</text>
+        <text class="s" x="40" y="288">24 kHz</text>
+        <rect class="box" x="190" y="228" width="160" height="84" rx="16"/>
+        <text class="t" x="210" y="264">Encoder</text>
+        <text class="s" x="210" y="288">codec · iGPU</text>
+        <rect class="hot" x="390" y="202" width="260" height="136" rx="18"/>
+        <text class="t" x="414" y="240" style="font-size:22px">Talker</text>
+        <text class="s" x="414" y="266">~0.6B · Intel UHD 620 iGPU</text>
+        <text class="s" x="414" y="288">runs every 80 ms</text>
+        <text class="s" x="414" y="310">listens, times, speaks</text>
+        <rect class="box" x="690" y="228" width="160" height="84" rx="16"/>
+        <text class="t" x="710" y="264">Decoder</text>
+        <text class="s" x="710" y="288">codec · iGPU</text>
+        <rect class="box" x="880" y="228" width="100" height="84" rx="16"/>
+        <text class="t" x="898" y="264">Speaker</text>
+        <path class="ln flow" d="M150,270 L186,270" marker-end="url(#a1)"/>
+        <path class="ln flow" d="M350,270 L386,270" marker-end="url(#a1)"/>
+        <path class="lnhot flow" d="M650,270 L686,270" marker-end="url(#a2)"/>
+        <path class="lnhot flow" d="M850,270 L876,270" marker-end="url(#a2)"/>
+        <text class="lab" x="20" y="362">your voice in</text>
+        <text class="lab" x="980" y="362" text-anchor="end">Formant's voice out</text>
+      </svg>
+    </div>
+
+    <div class="duo mt-l">
+      <div class="gcard t-or"><span class="tag" style="color:var(--accent)">Talker · the ears and voice</span><h3 class="fire">Owns the timing.</h3><p>A small model, about 0.6 billion parameters, that never stops running. It hears every frame, keeps a live transcript, and decides when to speak, backchannel or stop.</p>
+        <ul><li>Runs on the laptop's built-in Intel graphics, away from the thinker</li><li>Writes a running text of what you said, plus a turn signal</li><li>Covers short delays with natural fillers like "haan, ek second…"</li></ul></div>
+      <div class="gcard t-ye"><span class="tag" style="color:var(--amber)">Thinker · the brain</span><h3 style="color:var(--amber)">Owns the content.</h3><p>A mixture-of-experts language model. It holds a lot of knowledge in RAM but reads only a small part of it for each word, which is what makes it fit this laptop.</p>
+        <ul><li>Starts drafting while you are still speaking</li><li>Needs only ~5 tokens a second, the speed of speech</li><li>Candidates: Sarvam 30B, then a language slice of the course's 120B model</li></ul></div>
+    </div>
+
+    <ol class="steps mt-l">
+      <li><b>Listen</b><span>Every 80 ms the talker reads one frame of your voice and one of its own.</span></li>
+      <li><b>Track the turn</b><span>It labels the moment: speaking, paused, finished or interrupting.</span></li>
+      <li><b>Draft early</b><span>The thinker reads your words as they arrive and starts a reply before you finish.</span></li>
+      <li><b>Commit</b><span>When the talker sees a real turn end, the thinker's draft becomes the reply.</span></li>
+      <li><b>Speak</b><span>The plan streams into the talker, which says it with natural timing and tone.</span></li>
+      <li><b>Yield</b><span>If you cut in, the talker stops within a few frames and the thinker drops the rest.</span></li>
+    </ol>
+  </div>
+</section>
+
+<section id="inside" class="glow-l">
+  <div class="wrap">
+    <div class="kicker">Inside the laptop</div>
+    <h2 class="h2">The hard part is memory speed. <span class="dim">Not memory size.</span></h2>
+    <p class="sub">Each word a model generates means reading its weights from RAM. On this laptop that read runs at about <b>21 GB per second</b>, roughly a fifth of an edge AI chip. Everything in Formant is sized to that number.</p>
+    <div class="specs mt-l">
+      <div class="gcard spec"><div class="big fire">2<small>cores</small></div><div class="lbl">Intel Core i3-10110U</div><div class="det">4 threads, 15 W, from 2019</div></div>
+      <div class="gcard spec"><div class="big fire">0<small>GPUs</small></div><div class="lbl">Intel UHD 620 built in</div><div class="det">Shares system RAM; runs the talker</div></div>
+      <div class="gcard spec"><div class="big fire">24<small>GB</small></div><div class="lbl">DDR4-2666 RAM</div><div class="det">16 GB + 8 GB sticks</div></div>
+      <div class="gcard spec"><div class="big fire">20.8<small>GB/s</small></div><div class="lbl">Measured memory copy</div><div class="det">43 GB/s on paper</div></div>
+      <div class="gcard spec"><div class="big fire">80<small>ms</small></div><div class="lbl">Talker deadline</div><div class="det">12.5 frames every second</div></div>
+      <div class="gcard spec"><div class="big fire">~5<small>tok/s</small></div><div class="lbl">Thinker target</div><div class="det">About the speed of Hindi speech</div></div>
+    </div>
+
+    <div class="bars mt-l">
+      <div class="gcard barcard">
+        <div class="bar-h"><h3>Memory speed budget</h3><span class="mono">~14.7 of 20.8 GB/s planned</span></div>
+        <div class="bar" role="img" aria-label="Bandwidth budget: talker 4.4, depth decoder 2.5, codec 2.5, thinker 5.3 GB/s, leaving 6.1 GB/s free of 20.8 measured.">
+          <div class="c-talk" style="flex:4.4">4.4</div>
+          <div class="c-depth" style="flex:2.5">2.5</div>
+          <div class="c-codec" style="flex:2.5">2.5</div>
+          <div class="c-think" style="flex:5.3">5.3</div>
+          <div class="free" style="flex:6.1">headroom</div>
+        </div>
+        <div class="keys">
+          <span><i class="c-talk"></i>Talker <b>4.4</b></span>
+          <span><i class="c-depth"></i>Depth decoder <b>2.5</b></span>
+          <span><i class="c-codec"></i>Audio codec <b>2.5</b></span>
+          <span><i class="c-think"></i>Thinker <b>5.3</b></span>
+          <span>GB/s</span>
+        </div>
+      </div>
+      <div class="gcard barcard">
+        <div class="bar-h"><h3>Memory size budget</h3><span class="mono">up to ~21.5 of 24 GB</span></div>
+        <div class="bar" role="img" aria-label="Memory budget, upper estimate: thinker 14, talker and codec 0.5, caches 1, Windows and apps 6 GB, of 24 GB.">
+          <div class="c-think" style="flex:14">thinker 14</div>
+          <div class="c-talk" style="flex:.5"></div>
+          <div class="c-cache" style="flex:1"></div>
+          <div class="c-os" style="flex:6">Windows 6</div>
+          <div class="free" style="flex:2.5"></div>
+        </div>
+        <div class="keys">
+          <span><i class="c-think"></i>Thinker, all experts <b>8–14</b></span>
+          <span><i class="c-talk"></i>Talker + codec <b>0.5</b></span>
+          <span><i class="c-cache"></i>Caches <b>0.5–1</b></span>
+          <span><i class="c-os"></i>Windows and apps <b>5–6</b></span>
+          <span>GB</span>
+        </div>
+      </div>
+    </div>
+    <p class="note">Planning estimates from public specs and arithmetic. Stage 0 replaces them with measurements on this laptop.</p>
+  </div>
+</section>
+
+<section id="languages" class="glow-r">
+  <div class="wrap">
+    <div class="kicker">Languages</div>
+    <h2 class="h2">Five languages <span class="fire">and the way people mix them.</span></h2>
+    <p class="sub">Two language families, Indo-Aryan and Dravidian, covering the largest speaker bases. Every language has open recordings in AI4Bharat's IndicVoices to learn from.</p>
+    <div class="langs mt-l">
+      <div class="gcard lang"><span class="fam">Indo-Aryan</span><h3>Hindi</h3></div>
+      <div class="gcard lang"><span class="fam">Indo-Aryan</span><h3>Bengali</h3></div>
+      <div class="gcard lang"><span class="fam">Indo-Aryan</span><h3>Marathi</h3></div>
+      <div class="gcard lang"><span class="fam">Dravidian</span><h3>Tamil</h3></div>
+      <div class="gcard lang"><span class="fam">Dravidian</span><h3>Telugu</h3></div>
+      <div class="gcard lang"><span class="fam">Code-mixed</span><h3>Hinglish</h3><div class="name">Hindi + English, mid-sentence</div></div>
+    </div>
+  </div>
+</section>
+
+<section id="targets" class="glow-l">
+  <div class="wrap">
+    <div class="kicker">Targets</div>
+    <h2 class="h2">What counts as done.</h2>
+    <p class="sub">Proposed numbers, to be confirmed in Stage 0. Each one sits next to the best open result today.</p>
+    <div class="targets mt-l">
+      <div class="gcard tg"><div class="v fire">≤ 800 ms</div><div class="k">Reply time on the laptop</div><div class="r">≤ 500 ms on a T4 GPU. Moshi: ~200 ms on an L4 GPU.</div></div>
+      <div class="gcard tg"><div class="v fire">≤ 300 ms</div><div class="k">Stop after you interrupt</div><div class="r">At least 95% of the time. Qwen3-Omni-D2: 99.5% success.</div></div>
+      <div class="gcard tg"><div class="v fire">≥ 80%</div><div class="k">Complete replies</div><div class="r">And ≥ 75% that follow the prompt. Human-1: ~42% and ~53%.</div></div>
+      <div class="gcard tg"><div class="v fire">≤ 10%</div><div class="k">Character error rate</div><div class="r">When Formant's Hindi speech is transcribed back to text.</div></div>
+      <div class="gcard tg"><div class="v fire">≤ 15 GB/s</div><div class="k">Memory speed used</div><div class="r">About 70% of what this laptop measured.</div></div>
+      <div class="gcard tg"><div class="v fire">5 + 1</div><div class="k">Languages</div><div class="r">The only open Indian duplex model today covers Hindi only.</div></div>
+    </div>
+  </div>
+</section>
+
+<section id="roadmap" class="glow-r">
+  <div class="wrap">
+    <div class="kicker">Roadmap</div>
+    <h2 class="h2">Four weeks to v0.1. <span class="dim">Twelve sections in parallel.</span></h2>
+    <p class="sub">Each week is one phase, and every section delivers something in every phase. The board shows what each piece needs and what waits on it.</p>
+    <div class="ms ms4 mt-l" id="phases"></div>
+    <div class="cta"><a class="btn primary" href="plan.html">Open the plan board</a></div>
+  </div>
+</section>
+
+
+<footer>
+  <div class="wrap">
+    <div class="row">
+      <span>Formant · project site · updated 20 Nov 2026</span>
+      <span>Full plan: <a href="plan.html">project plan</a> · Code: <a href="https://github.com/TEJASKUMAR-REDDY-J/Formant" target="_blank" rel="noopener">GitHub</a></span>
+    </div>
+  </div>
+</footer>
+
+<script src="plan-data.js"></script>
+<script>
+(() => {
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* Hero: two tabla drums from above. The small dayan (talker) keeps a fast rhythm,
+     the big bayan (thinker) sounds slow and deep, and green rings (you) arrive from outside. */
+  const cv = document.getElementById('spiral'), ctx = cv.getContext('2d');
+  let W = 0, H = 0, raf = 0, visible = true, lastD = -1, lastB = -1, lastU = -1;
+  const rings = [];
+  const drums = [
+    { x: .38, y: .58, r: .27, col: [217, 119, 6], sx: -.32, sy: .12, sr: .40, flash: 0 },
+    { x: .70, y: .36, r: .19, col: [37, 99, 235], sx: 0, sy: 0, sr: .42, flash: 0 }
+  ];
+  const teental = [1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 0];
+  const size = () => { const r = cv.getBoundingClientRect(), d = Math.min(devicePixelRatio || 1, 2);
+    W = r.width; H = r.height; cv.width = Math.round(W * d); cv.height = Math.round(H * d); ctx.setTransform(d, 0, 0, d, 0, 0); };
+  const spawn = (dr, t, strong) => { dr.flash = strong ? 1 : .6;
+    rings.push({ x: dr.x, y: dr.y, r0: dr.r, t0: t, col: dr.col, life: strong ? 1900 : 1200, v: strong ? .00016 : .00024, w: strong ? 3 : 1.8 }); };
+  const drawDrum = (dr) => {
+    const S = Math.min(W, H), x = dr.x * W, y = dr.y * H, r = dr.r * S;
+    ctx.fillStyle = '#FAFAFA'; ctx.strokeStyle = '#111'; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.arc(x, y, r * 1.06, 0, 6.283); ctx.fill(); ctx.stroke();
+    ctx.strokeStyle = '#D0D0D0'; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(x, y, r * .88, 0, 6.283); ctx.stroke();
+    const sx = x + dr.sx * r, sy = y + dr.sy * r;
+    ctx.fillStyle = '#111'; ctx.beginPath(); ctx.arc(sx, sy, dr.sr * r, 0, 6.283); ctx.fill();
+    if (dr.flash > .01) { ctx.fillStyle = `rgba(${dr.col},${.18 * dr.flash})`; ctx.beginPath(); ctx.arc(x, y, r, 0, 6.283); ctx.fill(); }
+  };
+  const draw = (t) => {
+    ctx.clearRect(0, 0, W, H);
+    const S = Math.min(W, H);
+    const bi = Math.floor(t / 300), bb = Math.floor(t / 1200), ub = Math.floor(t / 2400);
+    if (bi !== lastD) { lastD = bi; if (teental[bi % 16]) spawn(drums[1], t, bi % 4 === 0); }
+    if (bb !== lastB) { lastB = bb; spawn(drums[0], t, true); }
+    if (ub !== lastU) { lastU = ub; rings.push({ x: .5, y: .5, r0: .62, t0: t, col: [22, 163, 74], life: 2200, v: -.00024, w: 2 }); }
+    for (let i = rings.length - 1; i >= 0; i--) {
+      const g = rings[i], age = t - g.t0;
+      if (age > g.life) { rings.splice(i, 1); continue; }
+      const k = 1 - age / g.life, r = Math.max(0, (g.r0 + age * g.v) * S);
+      ctx.strokeStyle = `rgba(${g.col},${.55 * k * k})`; ctx.lineWidth = g.w * (.4 + k);
+      ctx.beginPath(); ctx.arc(g.x * W, g.y * H, r, 0, 6.283); ctx.stroke();
+    }
+    drawDrum(drums[0]); drawDrum(drums[1]);
+    for (const d of drums) d.flash *= .9;
+  };
+  const loop = t => { draw(t); if (!reduce && visible) raf = requestAnimationFrame(loop); };
+  size();
+  if (reduce) { [300, 900, 1500].forEach(t => draw(t)); } else raf = requestAnimationFrame(loop);
+  new ResizeObserver(() => { size(); draw(performance.now()); }).observe(cv);
+  new IntersectionObserver(([e]) => { visible = e.isIntersecting; if (visible && !reduce) { cancelAnimationFrame(raf); raf = requestAnimationFrame(loop); } }).observe(cv);
+
+  /* Playhead runs across the 40-frame track at real speed. */
+  const convo = document.getElementById('convo');
+  const setRun = () => { const tr = convo.querySelector('.track'); if (tr) convo.style.setProperty('--run', tr.clientWidth + 'px'); };
+  new ResizeObserver(setRun).observe(convo); setRun();
+
+  /* Roadmap: the four phases from plan-data.js. */
+  if (window.PLAN) document.getElementById('phases').innerHTML = PLAN.phases.map(p =>
+    `<div class="gcard"><span class="mono">${p.week}</span><b>${p.title}</b><span>${p.theme}</span></div>`).join('');
+
+  /* Card glow follows the pointer. */
+  document.addEventListener('pointermove', e => {
+    const c = e.target.closest && e.target.closest('.gcard'); if (!c) return;
+    const r = c.getBoundingClientRect();
+    c.style.setProperty('--mx', (e.clientX - r.left) + 'px'); c.style.setProperty('--my', (e.clientY - r.top) + 'px');
+  }, { passive: true });
+
+  /* Highlight the nav link for the section in view. */
+  const links = [...document.querySelectorAll('.links a')];
+  const byId = Object.fromEntries(links.map(a => [a.getAttribute('href').slice(1), a]));
+  const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { links.forEach(l => l.classList.remove('on')); byId[e.target.id]?.classList.add('on'); } }),
+    { rootMargin: '-45% 0px -50% 0px' });
+  document.querySelectorAll('section[id]').forEach(s => io.observe(s));
+})();
+</script>
+</body>
+</html>
