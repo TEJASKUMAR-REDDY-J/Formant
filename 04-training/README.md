@@ -4,6 +4,7 @@ Pre-training the talker: smoke runs, speech pre-training on the voice set, two-s
 
 - **Owner:** _unassigned_
 - **Board:** [site/plan.html](../site/plan.html#view=section&section=TR) (phase IDs start with `TR`)
+- **Branch:** `sec/04-training`. Cut feature branches from it and open PRs into it; it merges into `main` when a phase is done ([GUIDELINES.md](../GUIDELINES.md) section 5).
 
 > New section: the first draft had post-training but no pre-training, which is the largest GPU cost.
 

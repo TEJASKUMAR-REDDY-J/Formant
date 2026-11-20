@@ -22,7 +22,7 @@ Each phase is one week, and all twelve sections work on the same phase number at
 
 - **Monday:** start phase *n*. Each owner checks that everything listed under "Needs" from phase *n−1* is done. If something is missing, say so on day one.
 - **Wednesday:** handoff check for same-week needs (shown as `~XX1`). The upstream owner shares early output: a sample shard, a draft spec, a first number.
-- **Friday:** demo. Each owner shows their phase against its "Done when" line, sets the status in `plan-data.js`, and writes `reports/<ID>.md`.
+- **Friday:** demo. Each owner shows their phase against its "Done when" line, sets the status in `plan-data.js`, writes `reports/<ID>.md`, and opens the `sec/<folder>` → `main` PR. After the merges, every section branch syncs from `main`.
 
 ## 4. Folders and ownership
 
@@ -32,13 +32,52 @@ Each phase is one week, and all twelve sections work on the same phase number at
 - Subfolders inside a section: `configs/`, `scripts/`, `notebooks/`, `plans/`, `reports/`. Create them only when needed.
 - Each phase gets `plans/<ID>.md` before it starts (what, how, SOTA picks, efficiency, day-by-day) and `reports/<ID>.md` when it ends.
 
-## 5. Git
+## 5. Git: one branch per section
 
-- `main` always works. Work on branches named `<phase-id>-<slug>`, for example `da2-voice-set` or `tr1-smoke`.
-- Small pull requests. One phase can take several.
-- The PR description states the phase ID, what changed, how it was checked, and whether "Done when" is now true.
-- Commit messages are short and imperative: `Add SNR gate to data filters`.
-- Clear notebook outputs before committing.
+```
+feature branch ──PR──▶ sec/<folder> ──PR at phase end──▶ main ──sync──▶ every sec/* branch
+da2-voice-set          sec/01-data                       (Vercel deploys main)
+```
+
+**Branches**
+
+- `main` is what is released and what Vercel serves. It only changes through a section PR (below). Nobody pushes to it directly.
+- Each section has one long-lived branch named after its folder:
+
+  `sec/01-data`, `sec/02-tokenizer`, `sec/03-architecture`, `sec/04-training`, `sec/05-post-training`, `sec/06-evaluation`, `sec/07-quantization`, `sec/08-performance`, `sec/09-serving`, `sec/10-infrastructure`, `sec/11-monitoring`, `sec/12-release`.
+- Every change starts on a short-lived feature branch cut from its section branch and named `<phase-id>-<slug>`, for example `da2-voice-set` or `tr1-smoke`.
+
+**Pull requests**
+
+1. **Feature → section.**
+   - Open a PR from the feature branch into `sec/<folder>`; the section owner reviews it.
+   - Squash-merge it, then delete the feature branch.
+   - Small PRs; one phase can take several.
+2. **Section → main.**
+   - When the section's phase is done (its "Done when" line is true and `reports/<ID>.md` exists, normally at the Friday demo), open one PR from `sec/<folder>` into `main`, titled `<ID> → main`.
+   - Merge it with a merge commit, so each phase stays visible in `main`'s history.
+3. **Sync.**
+   - After anything lands on `main`, every section branch merges `main` back in (`git merge origin/main`) and pushes.
+   - No PR is needed, because only reviewed work comes from `main`.
+   - Resolve conflicts on the section branch, never on `main`.
+
+**Shared files**
+
+| File or folder | Changed through |
+|---|---|
+| Anything inside `<NN-section>/` | That section's branch |
+| `site/`, `GUIDELINES.md`, `README.md`, `.github/`, `10-infrastructure/scripts/` | `sec/10-infrastructure` |
+| `site/plan-data.js` | Any section, but only its own cells and scope; statuses change at the Friday demo |
+| `src/formant/` (shared code) | The section that needs it first; later changes through `sec/10-infrastructure` |
+
+After editing `site/plan-data.js` or any section document, regenerate the READMEs and section pages in the same PR (section 2).
+
+**Writing**
+
+- **PR description:** the phase ID, what changed, how it was checked, and whether "Done when" is now true. The template in `.github/pull_request_template.md` asks for exactly this.
+- **Commit messages:** short and imperative, for example `Add SNR gate to data filters`.
+- **Notebooks:** clear outputs before committing.
+- **Optional protection:** turn on branch protection for `main` and `sec/*` in the GitHub settings: require a PR, no force-pushes.
 
 ## 6. Data rules
 
