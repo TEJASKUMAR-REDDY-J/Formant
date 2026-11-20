@@ -11,7 +11,8 @@ How we work on Formant. Short on purpose; if a rule gets in the way, change it h
 ## 2. The plan is the contract
 
 - `site/plan-data.js` is the single source of truth for scope, phases, dependencies and status. The board (`site/plan.html`) and every folder README come from it.
-- After editing it, regenerate the READMEs: `node 10-infrastructure/scripts/gen-readmes.js`
+- After editing it, or any document in a section folder, regenerate the READMEs and the site's section pages:
+  `node 10-infrastructure/scripts/gen-readmes.js` and `node 10-infrastructure/scripts/gen-sections.js`
 - Every piece of work belongs to a phase ID such as `DA2` or `TR3`. If it has no ID, it is not in v0.1; add it to the backlog instead.
 - Status values: `todo`, `doing`, `done`, `cut`. A phase is `done` only when its "Done when" line is true and its report exists.
 

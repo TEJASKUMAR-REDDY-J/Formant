@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Formant · Infrastructure</title>
+<meta name="description" content="Infrastructure: Kaggle, the Hugging Face Hub, the laptop and this repo working as one pipeline.">
+<link rel="icon" href="../favicon.png" type="image/png">
+<link rel="apple-touch-icon" href="../apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="sections.css">
+</head>
+<body>
+<nav aria-label="Sections"><div class="wrap"><b><img src="../logo.webp" alt="Formant" width="1000" height="175">Sections</b><a href="index.html">All</a><a href="data.html">Data</a><a href="tokenizer.html">Tokenizer &amp; embeddings</a><a href="architecture.html">Architecture</a><a href="training.html">Training</a><a href="post-training.html">Post-training</a><a href="evaluation.html">Evaluation</a><a href="quantization.html">Quantization</a><a href="performance.html">Performance</a><a href="serving.html">Serving</a><a href="infrastructure.html" aria-current="page">Infrastructure</a><a href="monitoring.html">Monitoring</a><a href="release.html">Release</a><a href="../plan.html">Plan board</a><a href="../index.html">Project site</a><a href="https://github.com/TEJASKUMAR-REDDY-J/Formant" target="_blank" rel="noopener">GitHub</a></div></nav>
+
+<header><div class="wrap">
+<div class="kicker">10 · Section IN · <a href="https://github.com/TEJASKUMAR-REDDY-J/Formant/tree/main/10-infrastructure" target="_blank" rel="noopener">10-infrastructure/</a></div>
+<h1>Infrastructure</h1>
+<p class="lede">Kaggle, the Hugging Face Hub, the laptop and this repo working as one pipeline.</p>
+
+<div class="facts"><span>Phases <b>IN1 · IN2 · IN3 · IN4</b></span><span>GPU <b>none</b></span><span>Documents <b>1</b></span><span><a href="../plan.html#view=section&section=IN">Open on the plan board</a></span></div>
+</div></header>
+<section><div class="wrap">
+<h2>Scope</h2>
+<div class="grid2"><div class="kv"><h3>In v0.1</h3><ul><li>Repo, environments, storage layout, Vercel site</li><li>Resumable Kaggle runner and data jobs</li><li>Export toolchain for the laptop</li><li>Release pipeline</li></ul></div><div class="kv"><h3>Not in v0.1</h3><ul><li>Paid cloud, CI runners</li></ul></div></div>
+<div class="grid3"><div class="kv"><h3>What to expect</h3><ul><li>Kaggle sessions end after 12 h and keep 20 GB of output, so the Hub is the real disk</li><li>Resume logic decides whether long runs survive</li></ul></div><div class="kv"><h3>Takes in</h3><ul><li>Everything</li></ul></div><div class="kv"><h3>Hands over</h3><ul><li>Runner, layouts, export scripts → every section</li></ul></div></div>
+</div></section>
+<section><div class="wrap">
+<h2>Phases</h2>
+<p class="sub">One week each. Solid chips must be done before the phase starts; dashed chips are same-week handoffs.</p>
+<div class="cards"><div class="card" id="IN1"><div class="top"><span class="id">IN1</span><span class="wk">Week 1</span></div>
+<h3>Repo, storage, runner v0</h3><p>This repo and guidelines; uv-locked Kaggle and laptop environments (laptop on F:, offline wheels on Kaggle); private Hub repos with Xet transfers; manifest schema; Trackio tracking; checkpoint-and-resume runner.</p>
+<div class="chips"><span class="lbl" style="margin:0">Needs</span><span class="lbl" style="margin:0;color:var(--muted)">nothing</span></div>
+<div class="chips"><span class="st doing">doing</span></div>
+<div class="links"><a href="#doc-10-infrastructure-plans-IN1-md">Week plan</a></div>
+<div class="done"><b>Done when</b>Fresh clone sets up both environments; a killed run resumes.</div></div>
+<div class="card" id="IN2"><div class="top"><span class="id">IN2</span><span class="wk">Week 2</span></div>
+<h3>Data jobs</h3><p>GPU jobs for tokenising and pseudo-labelling, CPU jobs for filters, a job ledger.</p>
+<div class="chips"><span class="lbl" style="margin:0">Needs</span><a class="chip" href="infrastructure.html#IN1" title="must be done first">IN1</a></div>
+<div class="chips"><span class="st todo">todo</span></div>
+<div class="links"></div>
+<div class="done"><b>Done when</b>Every shard traceable to source, filter version and tokenizer hash.</div></div>
+<div class="card" id="IN3"><div class="top"><span class="id">IN3</span><span class="wk">Week 3</span></div>
+<h3>Export toolchain</h3><p>One command exports a checkpoint to OpenVINO IR and GGUF and benchmarks it on the laptop.</p>
+<div class="chips"><span class="lbl" style="margin:0">Needs</span><a class="chip" href="infrastructure.html#IN2" title="must be done first">IN2</a><a class="chip" href="quantization.html#QZ2" title="must be done first">QZ2</a></div>
+<div class="chips"><span class="st todo">todo</span></div>
+<div class="links"></div>
+<div class="done"><b>Done when</b>Export + benchmark in one command.</div></div>
+<div class="card" id="IN4"><div class="top"><span class="id">IN4</span><span class="wk">Week 4</span></div>
+<h3>Release pipeline</h3><p>Push models to Hub repos, deploy the site, rebuild from a clean clone.</p>
+<div class="chips"><span class="lbl" style="margin:0">Needs</span><a class="chip" href="infrastructure.html#IN3" title="must be done first">IN3</a><a class="chip soft" href="release.html#RL4" title="same-week handoff">RL4</a></div>
+<div class="chips"><span class="st todo">todo</span></div>
+<div class="links"></div>
+<div class="done"><b>Done when</b>Clean-clone rebuild works.</div></div></div>
+</div></section>
+<section><div class="wrap">
+<h2>Documents</h2>
+<p class="sub">Everything in <code>10-infrastructure/</code> apart from its README: phase plans, design notes, data tables and reports.</p>
+<ul class="toc"><li><a href="#doc-10-infrastructure-plans-IN1-md">IN1 · Repo, storage, runner v0 — week 1 plan</a><span>10-infrastructure/plans/IN1.md</span></li></ul><article class="doc" id="doc-10-infrastructure-plans-IN1-md"><div class="doc-h"><span>10-infrastructure/plans/IN1.md</span><a href="https://github.com/TEJASKUMAR-REDDY-J/Formant/blob/main/10-infrastructure/plans/IN1.md" target="_blank" rel="noopener">View on GitHub</a></div><div class="md" data-path="10-infrastructure/plans/IN1.md"><pre class="raw"># IN1 · Repo, storage, runner v0 — week 1 plan
+
+**Goal:**
+- repo and guidelines;
+- pinned Kaggle and laptop environments;
+- private Hub repos;
+- manifest schema;
+- a checkpoint-and-resume runner.
+
+**Done when:** a fresh clone sets up both environments, and a killed run resumes.
+**Needs:** nothing. **GPU:** none.
+
+## Pieces
+
+| Piece | Choice | Why |
+|---|---|---|
+| Repo | This repo; `GUIDELINES.md`; plan board on Vercel | Done |
+| Laptop environment | `uv` virtual environment **on F:** (`F:\formant\.venv`), `uv.lock` committed; `HF_HOME=F:\hf-cache`; OpenVINO 2026.4, optimum-intel, llama.cpp release binaries (AVX2) | Reproducible; nothing on C or D |
+| Kaggle environment | Same lock exported to `requirements-kaggle.txt`; the wheels are cached as a private Kaggle dataset and installed offline | Saves ~5 min per session; avoids version drift |
+| Hub repos | `formant-data` (private dataset, layout from 01-data/DATA_PLAN.md), `formant-ckpt` (private model) | One store for everything |
+| Transfers | `huggingface_hub` with Xet storage: chunk-level dedup, so re-uploading a slightly changed checkpoint sends only the changed chunks | Fast, cheap checkpoint pushes |
+| Manifest schema | One Parquet schema shared by data, tokens and eval (DATA_PLAN section 3); validated on write | One contract |
+| Secrets | `HF_TOKEN` as a Kaggle secret and a laptop environment variable; never in files | GUIDELINES section 1 |
+| Tracking | **Trackio** (Hugging Face): local-first, wandb-compatible API, syncs to a private Hub Space | Free; data stays on the Hub |
+
+## Runner v0
+
+```
+formant-run &lt;config.yaml&gt;
+  → resolve config + git commit + data manifest version + tokenizer hash
+  → pull the latest checkpoint for this run name from formant-ckpt (if any) and restore
+     model, optimizer, loss scaler, sampler position, RNG states, step
+  → train; every 30–45 min: save in the background thread, upload to the Hub, keep the last 3
+  → at 11 h 30 min of session time: final save, clean exit
+```
+
+- **Launch:** from the laptop, `kaggle kernels push` with the config baked in. The next session is relaunched by hand, or by a small loop on the laptop. No CI runners.
+- **Done test:** start TR1's smoke run, kill the kernel mid-epoch, relaunch, and check that the step count and loss continue.
+
+## Week
+
+| Day | Work |
+|---|---|
+| Mon | `uv` lock; laptop environment on F:; Hub repos; Kaggle wheels dataset |
+| Tue | Manifest schema + validator; Trackio Space |
+| Wed | Runner save/restore; background uploads |
+| Thu | Kill-and-resume test with TR1; fresh-clone test on a second machine |
+| Fri | `reports/IN1.md`; setup steps in the root README |
+</pre></div></article>
+</div></section>
+<div class="wrap pager"><a href="serving.html">← 09 Serving</a><a href="monitoring.html">11 Monitoring →</a></div>
+<footer><div class="wrap">Generated from site/plan-data.js (plan v12, 2026-11-20) and the section folders by 10-infrastructure/scripts/gen-sections.js.</div></footer>
+<script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js"></script>
+<script>
+const MAP = {"01-data/DATA_PLAN.md":"data.html#doc-01-data-DATA-PLAN-md","01-data/sources/README.md":"data.html#doc-01-data-sources-README-md","01-data/sources/hf_datasets.csv":"data.html#doc-01-data-sources-hf-datasets-csv","01-data/reports/DA1.md":"data.html#doc-01-data-reports-DA1-md","02-tokenizer/plans/TK1.md":"tokenizer.html#doc-02-tokenizer-plans-TK1-md","03-architecture/plans/AR1.md":"architecture.html#doc-03-architecture-plans-AR1-md","04-training/plans/TR1.md":"training.html#doc-04-training-plans-TR1-md","05-post-training/plans/PT1.md":"post-training.html#doc-05-post-training-plans-PT1-md","06-evaluation/plans/EV1.md":"evaluation.html#doc-06-evaluation-plans-EV1-md","07-quantization/plans/QZ1.md":"quantization.html#doc-07-quantization-plans-QZ1-md","08-performance/plans/PF1.md":"performance.html#doc-08-performance-plans-PF1-md","09-serving/plans/SV1.md":"serving.html#doc-09-serving-plans-SV1-md","10-infrastructure/plans/IN1.md":"infrastructure.html#doc-10-infrastructure-plans-IN1-md","11-monitoring/plans/MO1.md":"monitoring.html#doc-11-monitoring-plans-MO1-md","12-release/plans/RL1.md":"release.html#doc-12-release-plans-RL1-md"}, REPO = "https://github.com/TEJASKUMAR-REDDY-J/Formant";
+document.querySelectorAll('.md[data-path]').forEach(el => {
+  if (!window.marked) return;
+  const p = el.dataset.path, dir = p.split('/').slice(0, -1).join('/');
+  el.innerHTML = marked.parse(el.querySelector('.raw').textContent);
+  el.querySelectorAll('table').forEach(t => { const w = document.createElement('div'); w.className = 'tw'; t.replaceWith(w); w.append(t); });
+  el.querySelectorAll('a[href]').forEach(a => {
+    const h = a.getAttribute('href');
+    if (/^(https?:|mailto:|#)/.test(h)) return;
+    const [file, hash] = h.split('#'), abs = new URL(file, 'https://x/' + dir + '/').pathname.slice(1);
+    a.href = MAP[abs] || REPO + '/blob/main/' + abs + (hash ? '#' + hash : '');
+  });
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,410 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Formant · Data</title>
+<meta name="description" content="Data: All audio and text the models learn from: licensed sources, quality gates, speaker splitting, conversation timing statistics, synthetic dialogues, thinker text and the held-out tests.">
+<link rel="icon" href="../favicon.png" type="image/png">
+<link rel="apple-touch-icon" href="../apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="sections.css">
+</head>
+<body>
+<nav aria-label="Sections"><div class="wrap"><b><img src="../logo.webp" alt="Formant" width="1000" height="175">Sections</b><a href="index.html">All</a><a href="data.html" aria-current="page">Data</a><a href="tokenizer.html">Tokenizer &amp; embeddings</a><a href="architecture.html">Architecture</a><a href="training.html">Training</a><a href="post-training.html">Post-training</a><a href="evaluation.html">Evaluation</a><a href="quantization.html">Quantization</a><a href="performance.html">Performance</a><a href="serving.html">Serving</a><a href="infrastructure.html">Infrastructure</a><a href="monitoring.html">Monitoring</a><a href="release.html">Release</a><a href="../plan.html">Plan board</a><a href="../index.html">Project site</a><a href="https://github.com/TEJASKUMAR-REDDY-J/Formant" target="_blank" rel="noopener">GitHub</a></div></nav>
+
+<header><div class="wrap">
+<div class="kicker">01 · Section DA · <a href="https://github.com/TEJASKUMAR-REDDY-J/Formant/tree/main/01-data" target="_blank" rel="noopener">01-data/</a></div>
+<h1>Data</h1>
+<p class="lede">All audio and text the models learn from: licensed sources, quality gates, speaker splitting, conversation timing statistics, synthetic dialogues, thinker text and the held-out tests.</p>
+
+<div class="facts"><span>Phases <b>DA1 · DA2 · DA3 · DA4</b></span><span>GPU <b>85–120 T4-hours</b></span><span>Documents <b>4</b></span><span><a href="../plan.html#view=section&section=DA">Open on the plan board</a></span></div>
+</div></header>
+<section><div class="wrap">
+<h2>Scope</h2>
+<div class="grid2"><div class="kv"><h3>In v0.1</h3><ul><li>~2–2.4k h single-speaker speech as codec tokens (Hindi ~800 h, Indian English ~400 h, ~300 h each other language)</li><li>≥ 250 h two-channel Hindi, English and Hinglish dialogue (synthetic + split real)</li><li>Spoken-style Q&amp;A text for the thinker</li><li>Speaker-disjoint test sets</li></ul></div><div class="kv"><h3>Not in v0.1</h3><ul><li>5–10k h voice set and all-language dialogue (v0.2)</li><li>Buying data or recording new conversations</li></ul></div></div>
+<div class="grid3"><div class="kv"><h3>What to expect</h3><ul><li>English is the cheapest language to add: open speech is plentiful and the codec, backbone and thinker are all strongest in it. The work is Indian-accented English, not English itself</li><li>Hindi is the strongest Indian language; Tamil and Telugu have fewer clean hours</li><li>Real two-party Indic conversation is scarce, so synthetic speech carries most of the duplex signal</li><li>Data is the biggest schedule risk in week 2</li></ul></div><div class="kv"><h3>Takes in</h3><ul><li>Licence ledger (12-release)</li><li>Frozen codec (02-tokenizer)</li><li>Test-speaker lists (06-evaluation)</li></ul></div><div class="kv"><h3>Hands over</h3><ul><li>Token shards and manifests on the Hub → 04-training, 05-post-training</li><li>Timing statistics → 03-architecture, 06-evaluation</li></ul></div></div>
+</div></section>
+<section><div class="wrap">
+<h2>Phases</h2>
+<p class="sub">One week each. Solid chips must be done before the phase starts; dashed chips are same-week handoffs.</p>
+<div class="cards"><div class="card" id="DA1"><div class="top"><span class="id">DA1 · critical</span><span class="wk">Week 1</span></div>
+<h3>Licences and pilot</h3><p>Licence ledger per source. Run 10 h per language through every gate: language ID ≥ 0.9, SNR ≥ 15 dB, 2–30 s clips, two-recogniser CER agreement ≤ 15%, PII masking. Measure gaps, overlaps and backchannels on pilot conversations.</p>
+<div class="chips"><span class="lbl" style="margin:0">Needs</span><a class="chip soft" href="infrastructure.html#IN1" title="same-week handoff">IN1</a><a class="chip soft" href="evaluation.html#EV1" title="same-week handoff">EV1</a><a class="chip soft" href="release.html#RL1" title="same-week handoff">RL1</a></div>
+<div class="chips"><span class="st doing">doing</span></div>
+<div class="links"><a href="#doc-01-data-reports-DA1-md">Report</a></div>
+<div class="done"><b>Done when</b>Pilot manifest on the Hub; gate pass rate and cost per 1,000 h for each step; first timing statistics.</div></div>
+<div class="card" id="DA2"><div class="top"><span class="id">DA2 · critical</span><span class="wk">Week 2</span></div>
+<h3>Voice set and dialogues v0</h3><p>Ingest ~2–2.4k h and tokenise with the chosen codec. Generate ≥ 250 h of Hindi, English and Hinglish two-channel dialogue: LLM-written scripts, open Indic TTS voices, DA1 timings. Split real conversations with the speaker splitter. Build the thinker's spoken-style text set.</p>
+<div class="chips"><span class="lbl" style="margin:0">Needs</span><a class="chip" href="data.html#DA1" title="must be done first">DA1</a><a class="chip" href="tokenizer.html#TK1" title="must be done first">TK1</a><a class="chip" href="evaluation.html#EV1" title="must be done first">EV1</a></div>
+<div class="chips"><span class="st todo">todo</span><span class="lbl" style="margin:0">65–90 T4-h</span></div>
+<div class="links"></div>
+<div class="done"><b>Done when</b>≥ 2k h of tokens and ≥ 250 h of dialogue on the Hub, every shard tagged with source, licence and tokenizer hash.</div></div>
+<div class="card" id="DA3"><div class="top"><span class="id">DA3</span><span class="wk">Week 3</span></div>
+<h3>Grow and check</h3><p>Keep shards flowing into training runs; top up the weaker languages; native-speaker spot-check of 100 synthetic clips per language.</p>
+<div class="chips"><span class="lbl" style="margin:0">Needs</span><a class="chip" href="data.html#DA2" title="must be done first">DA2</a></div>
+<div class="chips"><span class="st todo">todo</span><span class="lbl" style="margin:0">20–30 T4-h</span></div>
+<div class="links"></div>
+<div class="done"><b>Done when</b>Naturalness spot-check ≥ 3.5/5; hours report per language.</div></div>
+<div class="card" id="DA4"><div class="top"><span class="id">DA4</span><span class="wk">Week 4</span></div>
+<h3>Freeze and document</h3><p>Freeze v0.1 splits; write data cards; publish the recipe (scripts and manifests, not audio).</p>
+<div class="chips"><span class="lbl" style="margin:0">Needs</span><a class="chip" href="data.html#DA3" title="must be done first">DA3</a><a class="chip" href="release.html#RL3" title="must be done first">RL3</a></div>
+<div class="chips"><span class="st todo">todo</span></div>
+<div class="links"></div>
+<div class="done"><b>Done when</b>Data cards and recipe in the repo; someone else can rebuild the manifests.</div></div></div>
+</div></section>
+<section><div class="wrap">
+<h2>Documents</h2>
+<p class="sub">Everything in <code>01-data/</code> apart from its README: phase plans, design notes, data tables and reports.</p>
+<ul class="toc"><li><a href="#doc-01-data-DATA-PLAN-md">Data plan · sharding, storage and training mixtures</a><span>01-data/DATA_PLAN.md</span></li><li><a href="#doc-01-data-sources-README-md">Sources</a><span>01-data/sources/README.md</span></li><li><a href="#doc-01-data-sources-hf-datasets-csv">hf_datasets.csv</a><span>01-data/sources/hf_datasets.csv</span></li><li><a href="#doc-01-data-reports-DA1-md">DA1 · Licences and pilot</a><span>01-data/reports/DA1.md</span></li></ul><article class="doc" id="doc-01-data-DATA-PLAN-md"><div class="doc-h"><span>01-data/DATA_PLAN.md</span><a href="https://github.com/TEJASKUMAR-REDDY-J/Formant/blob/main/01-data/DATA_PLAN.md" target="_blank" rel="noopener">View on GitHub</a></div><div class="md" data-path="01-data/DATA_PLAN.md"><pre class="raw"># Data plan · sharding, storage and training mixtures
+
+How the v0.1 data in [`sources/hf_datasets.csv`](sources/hf_datasets.csv) is cut into shards, stored and mixed for training.
+
+It assumes the talker becomes a **Mixture-of-Experts** model, made by sparse upcycling of Qwen3-0.6B (for example 8 experts, top-2 routing, with a shared expert). That puts it in the same family as the Qwen3-Omni MoE talker. AR1 fixes the exact shape, and nothing below depends on the exact expert count.
+
+## 1. Principles
+
+1. **Hugging Face is the only source and the only store.** Every clip traces to `repo@commit`. Our own data repo on the Hub holds tokens, text and manifests, never raw audio.
+2. **Store what training reads, and re-derive the rest.** Speech is kept as codec tokens. Raw audio is re-streamed on demand from a pinned manifest: for test sets, for a codec change, or for the TK3 decoder fine-tune.
+3. **Keep scores, not just pass/fail.** Every clip carries its gate scores, so later mixtures can re-weight or tier the data without re-ingesting it.
+4. **Tokens are tied to a codec.** Each token tree sits under its codec's hash, and a codec change means a new tree built from the same manifests.
+5. **Batches stay language-balanced.** MoE routers learn from what each batch contains, so the sampler controls language ratios. Shard order never does.
+
+## 2. Layout on the Hub
+
+One private dataset repo, `formant-data`, versioned with git tags (`v0.1-r1`, `v0.1-r2`, …):
+
+```
+formant-data/
+  manifests/                       # source of truth: which clips, from which revision, why kept or dropped
+    {source}.parquet               # clip_id, repo, commit, file, offset, split, gate scores, kept, drop_reason
+  eval/
+    {set}.json                     # repo, commit, files, sha256: pulled on demand, never stored
+  tokens/{codec-hash}/             # canonical token shards (~64 MB, ~110 h each)
+    {lang}/{source}/train-00000-of-0000N.parquet
+    {lang}/{source}/dev-00000.parquet
+  dialogue/{codec-hash}/           # two-channel data (DA2)
+    {lang}/{synthetic|split-real|pseudo}/train-*.parquet
+  aug/{codec-hash}/                # noisy / far-field / echo copies of the user stream (TR4)
+    {lang}/train-*.parquet
+  text/{lang}/{tokenizer|instruct|seed}-*.parquet
+  timing/{indicvoices-conv|seamless}.parquet       # gap, overlap, backchannel events
+  mixtures/{stage}.yaml            # sampling weights per stage (section 5)
+  CARD.md                          # data card: sources, licences, hours, gate pass rates
+```
+
+Directory names carry the information every sampler and dashboard slices by: language, source, codec. The Hub viewer and `datasets.load_dataset(..., data_dir=...)` work on any subtree.
+
+## 3. Shard schema
+
+One row per clip, in Parquet with zstd and ~1k rows per row group:
+
+| Column | Type | Why |
+|---|---|---|
+| `clip_id`, `source`, `source_commit` | string | Traces back to the exact source file |
+| `lang`, `style`, `split` | string | Sampling and contamination checks |
+| `speaker` | string | Salted hash of the source speaker id. Used for speaker-disjoint splits and speaker-coherent packing. |
+| `gender`, `age_group`, `region` | string | Balance checks; probe prompts per group |
+| `duration_s`, `n_frames` | float32, int32 | Bucketing and packing |
+| `codes` | list&lt;uint16&gt; | Codebook-major `[K × T]` codes (K = 8 for Mimi) |
+| `text_verbatim`, `text_norm` | string | Inner-monologue text, and the normalised text for CER |
+| `word_start`, `word_end` | list&lt;uint32&gt; | Frame index of every word, from forced alignment. The talker needs text aligned to audio frames. |
+| `lid`, `snr_db`, `c50_db`, `dnsmos`, `cer` | float16 | Gate scores, kept for tiers and re-weighting |
+| `tier` | uint8 | 1 = studio/clean, 2 = good, 3 = passed the gates |
+
+**Size:** ~0.6 MB per hour with the alignments; the 2.57k h kept come to about 1.5 GB.
+
+**Shard target:** ~64 MB, about 110 h. Every (language, source) has at least two shards, and the whole set is about 35 shards.
+
+## 4. Ingest sharding (DA2)
+
+The work unit is **one source Parquet file**, which keeps jobs idempotent and resumable across Kaggle's 12-hour sessions:
+
+```
+for each source file not yet in manifests/:            # the manifest is the job ledger
+    stream it → VAD segment 2–30 s → gates (LID, SNR/C50, DNSMOS, length, two-ASR CER)
+    → dedup → resample 24 kHz, loudness-normalise → codec encode on T4, length-bucketed batches
+    → forced alignment (CTC aligner) → write part file → upload → append manifest rows
+weekly: compact part files into ~64 MB shards, shuffled within (lang, source)
+```
+
+- **Dedup:** IndicVoices-R is a cleaned re-release of IndicVoices clips. When the same (speaker, normalised text) appears in both, keep the IndicVoices-R copy. Exact audio repeats are dropped by hashing the first two codebooks.
+- **Contamination:**
+  - Speakers are held out across IndicVoices and IndicVoices-R together, because they share speakers.
+  - 13-gram text overlap is checked against every test-set transcript (FLEURS, Lahaja, Svarah, Vaani-Benchmark, IN22).
+  - Lahaja speakers are checked against IndicVoices, since both come from AI4Bharat.
+- **Dev split:** 1% of speakers per (language, source), speaker-disjoint, used for loss tracking and mixture search.
+- **Augmentation happens here, not in the dataloader.** Tokens cannot be noised after encoding, so the TR4 copies (noise, far-field, echo leak) are encoded once into `aug/` for ~200 h of **user-stream** audio. The talker's own stream is always clean.
+
+## 5. Training mixtures
+
+### Language ratio: temperature sampling with an epoch cap
+
+Weights follow hours^0.5 (temperature sampling, as in mT5), and no language may repeat more than 4 times (the UniMax cap). The budget is 3 epochs of the 2.47k h of speech, ≈ 7.4k h seen, ≈ 334M frames.
+
+| Language | Kept | Share of speech batches | Hours seen | Epochs |
+|---|---|---|---|---|
+| Hindi | 800 h | 23% | 1,715 | 2.1 |
+| English (Indian) | 400 h | 16.5% | 1,213 | 3.0 |
+| Bengali | 300 h | 14% | 1,050 | 3.5 |
+| Marathi | 300 h | 14% | 1,050 | 3.5 |
+| Tamil | 300 h | 14% | 1,050 | 3.5 |
+| Telugu | 300 h | 14% | 1,050 | 3.5 |
+| Hinglish | 71 h | 4% | 284 | 4.0 (capped) |
+
+Before TR2 commits to these weights, TR1 runs a small mixture search. It trains 8 runs of the ~50M talker on different weightings and keeps the one with the best worst-language dev loss (a RegMix/DoReMi-style search, ~5 T4-hours).
+
+### Online selection inside each step (OPUS, trial in TR1)
+
+Temperature sampling fixes **how much** of each language the model sees. **OPUS** (Optimizer-induced Projected Utility Selection, arXiv 2602.05400, 2026) chooses **which** clips within that budget, at every step.
+
+**How it works:**
+1. The sampler draws a candidate buffer twice the batch size.
+2. Each candidate gets a score: its gradient, seen through the optimizer's preconditioner (AdamW's second moments), dot a proxy gradient from data that looks like what we want to be good at.
+3. Per-sample gradients come from &quot;ghost&quot; factors (layer input × output gradient), compressed with an m = 8,192 CountSketch.
+4. Half the buffer is kept, sampled with a softmax at τ = 0.9 and a redundancy penalty so the batch stays diverse.
+
+**Reported results:**
+- about 4.7% extra compute;
+- +2.2% average accuracy over random selection on 10 benchmarks;
+- 8× less compute to match GPT-2 XL trained on FineWeb;
+- Qwen3-8B continued pre-training matching 3B tokens with 0.5B (6×).
+
+**Fitted to Formant:**
+
+| Paper | Formant |
+|---|---|
+| Proxy built by retrieving pre-training documents close to the benchmark validation sets | Proxy pool = the **dev split** (speaker-disjoint, never the test sets) + tier-1 clips + conversational clips, weighted toward the worst languages in the latest eval |
+| Free choice across the whole buffer | **Selection inside each language bucket**, so the temperature ratios and the MoE global-batch balance hold |
+| AdamW / Muon preconditioner | AdamW (8-bit states dequantised for scoring) |
+| Sketch every layer | Sketch the last 4 blocks + output heads first, to keep the cost down on T4s |
+
+**The catch is cost on T4s.** Scoring needs a forward pass over the whole buffer, so the 4.7% figure may not carry over. TR1 measures it.
+
+**TR1 runs it as an A/B at equal T4-hours:** random vs OPUS on the dense ~50M talker, compared on worst-language dev loss. TR2 adopts it only if it wins after paying its overhead.
+
+**Possible upside:** if OPUS reaches the same dev loss in ~2 epochs instead of 3, pre-training drops by ~30–50 T4-hours, about a quarter of the gap to one Kaggle account. The budget does not count on this until TR1 shows it.
+
+### Stages
+
+| Stage | Plan cell | Mixture | Why |
+|---|---|---|---|
+| **A. Speech pre-training** | TR2–TR3 | 90% speech (language ratio above; within a language, sources by hours with conversational clips up-weighted 2×), 10% text replay (Sangraha sample) | Learn Indic speech. Text replay keeps the Qwen3 text ability the monologue slot needs. |
+| **B. Quality anneal** | last 15% of A | Tier-1 speech only (IndicVoices-R, Rasa, top-DNSMOS Kathbath) + 10% text; learning rate decays to 0 | Finishing on clean data sharpens audio quality (the Llama 3 anneal and Qwen3-Omni's high-quality continued pre-training) |
+| **C. Duplex** | TR3 | 50% two-channel dialogue (synthetic + split real), 30% pseudo-duplex, 20% Stage-A replay | Learn turn-taking without forgetting the other languages |
+| **D. Robustness** | TR4 | 30% `aug/` user streams over C's mixture | Noise, far-field audio, crosstalk |
+| **E. Voice lock** | PT3 | 80% chosen Rasa voice, 20% Stage-C replay | One voice; the replay guards against forgetting |
+
+**Pseudo-duplex** data is two monologue clips from different speakers of the same language, laid on two channels with gaps, overlaps and backchannels sampled from the DA1 timing statistics. It costs nothing to make and gives Bengali, Marathi, Tamil and Telugu turn-taking practice before real dialogue exists for them (the Moshi multi-stream recipe, applied to monologue data).
+
+## 6. Packing and batches
+
+- **Sequences are 2,048 frames (164 s), packed per speaker.** Consecutive clips from the same speaker are joined with 3–8 silence frames, which teaches long-form, voice-consistent speech from short clips. Attention is masked at clip boundaries (document masking).
+- **A micro-batch holds one language; the global batch holds the mixture.** On 2× T4 a micro-batch is only a few sequences. Gradient accumulation builds a global batch of ~64 sequences (~131k frames) that matches the stage ratios.
+- **MoE load balancing is computed over the global batch, not each micro-batch.** Balancing per micro-batch forces every expert to see every language and blocks specialisation; balancing over the global batch lets experts specialise by language or codebook (Qiu et al., 2025). Use DeepSeek-V3's bias-based balancing without an auxiliary loss, plus a small per-sequence balance term.
+- **The sampler is deterministic and resumable.** It is seeded by (run, step), and its state is saved in every checkpoint, so a killed Kaggle session resumes on the exact next batch.
+- **There is no streaming dataloader.** All tokens (~1.5 GB) download to Kaggle in about a minute and sit in RAM. Packing builds `packed/{stage}/{lang}.bin` (uint16 memmap) plus an index in a few minutes per session.
+
+## 7. What MoE changes for data
+
+| Concern | What we do |
+|---|---|
+| Too little data for an MoE trained from scratch (334M frames) | **Upcycle** from the dense Qwen3-0.6B: experts start as copies of its FFN. Only the router and the expert divergence need data. |
+| Experts collapse onto Hindi, the largest language | Temperature sampling + global-batch balancing; MO logs **expert use per language** and router entropy each eval |
+| Experts never specialise | Single-language micro-batches + global-batch balancing |
+| A stage shift (A → C) reshuffles the experts | 20% replay in every later stage; MO2 alarm on sudden routing shifts |
+| Expert use depends on sample tags | Every packed sequence carries `lang`, `source`, `tier` in its index, so router stats can be sliced |
+
+## 8. Storage after this plan
+
+| Item | Stored |
+|---|---|
+| Speech tokens + alignments, 2.57k h | ~1.5 GB |
+| Two-channel dialogue tokens, ≥ 250 h × 2 channels | ~0.3 GB |
+| Augmented user streams, ~200 h | ~0.1 GB |
+| Text (tokenizer sample, instruction, Hinglish seeds) | ~3 GB |
+| Timing tables | ~0.1 GB |
+| Manifests (training clips + test sets) | ~0.05 GB |
+| **Total** | **~5 GB**, against 1.76 TB raw in our languages |
+
+## 9. References
+
+- **Moshi** (Défossez et al., 2024): multi-stream duplex data, inner-monologue text aligned to frames, synthetic dialogues.
+- **Qwen3-Omni** (2025): MoE talker; staged training from broad data to a high-quality continued pre-train; speaker fine-tune last.
+- **UniMax** (Chung et al., 2023): language sampling with an epoch cap.
+- **DoReMi** (Xie et al., 2023) and **RegMix** (Liu et al., 2024): choosing mixtures with small proxy runs.
+- **Sparse upcycling** (Komatsuzaki et al., 2022): building an MoE from a dense checkpoint.
+- **DeepSeek-V3** (2024): load balancing without an auxiliary loss.
+- **OPUS** (arXiv 2602.05400, 2026): per-step data selection in the optimizer's update space.
+- **Qiu et al., 2025**, &quot;Demons in the Detail&quot;: global-batch load balancing lets experts specialise.
+- **Emilia-Pipe** (He et al., 2024): speech preprocessing (separation, VAD, quality scoring).
+- **Llama 3** (2024): annealing on high-quality data, and document masking for packed sequences.
+</pre></div></article>
+<article class="doc" id="doc-01-data-sources-README-md"><div class="doc-h"><span>01-data/sources/README.md</span><a href="https://github.com/TEJASKUMAR-REDDY-J/Formant/blob/main/01-data/sources/README.md" target="_blank" rel="noopener">View on GitHub</a></div><div class="md" data-path="01-data/sources/README.md"><pre class="raw"># Sources
+
+`hf_datasets.csv` lists every dataset Formant keeps. All of them are on Hugging Face, and nothing comes from anywhere else. Each row also says how small the dataset gets once we keep only our languages and convert it to what training reads.
+
+How the data is sharded and mixed for training: [`../DATA_PLAN.md`](../DATA_PLAN.md).
+
+Rebuild: `python 01-data/scripts/hf_inventory.py`. Sizes, licences, clip counts, fields, dates and downloads come live from the Hub API.
+
+## What we store, and how small it gets
+
+| What | Stored as | Size per hour |
+|---|---|---|
+| Training speech | Codec tokens (Mimi: 8 codebooks at 12.5 Hz, uint16) + transcript + speaker, gender, duration. Parquet, zstd. | **0.54 MB** (measured, worst case) |
+| Test sets, codec fine-tune audio (TK3) | Manifest only: repo, commit and clip ids. The audio is re-streamed from the Hub when needed. | ~0 |
+| Text | Parquet, zstd, sampled | Fixed budget per row |
+| English turn timing | Speech/silence start and end times per speaker, no audio | ~0.1 GB in total |
+
+For comparison, the raw audio runs 42–615 MB per hour depending on the dataset (`raw_mb_per_hour`).
+
+The 0.54 MB figure was measured on one hour of 6-second clips filled with uniformly random codes, so it is an upper bound: real codes compress a little better. With 12 codebooks (LiquidCodec, if TK1 picks it) the figure is 0.79 MB per hour.
+
+**Only what fits is kept.** Every clip passes language ID, SNR, length and transcript-agreement (CER) filters before it is tokenised. The pass rate is assumed to be 75% until the DA1 pilot measures it. Clips that fail are never stored.
+
+## Columns
+
+| Column | Meaning |
+|---|---|
+| `priority` | **P1**: pulled for v0.1. **P2**: reserve, used only if P1 falls short or once its licence clears. **EVAL**: test only, never trained on. |
+| `dataset` | Hub repo id |
+| `what_it_is` | One-line description |
+| `style` | Read, extempore, conversation, studio TTS, lectures, news or text |
+| `used_for` | Its job in Formant, with the plan cell |
+| `licence` | As declared on the card. `none on card` means it stays unused until RL1 confirms the terms. |
+| `commercial_use` | `yes`, `no` (non-commercial), or `check` |
+| `access` | `open`, `click to accept` (log in and accept once), or `owner approval` |
+| `hours_reported` | Hours the card reports for the whole repo |
+| `hours_our_languages_est` | Hours in hi, bn, mr, ta, te and en, estimated as language GB ÷ repo GB per hour. The pilot replaces this with measured hours. |
+| `hours_by_language_est` | The same, per language |
+| `clips_our_languages` | Clips in our languages, all splits, from the card |
+| `raw_gb_our_languages` | Bytes on the Hub for our languages only |
+| `raw_gb_by_language` | The same, per language |
+| `raw_mb_per_hour` | Repo size ÷ reported hours: how heavy the raw audio is |
+| `v01_hours_kept` | Hours of speech v0.1 keeps after filtering |
+| `v01_hours_kept_by_language` | The same, per language |
+| `v01_raw_gb_streamed` | Raw audio streamed through Kaggle to get those hours. It is never stored. |
+| `v01_stored_as` | Storage form (see the table above) |
+| `v01_stored_gb` | What we actually keep on the Hub |
+| `times_smaller_than_raw` | `raw_gb_our_languages` ÷ `v01_stored_gb` |
+| `keep_rule` | Exactly which configs, splits and slices are kept |
+| `splits` | Splits the dataset ships |
+| `metadata_fields` | Non-audio columns it ships, for example speaker, gender, age, district or scenario |
+| `total_repo_gb` | Whole repo, all languages |
+| `last_updated` | Last commit on the Hub |
+| `downloads_30d` | Hub downloads in the last 30 days |
+| `url` | Repo page |
+</pre></div></article>
+<article class="doc" id="doc-01-data-sources-hf-datasets-csv"><div class="doc-h"><span>01-data/sources/hf_datasets.csv</span><a href="https://github.com/TEJASKUMAR-REDDY-J/Formant/blob/main/01-data/sources/hf_datasets.csv" target="_blank" rel="noopener">View on GitHub</a></div><div class="tw"><table><thead><tr><th>priority</th><th>dataset</th><th>style</th><th>used_for</th><th>licence</th><th>access</th><th>hours_our_languages_est</th><th>raw_gb_our_languages</th><th>v01_hours_kept</th><th>v01_stored_gb</th><th>keep_rule</th></tr></thead><tbody><tr><td>P1</td><td><a href="https://huggingface.co/datasets/ai4bharat/indicvoices_r">ai4bharat/indicvoices_r</a></td><td>natural, studio-clean</td><td>Talker training speech (first pick); TK3 codec decoder fine-tune re-streams it from the manifest</td><td>cc-by-4.0</td><td>click to accept</td><td>488</td><td>300.2</td><td>366</td><td>0.2</td><td>train split of our 5 languages; filters; tokens</td></tr><tr><td>P1</td><td><a href="https://huggingface.co/datasets/ai4bharat/IndicVoices">ai4bharat/IndicVoices</a></td><td>read 8%, extempore 76%, conversation 16%</td><td>Talker training speech (bulk); real conversations for turn-timing statistics</td><td>cc-by-4.0</td><td>click to accept</td><td>3178</td><td>211.3</td><td>1454</td><td>0.78</td><td>train split of our 5 languages; filters; tokens; timing table from the conversational part</td></tr><tr><td>P1</td><td><a href="https://huggingface.co/datasets/ai4bharat/Kathbath">ai4bharat/Kathbath</a></td><td>read</td><td>Talker training speech (read style, many speakers)</td><td>cc-by-4.0</td><td>click to accept</td><td>810</td><td>83.7</td><td>120</td><td>0.06</td><td>train split of our 5 languages; filters; tokens</td></tr><tr><td>P1</td><td><a href="https://huggingface.co/datasets/ai4bharat/Rasa">ai4bharat/Rasa</a></td><td>expressive studio TTS</td><td>Voice-lock candidates for the talker's own voice (PT3)</td><td>cc-by-4.0</td><td>click to accept</td><td></td><td>90.5</td><td>100</td><td>0.05</td><td>20 h per language from 1-2 candidate voices; tokens</td></tr><tr><td>P1</td><td><a href="https://huggingface.co/datasets/ai4bharat/NPTEL">ai4bharat/NPTEL</a></td><td>lectures</td><td>Indian-accented English for the talker</td><td>cc-by-4.0</td><td>click to accept</td><td></td><td>46.0</td><td>400</td><td>0.22</td><td>en2indic config only (English audio); filters; tokens; drop translation columns</td></tr><tr><td>P1</td><td><a href="https://huggingface.co/datasets/dianavdavidson/MUCS-Hinglish">dianavdavidson/MUCS-Hinglish</a></td><td>read, code-mixed</td><td>Hinglish talker speech; Hinglish test (its test split)</td><td>cc-by-4.0</td><td>open</td><td>95</td><td>10.0</td><td>71</td><td>0.04</td><td>all of it; test split kept apart for EV</td></tr><tr><td>P1</td><td><a href="https://huggingface.co/datasets/ai4bharat/sangraha">ai4bharat/sangraha</a></td><td>text</td><td>Tokenizer vocabulary merges (TK2)</td><td>cc-by-4.0</td><td>open</td><td></td><td>143.8</td><td></td><td>1.8</td><td>300 MB of text per language (6 languages), deduplicated sample</td></tr><tr><td>P2</td><td><a href="https://huggingface.co/datasets/ai4bharat/Shrutilipi">ai4bharat/Shrutilipi</a></td><td>broadcast news</td><td>Hindi top-up only if P1 falls short</td><td>cc-by-4.0</td><td>click to accept</td><td>4079</td><td>172.9</td><td>60</td><td>0.03</td><td>Hindi only, as needed; tokens</td></tr><tr><td>P2</td><td><a href="https://huggingface.co/datasets/ARTPARK-IISc/Vaani-transcription-part">ARTPARK-IISc/Vaani-transcription-part</a></td><td>spontaneous, phone quality</td><td>Robustness top-up (accents, noisy phones)</td><td>cc-by-4.0</td><td>click to accept</td><td>1460</td><td>167.6</td><td></td><td>0.0</td><td>not in v0.1; dialect top-up later</td></tr><tr><td>P2</td><td><a href="https://huggingface.co/datasets/SPRINGLab/IndicTTS-English">SPRINGLab/IndicTTS-English</a></td><td>studio TTS</td><td>Indian English top-up if RL1 clears the licence</td><td>none on card</td><td>open</td><td></td><td>78.2</td><td></td><td>0.0</td><td>only after RL1 confirms the licence</td></tr><tr><td>P2</td><td><a href="https://huggingface.co/datasets/SPRINGLab/IndicTTS-Hindi">SPRINGLab/IndicTTS-Hindi</a></td><td>studio TTS</td><td>Cascade fallback voice (SV1) if RL1 clears the licence</td><td>none on card</td><td>open</td><td></td><td>8.2</td><td></td><td>0.0</td><td>only after RL1 confirms the licence</td></tr><tr><td>P2</td><td><a href="https://huggingface.co/datasets/SPRINGLab/IndicTTS_Bengali">SPRINGLab/IndicTTS_Bengali</a></td><td>studio TTS</td><td>Cascade fallback voice (SV1)</td><td>cc-by-4.0</td><td>open</td><td></td><td>6.7</td><td></td><td>0.0</td><td>only for SV1</td></tr><tr><td>P2</td><td><a href="https://huggingface.co/datasets/SPRINGLab/IndicTTS_Tamil">SPRINGLab/IndicTTS_Tamil</a></td><td>studio TTS</td><td>Cascade fallback voice (SV1)</td><td>cc-by-4.0</td><td>open</td><td></td><td>8.4</td><td></td><td>0.0</td><td>only for SV1</td></tr><tr><td>P2</td><td><a href="https://huggingface.co/datasets/SPRINGLab/IndicTTS_Telugu">SPRINGLab/IndicTTS_Telugu</a></td><td>studio TTS</td><td>Cascade fallback voice (SV1) if RL1 clears the licence</td><td>none on card</td><td>open</td><td></td><td>6.4</td><td></td><td>0.0</td><td>only after RL1 confirms the licence</td></tr><tr><td>P2</td><td><a href="https://huggingface.co/datasets/pengyizhou/seamless-interaction-audio-only">pengyizhou/seamless-interaction-audio-only</a></td><td>two-person conversation</td><td>English turn-timing statistics only (pauses, overlaps, backchannels); never trains shipped weights</td><td>cc-by-nc-4.0</td><td>open</td><td>4000</td><td>374.4</td><td></td><td>0.1</td><td>speech/silence timing table per speaker; no audio, no tokens</td></tr><tr><td>P2</td><td><a href="https://huggingface.co/datasets/ai4bharat/indic-align">ai4bharat/indic-align</a></td><td>text</td><td>Thinker spoken-style tuning (PT2)</td><td>cc-by-4.0</td><td>open</td><td></td><td>28.2</td><td></td><td>1.0</td><td>our 5 languages + English, sampled</td></tr><tr><td>P2</td><td><a href="https://huggingface.co/datasets/Abhishekcr448/Hinglish-Everyday-Conversations-1M">Abhishekcr448/Hinglish-Everyday-Conversations-1M</a></td><td>text dialogue</td><td>Seed scripts for synthetic Hinglish dialogues (DA2)</td><td>mit</td><td>open</td><td></td><td>0.2</td><td></td><td>0.2</td><td>all, after a quality spot-check</td></tr><tr><td>EVAL</td><td><a href="https://huggingface.co/datasets/google/fleurs">google/fleurs</a></td><td>read</td><td>ASR / codec round-trip tests (EV1, TK1)</td><td>cc-by-4.0</td><td>open</td><td></td><td>13.9</td><td></td><td>0.0</td><td>test split of hi_in, bn_in, mr_in, ta_in, te_in, en_us; manifest only</td></tr><tr><td>EVAL</td><td><a href="https://huggingface.co/datasets/ai4bharat/Svarah">ai4bharat/Svarah</a></td><td>read + extempore</td><td>Indian English test</td><td>none on card</td><td>click to accept</td><td></td><td>1.1</td><td></td><td>0.0</td><td>all; manifest only</td></tr><tr><td>EVAL</td><td><a href="https://huggingface.co/datasets/ai4bharat/Lahaja">ai4bharat/Lahaja</a></td><td>read + extempore</td><td>Hindi accent test</td><td>mit</td><td>click to accept</td><td></td><td>1.4</td><td></td><td>0.0</td><td>all; manifest only</td></tr><tr><td>EVAL</td><td><a href="https://huggingface.co/datasets/ARTPARK-IISc/Vaani-Benchmark-V1.0">ARTPARK-IISc/Vaani-Benchmark-V1.0</a></td><td>spontaneous</td><td>Dialect robustness test</td><td>cc-by-4.0</td><td>click to accept</td><td></td><td>4.9</td><td></td><td>0.0</td><td>our languages only; manifest only</td></tr><tr><td>EVAL</td><td><a href="https://huggingface.co/datasets/ai4bharat/IN22-Conv">ai4bharat/IN22-Conv</a></td><td>text</td><td>Thinker conversation check</td><td>cc-by-4.0</td><td>click to accept</td><td></td><td>0.0</td><td></td><td>0.0</td><td>all</td></tr></tbody></table></div><p class="sub">Showing 11 of 28 columns; the full file is on GitHub.</p></article>
+<article class="doc" id="doc-01-data-reports-DA1-md"><div class="doc-h"><span>01-data/reports/DA1.md</span><a href="https://github.com/TEJASKUMAR-REDDY-J/Formant/blob/main/01-data/reports/DA1.md" target="_blank" rel="noopener">View on GitHub</a></div><div class="md" data-path="01-data/reports/DA1.md"><pre class="raw"># DA1 · Licences and pilot
+
+**Status:** in progress. This report covers part 1: which datasets we keep, and how small they get. Part 2 is the pilot run, 10 h per language through every gate.
+
+## What was done
+
+Built the list of datasets Formant keeps. **Rule: Hugging Face only.** Every source is a Hub repository, so every pull is scriptable on Kaggle and every shard traces back to a repo and revision.
+
+- List: [`01-data/sources/hf_datasets.csv`](../sources/hf_datasets.csv), 22 rows.
+- Column guide: [`01-data/sources/README.md`](../sources/README.md).
+- Sharding, storage and training mixtures: [`01-data/DATA_PLAN.md`](../DATA_PLAN.md).
+- Script: [`01-data/scripts/hf_inventory.py`](../scripts/hf_inventory.py) rebuilds the CSV from the public Hub API, with no login needed.
+
+## How small it gets
+
+We keep only our six languages (hi, bn, mr, ta, te, en), only the clips that pass the filters, and only in the form training reads.
+
+| | Raw, our languages | Stored after transform |
+|---|---|---|
+| Speech for the talker, 2.57k h kept | 1.19 TB | **1.4 GB** of codec tokens + transcripts |
+| Text: tokenizer sample, instruction and seed text | 172 GB | 3 GB |
+| Test sets, plus TK3 codec fine-tune audio | 21 GB | ~0: pinned manifests, audio re-streamed on demand |
+| English turn timing | 374 GB | 0.1 GB |
+| **Total** | **~1.76 TB** | **~4.5 GB, about 390× smaller** |
+
+**Training speech: 0.54 MB per hour,** measured. One hour of 6 s clips was stored as Mimi codes (8 codebooks, 12.5 Hz, uint16) plus transcript, speaker, gender and duration, in Parquet with zstd-9. The codes were uniformly random, so this is the worst case; with 12 codebooks it is 0.79 MB per hour.
+
+**Raw audio: 42–615 MB per hour,** depending on the dataset. So tokenising alone makes speech 80–1,100× smaller.
+
+**Streamed:** about 460 GB of raw audio goes through Kaggle, shard by shard, plus the NPTEL and Rasa slices, whose hours per GB the pilot measures. Each shard is streamed, filtered, tokenised and uploaded, then its audio is deleted. Nothing raw is ever stored.
+
+**Only what fits is kept.** Every clip passes language ID, SNR, length and transcript agreement (CER against an ASR pass). The pass rate is assumed to be 75% until the pilot measures it.
+
+### Hours kept for v0.1
+
+| Language | Kept | From |
+|---|---|---|
+| Hindi | 800 h | IndicVoices-R 58 → IndicVoices 562 → Kathbath 120 → Shrutilipi 60 |
+| English (Indian) | 400 h | NPTEL En-Indic |
+| Bengali | 300 h | IndicVoices-R 88 → IndicVoices 212 |
+| Marathi | 300 h | IndicVoices-R 38 → IndicVoices 262 |
+| Tamil | 300 h | IndicVoices-R 77 → IndicVoices 223 |
+| Telugu | 300 h | IndicVoices-R 105 → IndicVoices 195 |
+| Hinglish | 71 h | MUCS-Hinglish, all that passes |
+| Voice-lock candidates | 100 h | Rasa, 20 h per Indian language |
+
+Per-language hours are estimates: language GB ÷ the repo's GB per hour. The IndicVoices figure assumes the Hub copy holds the 11.2k transcribed hours. The pilot measures real hours.
+
+Tokens are so small that storage stops mattering. If v0.1 needs more speech, tokenising **all** ~4.6k estimated hours of IndicVoices-R, IndicVoices, Kathbath and MUCS in our languages would still be about 2.5 GB. The real limits are T4-hours and download time.
+
+## Result by priority
+
+| Priority | Meaning | Datasets | Raw, our languages | Stored |
+|---|---|---|---|---|
+| P1 | Pulled for v0.1 | 7 | 885.5 GB | 3.15 GB |
+| P2 | Reserve: only if P1 falls short or once the licence clears | 10 | 851.2 GB | 1.33 GB |
+| EVAL | Test only, never trained on | 5 | 21.3 GB | ~0 (manifests) |
+
+## Dropped from the list
+
+Ten datasets from the first pass are out. Each one is either not needed or not safe to use.
+
+| Dataset | Why it is out |
+|---|---|
+| ARTPARK-IISc/Vaani (full) | 7.2 TB, mostly untranscribed; the transcribed part is already a P2 reserve |
+| shiprocket-ai/nirantar | Needs owner approval; provenance unclear |
+| SPRINGLab/Hindi-1482Hrs | No licence on the card; Hindi is already covered |
+| SPRINGLab/SPRING_INX Bengali, Marathi, Tamil R1 | No licence on the card; those languages are already covered |
+| fsicoli/common_voice_22_0 | Community mirror; under 1 GB for hi, mr and te |
+| krutrim-ai-labs/IndicST | Repackages sources already listed; custom licence |
+| amphion/Emilia-Dataset | 1.5 TB of English, mixed NC/BY licences; NPTEL covers English |
+| facebook/seamless-interaction | 25.6 TB with video; the audio-only copy is the P2 row |
+
+## Flags
+
+- **Gated repos** (ai4bharat, ARTPARK-IISc): the team's Hugging Face account must accept each repo once before Kaggle can pull.
+- **No licence on the card:** IndicTTS English, Hindi and Telugu, and Svarah. They are P2/EVAL and cannot be used until RL1 confirms their terms.
+- **Non-commercial:** Seamless Interaction (CC-BY-NC). It is used only for the turn-timing table, never for audio or weights.
+- **Community mirror:** MUCS-Hinglish. It is kept only if RL1 confirms the original MUCS licence.
+- **Test sets:** FLEURS, Svarah, Lahaja, Vaani-Benchmark and IN22-Conv, plus the held-out speakers EV1 reserves, never enter training. The DA2 filter checks this.
+
+## Next (rest of DA1)
+
+1. Accept the gated repos with the team's Hugging Face account. Add the Hub token as a Kaggle secret.
+2. Pilot: stream 10 h per language from the P1 sets through every gate. Measure real hours, pass rate, GB per hour and T4-minutes per 1,000 h. Then rerun the script with the measured numbers.
+3. Measure pause, overlap and backchannel statistics on the conversational part of IndicVoices (Indian languages) and on Seamless Interaction (English).
+4. RL1: confirm the terms for every `none on card` row, and mark each one train-only, shareable or excluded.
+</pre></div></article>
+</div></section>
+<div class="wrap pager"><span></span><a href="tokenizer.html">02 Tokenizer &amp; embeddings →</a></div>
+<footer><div class="wrap">Generated from site/plan-data.js (plan v12, 2026-11-20) and the section folders by 10-infrastructure/scripts/gen-sections.js.</div></footer>
+<script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js"></script>
+<script>
+const MAP = {"01-data/DATA_PLAN.md":"data.html#doc-01-data-DATA-PLAN-md","01-data/sources/README.md":"data.html#doc-01-data-sources-README-md","01-data/sources/hf_datasets.csv":"data.html#doc-01-data-sources-hf-datasets-csv","01-data/reports/DA1.md":"data.html#doc-01-data-reports-DA1-md","02-tokenizer/plans/TK1.md":"tokenizer.html#doc-02-tokenizer-plans-TK1-md","03-architecture/plans/AR1.md":"architecture.html#doc-03-architecture-plans-AR1-md","04-training/plans/TR1.md":"training.html#doc-04-training-plans-TR1-md","05-post-training/plans/PT1.md":"post-training.html#doc-05-post-training-plans-PT1-md","06-evaluation/plans/EV1.md":"evaluation.html#doc-06-evaluation-plans-EV1-md","07-quantization/plans/QZ1.md":"quantization.html#doc-07-quantization-plans-QZ1-md","08-performance/plans/PF1.md":"performance.html#doc-08-performance-plans-PF1-md","09-serving/plans/SV1.md":"serving.html#doc-09-serving-plans-SV1-md","10-infrastructure/plans/IN1.md":"infrastructure.html#doc-10-infrastructure-plans-IN1-md","11-monitoring/plans/MO1.md":"monitoring.html#doc-11-monitoring-plans-MO1-md","12-release/plans/RL1.md":"release.html#doc-12-release-plans-RL1-md"}, REPO = "https://github.com/TEJASKUMAR-REDDY-J/Formant";
+document.querySelectorAll('.md[data-path]').forEach(el => {
+  if (!window.marked) return;
+  const p = el.dataset.path, dir = p.split('/').slice(0, -1).join('/');
+  el.innerHTML = marked.parse(el.querySelector('.raw').textContent);
+  el.querySelectorAll('table').forEach(t => { const w = document.createElement('div'); w.className = 'tw'; t.replaceWith(w); w.append(t); });
+  el.querySelectorAll('a[href]').forEach(a => {
+    const h = a.getAttribute('href');
+    if (/^(https?:|mailto:|#)/.test(h)) return;
+    const [file, hash] = h.split('#'), abs = new URL(file, 'https://x/' + dir + '/').pathname.slice(1);
+    a.href = MAP[abs] || REPO + '/blob/main/' + abs + (hash ? '#' + hash : '');
+  });
+});
+</script>
+</body>
+</html>
