@@ -31,7 +31,8 @@ LANG = {"hindi": "hi", "hi": "hi", "hin": "hi", "hi_in": "hi",
 
 # sub: folder holding language dirs ("" = repo root, None = single-language repo).
 # hours: reported hours for the whole repo (used for GB per hour). keep_h: fixed hours kept instead of the
-# ORDER allocation. keep_gb: fixed stored size (text, timing tables; 0 = manifest only).
+# ORDER allocation. keep_gb: fixed stored size (text, timing tables; 0 = manifest only). pull_gb / pull_h: what v0.1
+# reads from the repo when it is not the token allocation (text samples, test splits, timing sample).
 S = lambda **k: k
 SOURCES = [
     # --- P1: what v0.1 is built from ---
@@ -62,7 +63,7 @@ SOURCES = [
     S(id="ai4bharat/sangraha", sub="verified", prio="P1", style="text",
       what="Verified Indic web + PDF text corpus, 22 languages.",
       use="Tokenizer vocabulary merges (TK2)",
-      keep_gb=1.8, rule="300 MB of text per language (6 languages), deduplicated sample"),
+      keep_gb=1.8, pull_gb=1.8, rule="300 MB of text per language (6 languages), deduplicated sample"),
     # --- P2: reserves (licence pending or only if P1 falls short) ---
     S(id="ai4bharat/Shrutilipi", sub="", prio="P2", style="broadcast news",
       what="All India Radio news bulletins with transcripts, 12 languages.",
@@ -86,26 +87,31 @@ SOURCES = [
     S(id="pengyizhou/seamless-interaction-audio-only", sub=None, prio="P2", style="two-person conversation",
       what="Audio-only copy of Meta Seamless Interaction, ~4,000 h of English dyadic talk. Non-commercial.",
       use="English turn-timing statistics only (pauses, overlaps, backchannels); never trains shipped weights",
-      hours=4000, keep_gb=0.1, rule="speech/silence timing table per speaker; no audio, no tokens"),
+      hours=4000, keep_gb=0.01, pull_h=200, rule="200 h sample; speech/silence timing table per speaker; no audio, no tokens"),
     S(id="ai4bharat/indic-align", sub=None, prio="P2", style="text",
-      what="Indic instruction-tuning and safety data.", use="Thinker spoken-style tuning (PT2)",
-      keep_gb=1.0, rule="our 5 languages + English, sampled"),
+      what="Indic instruction-tuning and safety data.", use="Thinker spoken-style tuning (PT2)", multi=True,
+      keep_gb=1.0, pull_gb=1.0, rule="our 5 languages + English, sampled"),
     S(id="Abhishekcr448/Hinglish-Everyday-Conversations-1M", sub=None, prio="P2", style="text dialogue",
       what="1M synthetic everyday Hinglish conversations (romanised).", use="Seed scripts for synthetic Hinglish dialogues (DA2)",
-      keep_gb=0.2, rule="all, after a quality spot-check"),
+      keep_gb=0.2, pull_gb=0.2, rule="all, after a quality spot-check"),
     # --- EVAL: test only, never trained on ---
     S(id="google/fleurs", sub="data", prio="EVAL", style="read",
       what="Google's standard multilingual read-speech benchmark, 102 languages.", use="ASR / codec round-trip tests (EV1, TK1)",
-      keep_gb=0.0, rule="test split of hi_in, bn_in, mr_in, ta_in, te_in, en_us; manifest only"),
+      keep_gb=0.0, pull_gb=3.2, rule="test split of hi_in, bn_in, mr_in, ta_in, te_in, en_us; manifest only"),
     S(id="ai4bharat/Svarah", sub=None, prio="EVAL", style="read + extempore",
       what="Indian-accented English benchmark, 117 speakers.", use="Indian English test", keep_gb=0.0, rule="all; manifest only"),
     S(id="ai4bharat/Lahaja", sub=None, prio="EVAL", style="read + extempore",
       what="Hindi accent benchmark, 132 speakers from many regions.", use="Hindi accent test", keep_gb=0.0, rule="all; manifest only"),
     S(id="ARTPARK-IISc/Vaani-Benchmark-V1.0", sub="", prio="EVAL", style="spontaneous",
-      what="Vaani dialect benchmark.", use="Dialect robustness test", keep_gb=0.0, rule="our languages only; manifest only"),
+      what="Vaani dialect benchmark.", use="Dialect robustness test", multi=True, keep_gb=0.0, rule="our languages only; manifest only"),
     S(id="ai4bharat/IN22-Conv", sub=None, prio="EVAL", style="text",
-      what="Conversational translation benchmark, 22 languages.", use="Thinker conversation check", keep_gb=0.0, rule="all"),
+      what="Conversational translation benchmark, 22 languages.", use="Thinker conversation check", multi=True, keep_gb=0.001, rule="all"),
 ]
+
+
+def gb(x):
+    """Readable GB: tiny values are not rounded to a misleading 0.0."""
+    return "<0.01" if 0 < x < 0.01 else round(x, 2) if x < 1 else round(x, 1)
 
 
 def get(path):
@@ -175,9 +181,11 @@ def main():
     out = []
     for r in rows.values():
         keep_h = r.get("keep_h", sum(r["kept"].values()))
-        pull_gb = keep_h / PASS * r["gb_h"] if r["gb_h"] else None
-        stored = r["keep_gb"] if "keep_gb" in r else keep_h * TOKEN_MB_PER_H / 1000
         raw = r["ours"] / 1e9
+        pull_gb = (r["pull_gb"] if "pull_gb" in r else r["pull_h"] * r["gb_h"] if "pull_h" in r
+                   else raw if r["prio"] == "EVAL" else keep_h / PASS * r["gb_h"] if r["gb_h"] and keep_h else None)
+        pull_gb = min(pull_gb, raw) if pull_gb else pull_gb  # never read more than the repo holds
+        stored = min(r["keep_gb"], raw) if "keep_gb" in r else keep_h * TOKEN_MB_PER_H / 1000
         hours_ours = {k: v / 1e9 / r["gb_h"] for k, v in r["per"].items()} if r["gb_h"] and r["per"] else {}
         store_as = ("timing table" if r["style"].startswith("two-person") else "text, Parquet zstd" if "text" in r["style"]
                     else "manifest: pinned revision, audio pulled on demand" if r["prio"] == "EVAL" else "codec tokens + transcript, Parquet zstd" if keep_h else "-")
@@ -194,15 +202,17 @@ def main():
             "hours_our_languages_est": round(sum(hours_ours.values())) if hours_ours else (round(r["hours"]) if r.get("hours") and not r["per"] else ""),
             "hours_by_language_est": "; ".join(f"{k}:{v:,.0f}" for k, v in sorted(hours_ours.items())),
             "clips_our_languages": sum(v for k, v in r["clips"].items()) or "",
-            "raw_gb_our_languages": round(raw, 1),
+            "raw_gb_our_languages": gb(raw),
+            "raw_gb_scope": ("our-language folders only" if r["per"] else "whole repo, all languages (no language folders)"
+                             if r.get("multi") else "whole repo (one language or our languages only)"),
             "raw_gb_by_language": "; ".join(f"{k}:{v / 1e9:.1f}" for k, v in sorted(r["per"].items())),
             "raw_mb_per_hour": round(r["gb_h"] * 1000) if r["gb_h"] else "",
             "v01_hours_kept": round(keep_h) if "tokens" in store_as else "",
             "v01_hours_kept_by_language": r.get("by") or "; ".join(f"{k}:{v:,.0f}" for k, v in sorted(r["kept"].items())),
-            "v01_raw_gb_streamed": round(pull_gb, 1) if pull_gb else "",
+            "v01_raw_gb_streamed": gb(pull_gb) if pull_gb else "",
             "v01_stored_as": store_as,
-            "v01_stored_gb": round(stored, 2),
-            "times_smaller_than_raw": f"{raw / stored:,.0f}x" if stored and raw / stored >= 2 else "",
+            "v01_stored_gb": "" if store_as in ("-",) or store_as.startswith("manifest") else gb(stored),
+            "shrink_per_hour": f"{r['gb_h'] * 1000 / TOKEN_MB_PER_H:,.0f}x" if "tokens" in store_as and r["gb_h"] else "",
             "keep_rule": r["rule"],
             "splits": " ".join(r["splits"]),
             "metadata_fields": " ".join(r["fields"]),
@@ -218,9 +228,14 @@ def main():
         w.writerows(out)
     for p in ("P1", "P2", "EVAL"):
         rs = [o for o in out if o["priority"] == p]
-        print(f"{p}: {len(rs)} datasets, raw {sum(o['raw_gb_our_languages'] for o in rs):,.1f} GB in our languages"
-              f" -> stored {sum(o['v01_stored_gb'] for o in rs):,.2f} GB, {sum(o['v01_hours_kept'] or 0 for o in rs):,} h kept")
-    print("streamed:", round(sum(o["v01_raw_gb_streamed"] or 0 for o in out)), "GB; wrote", OUT)
+        print(f"{p}: {len(rs)} datasets, raw {sum(num(o['raw_gb_our_languages']) for o in rs):,.1f} GB in our languages"
+              f" -> streamed {sum(num(o['v01_raw_gb_streamed']) for o in rs):,.1f} GB, stored {sum(num(o['v01_stored_gb']) for o in rs):,.2f} GB,"
+              f" {sum(o['v01_hours_kept'] or 0 for o in rs):,} h kept")
+    print("wrote", OUT)
+
+
+def num(v):
+    return 0 if v in ("", "<0.01") else float(v)
 
 
 if __name__ == "__main__":

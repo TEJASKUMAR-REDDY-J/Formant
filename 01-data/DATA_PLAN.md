@@ -167,7 +167,7 @@ Temperature sampling fixes **how much** of each language the model sees. **OPUS*
 | Text (tokenizer sample, instruction, Hinglish seeds) | ~3 GB |
 | Timing tables | ~0.1 GB |
 | Manifests (training clips + test sets) | ~0.05 GB |
-| **Total** | **~5 GB**, against 1.76 TB raw in our languages |
+| **Total** | **~5 GB** stored; ~490 GB read once (plus the NPTEL and Rasa slices) out of 1.76 TB available in our languages |
 
 ## 9. References
 

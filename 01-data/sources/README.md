@@ -37,15 +37,16 @@ The 0.54 MB figure was measured on one hour of 6-second clips filled with unifor
 | `hours_our_languages_est` | Hours in hi, bn, mr, ta, te and en, estimated as language GB ÷ repo GB per hour. The pilot replaces this with measured hours. |
 | `hours_by_language_est` | The same, per language |
 | `clips_our_languages` | Clips in our languages, all splits, from the card |
-| `raw_gb_our_languages` | Bytes on the Hub for our languages only |
+| `raw_gb_our_languages` | Bytes on the Hub that are **available** to us. This is not what v0.1 downloads (see `v01_raw_gb_streamed`). |
+| `raw_gb_scope` | What that number covers: only our-language folders, a whole one-language repo, or a whole multi-language repo with no language folders (an upper bound) |
 | `raw_gb_by_language` | The same, per language |
-| `raw_mb_per_hour` | Repo size ÷ reported hours: how heavy the raw audio is |
+| `raw_mb_per_hour` | Repo size ÷ reported hours: how heavy the raw audio is. Blank when the card reports no hours. |
 | `v01_hours_kept` | Hours of speech v0.1 keeps after filtering |
 | `v01_hours_kept_by_language` | The same, per language |
-| `v01_raw_gb_streamed` | Raw audio streamed through Kaggle to get those hours. It is never stored. |
+| `v01_raw_gb_streamed` | What v0.1 actually reads from the repo, once: kept hours ÷ pass rate × MB per hour for speech; the sample size for text and timing; the test split for evaluation sets (re-read for each run). Blank = unknown until the pilot measures MB per hour (NPTEL, Rasa) or not read in v0.1. Never stored. |
 | `v01_stored_as` | Storage form (see the table above) |
-| `v01_stored_gb` | What we actually keep on the Hub |
-| `times_smaller_than_raw` | `raw_gb_our_languages` ÷ `v01_stored_gb` |
+| `v01_stored_gb` | What we keep on the Hub. Speech uses the measured worst case of 0.54 MB per hour. Blank = nothing stored (a reserve not used in v0.1, or a test set kept as a manifest only). |
+| `shrink_per_hour` | `raw_mb_per_hour` ÷ 0.54: how much smaller one hour of speech gets once it is tokenised. It is a per-hour ratio, so it measures compression alone, never how much of the dataset we skip. |
 | `keep_rule` | Exactly which configs, splits and slices are kept |
 | `splits` | Splits the dataset ships |
 | `metadata_fields` | Non-audio columns it ships, for example speaker, gender, age, district or scenario |

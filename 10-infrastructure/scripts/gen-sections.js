@@ -10,8 +10,13 @@ const P = window.PLAN;
 const REPO = 'https://github.com/TEJASKUMAR-REDDY-J/Formant';
 const OUT = path.join(root, 'site', 'sections');
 const MARKED = 'https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js';
-const CSV_COLS = ['priority', 'dataset', 'style', 'used_for', 'licence', 'access', 'hours_our_languages_est',
-  'raw_gb_our_languages', 'v01_hours_kept', 'v01_stored_gb', 'keep_rule'];
+// Dataset table: the columns a reader needs, with plain labels. Sizes keep "available", "read" and "stored" apart.
+const CSV_LABELS = { dataset: 'Dataset', priority: 'Priority', style: 'Style', used_for: 'Used for', licence: 'Licence',
+  access: 'Access', hours_our_languages_est: 'Hours in our languages (est.)', raw_gb_our_languages: 'Available, GB',
+  raw_gb_scope: 'Available covers', v01_hours_kept: 'v0.1 hours kept', v01_raw_gb_streamed: 'v0.1 read once, GB',
+  v01_stored_gb: 'v0.1 stored, GB', shrink_per_hour: 'Smaller per hour', keep_rule: 'What we keep' };
+const CSV_COLS = Object.keys(CSV_LABELS), NUM = new Set(['hours_our_languages_est', 'raw_gb_our_languages',
+  'v01_hours_kept', 'v01_raw_gb_streamed', 'v01_stored_gb', 'shrink_per_hour']);
 
 const esc = s => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const slug = s => s.folder.slice(3);
@@ -54,9 +59,11 @@ function csvTable(text) {
   const [head, ...rows] = csvRows(text);
   const keep = CSV_COLS.every(c => head.includes(c)) ? CSV_COLS.map(c => head.indexOf(c)) : head.map((_, i) => i);
   const url = head.indexOf('url');
-  const td = (r, i) => head[i] === 'dataset' && url >= 0 ? `<a href="${esc(r[url])}">${esc(r[i])}</a>` : esc(r[i]);
-  return `<div class="tw"><table><thead><tr>${keep.map(i => `<th>${esc(head[i])}</th>`).join('')}</tr></thead><tbody>` +
-    rows.map(r => `<tr>${keep.map(i => `<td>${td(r, i)}</td>`).join('')}</tr>`).join('') + '</tbody></table></div>' +
+  const td = (r, i) => head[i] === 'dataset' && url >= 0 ? `<a href="${esc(r[url])}">${esc(r[i])}</a>` : esc(r[i] || '—');
+  const cls = i => NUM.has(head[i]) ? ' class="n"' : '';
+  return `<div class="tw sticky"><table><thead><tr>${keep.map(i => `<th${cls(i)}>${esc(CSV_LABELS[head[i]] || head[i])}</th>`).join('')}</tr></thead><tbody>` +
+    rows.map(r => `<tr>${keep.map(i => `<td${cls(i)}>${td(r, i)}</td>`).join('')}</tr>`).join('') + '</tbody></table></div>' +
+    `<p class="sub">— means not applicable or not known yet. Column meanings are in the column guide on this page.</p>` +
     (keep.length < head.length ? `<p class="sub">Showing ${keep.length} of ${head.length} columns; the full file is on GitHub.</p>` : '');
 }
 
