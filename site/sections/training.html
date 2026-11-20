@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Formant · Training</title>
+<meta name="description" content="Training: Pre-training the talker: smoke runs, speech pre-training on the voice set, two-stream dialogue training, robustness.">
+<link rel="icon" href="../favicon.png" type="image/png">
+<link rel="apple-touch-icon" href="../apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="sections.css">
+</head>
+<body>
+<nav aria-label="Sections"><div class="wrap"><b><img src="../logo.webp" alt="Formant" width="1000" height="175">Sections</b><a href="index.html">All</a><a href="data.html">Data</a><a href="tokenizer.html">Tokenizer &amp; embeddings</a><a href="architecture.html">Architecture</a><a href="training.html" aria-current="page">Training</a><a href="post-training.html">Post-training</a><a href="evaluation.html">Evaluation</a><a href="quantization.html">Quantization</a><a href="performance.html">Performance</a><a href="serving.html">Serving</a><a href="infrastructure.html">Infrastructure</a><a href="monitoring.html">Monitoring</a><a href="release.html">Release</a><a href="../plan.html">Plan board</a><a href="../index.html">Project site</a><a href="https://github.com/TEJASKUMAR-REDDY-J/Formant" target="_blank" rel="noopener">GitHub</a></div></nav>
+
+<header><div class="wrap">
+<div class="kicker">04 · Section TR · <a href="https://github.com/TEJASKUMAR-REDDY-J/Formant/tree/main/04-training" target="_blank" rel="noopener">04-training/</a></div>
+<h1>Training</h1>
+<p class="lede">Pre-training the talker: smoke runs, speech pre-training on the voice set, two-stream dialogue training, robustness.</p>
+<p class="note">New section: the first draft had post-training but no pre-training, which is the largest GPU cost.</p>
+<div class="facts"><span>Phases <b>TR1 · TR2 · TR3 · TR4</b></span><span>GPU <b>130–192 T4-hours</b></span><span>Documents <b>1</b></span><span><a href="../plan.html#view=section&section=TR">Open on the plan board</a></span></div>
+</div></header>
+<section><div class="wrap">
+<h2>Scope</h2>
+<div class="grid2"><div class="kv"><h3>In v0.1</h3><ul><li>Smoke runs on a small model, dense vs MoE, and the data-mixture search</li><li>MoE talker speech pre-training on ~2–2.4k h, 2–3 epochs, upcycled from Qwen3-0.6B</li><li>Hindi, English and Hinglish two-stream dialogue training</li><li>Noise, crosstalk and echo robustness</li></ul></div><div class="kv"><h3>Not in v0.1</h3><ul><li>Training on 5–10k h (v0.2)</li><li>Duplex training in Bengali, Marathi, Tamil and Telugu (v0.2)</li></ul></div></div>
+<div class="grid3"><div class="kv"><h3>What to expect</h3><ul><li>About 25–40 T4-hours per epoch on ~2k h at realistic T4 efficiency; expert dispatch costs ~20–30% over dense</li><li>fp16 only, so loss scaling must be watched; the router runs in fp32 with a z-loss</li><li>Upcycling, not training from scratch: ~334M frames is too little data for a fresh MoE</li><li>Expect intelligible Hindi and English speech with natural turn timing; voice quality below Sarvam's Bulbul</li></ul></div><div class="kv"><h3>Takes in</h3><ul><li>Token shards (01-data)</li><li>Frozen tokenizers (02-tokenizer)</li><li>Runner (10-infrastructure)</li><li>Dashboards (11-monitoring)</li></ul></div><div class="kv"><h3>Hands over</h3><ul><li>Talker checkpoints on the Hub → 05-post-training, 07-quantization, 09-serving</li></ul></div></div>
+</div></section>
+<section><div class="wrap">
+<h2>Phases</h2>
+<p class="sub">One week each. Solid chips must be done before the phase starts; dashed chips are same-week handoffs.</p>
+<div class="cards"><div class="card" id="TR1"><div class="top"><span class="id">TR1</span><span class="wk">Week 1</span></div>
+<h3>Smoke runs</h3><p>~50M talker on pilot or public codec tokens, dense and MoE: check fp16 stability, router balance, loss per codebook, resume after a killed session. Run 8 tiny mixture-search runs and pick the language weights with the best worst-language dev loss; A/B online data selection (OPUS) against random at equal T4-hours (01-data/DATA_PLAN.md).</p>
+<div class="chips"><span class="lbl" style="margin:0">Needs</span><a class="chip soft" href="infrastructure.html#IN1" title="same-week handoff">IN1</a><a class="chip soft" href="monitoring.html#MO1" title="same-week handoff">MO1</a></div>
+<div class="chips"><span class="st todo">todo</span><span class="lbl" style="margin:0">10–12 T4-h</span></div>
+<div class="links"><a href="#doc-04-training-plans-TR1-md">Week plan</a></div>
+<div class="done"><b>Done when</b>Loss falls on every codebook; experts stay balanced; resume reproduces the curve; mixture weights fixed; OPUS adopted or dropped with numbers.</div></div>
+<div class="card" id="TR2"><div class="top"><span class="id">TR2 · critical</span><span class="wk">Week 2</span></div>
+<h3>Launch pre-training</h3><p>Upcycle Qwen3-0.6B into the AR1 MoE with the frozen tables; ZeRO-2 across 2× T4 with 8-bit AdamW; global-batch load balancing (bias-based, no auxiliary loss); single-language micro-batches mixed to the DATA_PLAN ratios; add shards as they land.</p>
+<div class="chips"><span class="lbl" style="margin:0">Needs</span><a class="chip" href="training.html#TR1" title="must be done first">TR1</a><a class="chip" href="architecture.html#AR1" title="must be done first">AR1</a><a class="chip soft" href="tokenizer.html#TK2" title="same-week handoff">TK2</a><a class="chip soft" href="data.html#DA2" title="same-week handoff">DA2</a><a class="chip soft" href="performance.html#PF2" title="same-week handoff">PF2</a></div>
+<div class="chips"><span class="st todo">todo</span><span class="lbl" style="margin:0">30–45 T4-h</span></div>
+<div class="links"></div>
+<div class="done"><b>Done when</b>Run passes 1 epoch with stable loss and no dead experts; checkpoint every 30–45 min on the Hub.</div></div>
+<div class="card" id="TR3"><div class="top"><span class="id">TR3 · critical</span><span class="wk">Week 3</span></div>
+<h3>Finish pre-training, dialogue</h3><p>Complete 2–3 epochs; then train both streams on Hindi, English and Hinglish dialogues (synthetic + split real).</p>
+<div class="chips"><span class="lbl" style="margin:0">Needs</span><a class="chip" href="training.html#TR2" title="must be done first">TR2</a><a class="chip" href="data.html#DA2" title="must be done first">DA2</a><a class="chip" href="tokenizer.html#TK2" title="must be done first">TK2</a></div>
+<div class="chips"><span class="st todo">todo</span><span class="lbl" style="margin:0">80–125 T4-h</span></div>
+<div class="links"></div>
+<div class="done"><b>Done when</b>Probe CER ≤ 25% in all six languages; takeover rate ≥ 0.8 in Hindi and English on held-out clips.</div></div>
+<div class="card" id="TR4"><div class="top"><span class="id">TR4 · critical</span><span class="wk">Week 4</span></div>
+<h3>Robustness</h3><p>Add noise, far-field audio, crosstalk and echo-like leakage; pick the final checkpoint with evaluation.</p>
+<div class="chips"><span class="lbl" style="margin:0">Needs</span><a class="chip" href="training.html#TR3" title="must be done first">TR3</a><a class="chip" href="evaluation.html#EV3" title="must be done first">EV3</a></div>
+<div class="chips"><span class="st todo">todo</span><span class="lbl" style="margin:0">10 T4-h</span></div>
+<div class="links"></div>
+<div class="done"><b>Done when</b>Noisy CER within 5 points of clean; final checkpoint tagged.</div></div></div>
+</div></section>
+<section><div class="wrap">
+<h2>Documents</h2>
+<p class="sub">Everything in <code>04-training/</code> apart from its README: phase plans, design notes, data tables and reports.</p>
+<ul class="toc"><li><a href="#doc-04-training-plans-TR1-md">TR1 · Smoke runs — week 1 plan</a><span>04-training/plans/TR1.md</span></li></ul><article class="doc" id="doc-04-training-plans-TR1-md"><div class="doc-h"><span>04-training/plans/TR1.md</span><a href="https://github.com/TEJASKUMAR-REDDY-J/Formant/blob/main/04-training/plans/TR1.md" target="_blank" rel="noopener">View on GitHub</a></div><div class="md" data-path="04-training/plans/TR1.md"><pre class="raw"># TR1 · Smoke runs — week 1 plan
+
+**Goal:** prove the training stack on a ~50M talker, dense and MoE, before TR2 spends real T4-hours. Also fix the data-mixture weights.
+**Done when:** loss falls on every codebook; experts stay balanced; resume reproduces the curve; mixture weights are fixed; OPUS adopted or dropped, with numbers.
+**Needs:** ~IN1 (runner), ~MO1 (metrics). **GPU:** 10–12 T4-hours.
+
+## Setup
+
+- **Model:**
+  - **Dense:** 8 layers, d = 512, 8 heads.
+  - **MoE:** the same, with 1 shared + 16 routed experts, top-2. It mirrors the AR1 pattern at small scale.
+- **Data:** FLEURS **train** split (open, ~10 h per language), Mimi-tokenised in one T4-hour. Smoke weights are thrown away, so this never touches the test splits. Thursday's mixture search uses the DA1 pilot tokens.
+- **Sequence:** 2,048 frames, packed per speaker with document masking (01-data/DATA_PLAN.md).
+
+## Efficiency stack for T4 (sm75: fp16, no bf16, no FlashAttention-2)
+
+| Choice | Why |
+|---|---|
+| PyTorch SDPA (memory-efficient kernel) | Best attention on Turing |
+| fp16 AMP with dynamic loss scaling; router, softmax and losses in fp32; router z-loss 1e-3 | Stable MoE in fp16 (ST-MoE) |
+| `torch.compile` on the block | Triton runs on sm75; fuses the norms and SwiGLU |
+| Liger-style fused linear + cross-entropy for the 40k text head and codebook heads | Never materialises full logits; large memory saving |
+| Fused AdamW, or 8-bit AdamW (bitsandbytes) for the MoE | Optimizer memory |
+| Activation checkpointing only if memory forces it | Costs ~30% speed |
+| MoE dispatch: sort tokens by expert + per-expert GEMM, dropless; ScatterMoE (Triton) if it runs on sm75 | Measure both |
+| DDP on 2× T4, gradient accumulation to the global batch | Simple and reliable; ZeRO-2 waits for TR2 at full size |
+| WSD schedule (warmup–stable–decay) | Resume-friendly; the decay doubles as the DATA_PLAN quality anneal |
+
+## Checks
+
+| Check | Pass when |
+|---|---|
+| fp16 stability | No overflow streaks; the loss scale settles |
+| Loss per codebook | All 8 fall; codebook 0 falls fastest |
+| Router | Max/mean expert load ≤ 1.5 over the global batch; no dead experts; router entropy steady |
+| Resume | Kill the run mid-epoch, then restart from the Hub checkpoint (model, optimizer, scaler, sampler, RNG). The loss curve matches within 1%. |
+| Throughput | Frames per second per T4, dense vs MoE; MoE overhead ≤ 30% |
+
+## Mixture search (Thursday, ~5 T4-hours)
+
+- **Runs:** 8 runs of the dense ~50M model, ~0.5 T4-hour each, on the DA1 pilot tokens. Weights are sampled around the DATA_PLAN prior: hi 23 / en 16.5 / bn, mr, ta, te 14 each / Hinglish 4.
+- **Pick:** the weights with the best **worst-language** dev loss (a RegMix/DoReMi-style search). If no run beats the prior by more than noise, keep the prior.
+
+## OPUS A/B (Friday, ~2 T4-hours)
+
+Online data selection per step (01-data/DATA_PLAN.md, section 5): score a 2× candidate buffer, keep the best half.
+
+| Setting | Value |
+|---|---|
+| Buffer | 2× the micro-batch, drawn from one language bucket |
+| Score | Per-sample gradient sketches (ghost factors, CountSketch m = 8,192) of the last 4 blocks + heads, preconditioned by AdamW's second moments, dot the proxy gradient |
+| Proxy | Dev-split clips (speaker-disjoint), tier-1 and conversational, refreshed every 500 steps |
+| Keep | 50%, softmax sampling at τ = 0.9 with a redundancy penalty |
+| Compare | Random vs OPUS at **equal T4-hours**, not equal steps; worst-language dev loss and per-codebook loss |
+
+**Adopt for TR2 only if OPUS wins after paying its overhead.** Also report the overhead itself; the paper says ~4.7%, but a T4 with a full candidate forward pass may cost more.
+
+## Week
+
+| Day | Work |
+|---|---|
+| Mon | Runner from IN1; tokenise FLEURS train; dense model trains |
+| Tue | MoE variant; dispatch benchmark; fp16 and router checks |
+| Wed | Kill-and-resume test; metric set from MO1 wired in |
+| Thu | Mixture search on the DA1 pilot tokens |
+| Fri | OPUS A/B; `reports/TR1.md`: curves, throughput, chosen weights, OPUS verdict, TR2 config draft |
+
+## Risks
+
+- **ScatterMoE or `torch.compile` fails on sm75.** Fall back to the plain sort-and-loop dispatch, which is slower but correct.
+- **The pilot tokens arrive late.** The mixture search moves to Monday of week 2, before TR2 launches.
+</pre></div></article>
+</div></section>
+<div class="wrap pager"><a href="architecture.html">← 03 Architecture</a><a href="post-training.html">05 Post-training →</a></div>
+<footer><div class="wrap">Generated from site/plan-data.js (plan v12, 2026-11-20) and the section folders by 10-infrastructure/scripts/gen-sections.js.</div></footer>
+<script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js"></script>
+<script>
+const MAP = {"01-data/DATA_PLAN.md":"data.html#doc-01-data-DATA-PLAN-md","01-data/sources/README.md":"data.html#doc-01-data-sources-README-md","01-data/sources/hf_datasets.csv":"data.html#doc-01-data-sources-hf-datasets-csv","01-data/reports/DA1.md":"data.html#doc-01-data-reports-DA1-md","02-tokenizer/plans/TK1.md":"tokenizer.html#doc-02-tokenizer-plans-TK1-md","03-architecture/plans/AR1.md":"architecture.html#doc-03-architecture-plans-AR1-md","04-training/plans/TR1.md":"training.html#doc-04-training-plans-TR1-md","05-post-training/plans/PT1.md":"post-training.html#doc-05-post-training-plans-PT1-md","06-evaluation/plans/EV1.md":"evaluation.html#doc-06-evaluation-plans-EV1-md","07-quantization/plans/QZ1.md":"quantization.html#doc-07-quantization-plans-QZ1-md","08-performance/plans/PF1.md":"performance.html#doc-08-performance-plans-PF1-md","09-serving/plans/SV1.md":"serving.html#doc-09-serving-plans-SV1-md","10-infrastructure/plans/IN1.md":"infrastructure.html#doc-10-infrastructure-plans-IN1-md","11-monitoring/plans/MO1.md":"monitoring.html#doc-11-monitoring-plans-MO1-md","12-release/plans/RL1.md":"release.html#doc-12-release-plans-RL1-md"}, REPO = "https://github.com/TEJASKUMAR-REDDY-J/Formant";
+document.querySelectorAll('.md[data-path]').forEach(el => {
+  if (!window.marked) return;
+  const p = el.dataset.path, dir = p.split('/').slice(0, -1).join('/');
+  el.innerHTML = marked.parse(el.querySelector('.raw').textContent);
+  el.querySelectorAll('table').forEach(t => { const w = document.createElement('div'); w.className = 'tw'; t.replaceWith(w); w.append(t); });
+  el.querySelectorAll('a[href]').forEach(a => {
+    const h = a.getAttribute('href');
+    if (/^(https?:|mailto:|#)/.test(h)) return;
+    const [file, hash] = h.split('#'), abs = new URL(file, 'https://x/' + dir + '/').pathname.slice(1);
+    a.href = MAP[abs] || REPO + '/blob/main/' + abs + (hash ? '#' + hash : '');
+  });
+});
+</script>
+</body>
+</html>

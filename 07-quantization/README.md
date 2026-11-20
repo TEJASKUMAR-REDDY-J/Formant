@@ -9,7 +9,7 @@ Shrinking every model to fit the laptop's RAM and memory bandwidth, measuring th
 
 - Thinker GGUF sweep with Indic calibration
 - Codec decoder in OpenVINO on the iGPU
-- Talker int8 (int4 where it holds)
+- Talker int8 (int4 where it holds), with calibration covering every expert
 - Final quantised bundle
 
 **Not in v0.1:**
@@ -18,6 +18,7 @@ Shrinking every model to fit the laptop's RAM and memory bandwidth, measuring th
 
 ## What to expect
 
+- Q4_K_M Sarvam 30B is ~18 GB and does not fit the 14 GB budget; ~3.5 bits does, at ~5 tokens/s before speculation
 - Talker int8 is close to free; int4 may hurt audio
 - Thinker at ~3.5 bits loses some quality; Indic calibration text matters
 
@@ -34,10 +35,11 @@ Shrinking every model to fit the laptop's RAM and memory bandwidth, measuring th
 
 ### QZ1 · Week 1 · Thinker sweep
 
-Sarvam 30B at Q4_K_M, Q3_K_M and IQ3 with an Indic importance matrix; tokens/s on the i3 and Indic quality.
+Sarvam 30B at Q3_K_M, IQ3_S, IQ4_XS and a mixed MoE recipe (routed experts low-bit; attention, router and shared parts at Q6–Q8) with an Indic importance matrix; KL divergence against a Q6_K reference per language; tokens/s on the i3 alone and under talker load; MTP or n-gram speculative decoding.
 
 - **Done when:** Speed–quality curve; one setting chosen.
 - **Needs:** PF1 (same-week handoff), EV1 (same-week handoff)
+- **Plan:** [plans/QZ1.md](plans/QZ1.md)
 - **Status:** todo
 
 ### QZ2 · Week 2 · Codec on the iGPU
@@ -51,7 +53,7 @@ Export the chosen codec decoder to OpenVINO fp16; save fp16 reference outputs fo
 
 ### QZ3 · Week 3 · Talker int8
 
-NNCF int8 on the week-2 checkpoint (shapes are fixed); try int4.
+NNCF int8 on the week-2 checkpoint (shapes are fixed); calibrate on all six languages so rarely used experts see data; try int4.
 
 - **Done when:** CER within 2 points of fp16 on the probe set.
 - **Needs:** TR2, QZ2, TR3 (same-week handoff)
@@ -77,6 +79,7 @@ Create a subfolder the first time you need it.
 ├── configs/      run, filter and export configs (YAML), one per job
 ├── scripts/      code for this section's jobs
 ├── notebooks/    Kaggle notebooks, outputs cleared before commit
+├── plans/        one file per phase, written before the phase starts: QZ1.md, QZ2.md, QZ3.md, QZ4.md
 └── reports/      one file per phase: QZ1.md, QZ2.md, QZ3.md, QZ4.md
 ```
 

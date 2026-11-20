@@ -14,6 +14,7 @@ for (const s of P.sections) {
     `- **Done when:** ${c.done}`,
     `- **Needs:** ${c.needs.length ? c.needs.map(d => d[0] === '~' ? `${d.slice(1)} (same-week handoff)` : d).join(', ') : 'nothing'}`,
     c.gpu ? `- **GPU:** ${c.gpu} T4-hours` : null,
+    fs.existsSync(path.join(root, s.folder, 'plans', c.id + '.md')) ? `- **Plan:** [plans/${c.id}.md](plans/${c.id}.md)` : null,
     `- **Status:** ${c.status}`
   ].filter(x => x !== null).join('\n')).join('\n\n');
   const md = `# ${s.num} · ${s.name}
@@ -57,6 +58,7 @@ ${s.folder}/
 ├── configs/      run, filter and export configs (YAML), one per job
 ├── scripts/      code for this section's jobs
 ├── notebooks/    Kaggle notebooks, outputs cleared before commit
+├── plans/        one file per phase, written before the phase starts: ${s.cells.map(c => c.id + '.md').join(', ')}
 └── reports/      one file per phase: ${s.cells.map(c => c.id + '.md').join(', ')}
 \`\`\`
 

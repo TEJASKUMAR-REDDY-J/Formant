@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Formant · Performance</title>
+<meta name="description" content="Performance: Two things: training speed on T4s, and real-time speed on the i3 (80 ms frame deadline, thinker at ≥ 5 tokens/s).">
+<link rel="icon" href="../favicon.png" type="image/png">
+<link rel="apple-touch-icon" href="../apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="sections.css">
+</head>
+<body>
+<nav aria-label="Sections"><div class="wrap"><b><img src="../logo.webp" alt="Formant" width="1000" height="175">Sections</b><a href="index.html">All</a><a href="data.html">Data</a><a href="tokenizer.html">Tokenizer &amp; embeddings</a><a href="architecture.html">Architecture</a><a href="training.html">Training</a><a href="post-training.html">Post-training</a><a href="evaluation.html">Evaluation</a><a href="quantization.html">Quantization</a><a href="performance.html" aria-current="page">Performance</a><a href="serving.html">Serving</a><a href="infrastructure.html">Infrastructure</a><a href="monitoring.html">Monitoring</a><a href="release.html">Release</a><a href="../plan.html">Plan board</a><a href="../index.html">Project site</a><a href="https://github.com/TEJASKUMAR-REDDY-J/Formant" target="_blank" rel="noopener">GitHub</a></div></nav>
+
+<header><div class="wrap">
+<div class="kicker">08 · Section PF · <a href="https://github.com/TEJASKUMAR-REDDY-J/Formant/tree/main/08-performance" target="_blank" rel="noopener">08-performance/</a></div>
+<h1>Performance</h1>
+<p class="lede">Two things: training speed on T4s, and real-time speed on the i3 (80 ms frame deadline, thinker at ≥ 5 tokens/s).</p>
+
+<div class="facts"><span>Phases <b>PF1 · PF2 · PF3 · PF4</b></span><span>GPU <b>7–7 T4-hours</b></span><span>Documents <b>1</b></span><span><a href="../plan.html#view=section&section=PF">Open on the plan board</a></span></div>
+</div></header>
+<section><div class="wrap">
+<h2>Scope</h2>
+<div class="grid2"><div class="kv"><h3>In v0.1</h3><ul><li>Baselines on both machines</li><li>Training speed-ups</li><li>Runtime speed for talker, codec and thinker</li><li>Both models together, sustained</li></ul></div><div class="kv"><h3>Not in v0.1</h3><ul><li>EAGLE3-style draft head for the thinker (v0.2)</li></ul></div></div>
+<div class="grid3"><div class="kv"><h3>What to expect</h3><ul><li>T4 has no FlashAttention-2, so use PyTorch SDPA; aim for 1.5–2× over the naive baseline</li><li>The iGPU and CPU share one 20.8 GB/s bus; running both together is the real limit</li><li>Heat and throttling show up in 30-minute runs</li></ul></div><div class="kv"><h3>Takes in</h3><ul><li>Specs (03-architecture)</li><li>Quantised models (07-quantization)</li></ul></div><div class="kv"><h3>Hands over</h3><ul><li>Budgets and measurements → every section</li></ul></div></div>
+</div></section>
+<section><div class="wrap">
+<h2>Phases</h2>
+<p class="sub">One week each. Solid chips must be done before the phase starts; dashed chips are same-week handoffs.</p>
+<div class="cards"><div class="card" id="PF1"><div class="top"><span class="id">PF1</span><span class="wk">Week 1</span></div>
+<h3>Baselines</h3><p>Bandwidth (done: 20.8 GB/s). OpenVINO step time on the UHD 620 for a dense 0.6B model and for an MoE with the same active size (expert dispatch); llama.cpp tokens/s for Sarvam 30B; T4 training tokens/s for Qwen3-0.6B.</p>
+<div class="chips"><span class="lbl" style="margin:0">Needs</span><span class="lbl" style="margin:0;color:var(--muted)">nothing</span></div>
+<div class="chips"><span class="st doing">doing</span><span class="lbl" style="margin:0">2 T4-h</span></div>
+<div class="links"><a href="#doc-08-performance-plans-PF1-md">Week plan</a></div>
+<div class="done"><b>Done when</b>Baseline sheet every later number is compared to.</div></div>
+<div class="card" id="PF2"><div class="top"><span class="id">PF2</span><span class="wk">Week 2</span></div>
+<h3>Training speed</h3><p>Sequence packing, SDPA, chunked cross-entropy, gradient checkpointing, DDP on 2× T4, 8-bit AdamW.</p>
+<div class="chips"><span class="lbl" style="margin:0">Needs</span><a class="chip" href="training.html#TR1" title="must be done first">TR1</a><a class="chip" href="performance.html#PF1" title="must be done first">PF1</a></div>
+<div class="chips"><span class="st todo">todo</span><span class="lbl" style="margin:0">5 T4-h</span></div>
+<div class="links"></div>
+<div class="done"><b>Done when</b>≥ 1.5× PF1 tokens/s with an unchanged loss curve.</div></div>
+<div class="card" id="PF3"><div class="top"><span class="id">PF3</span><span class="wk">Week 3</span></div>
+<h3>Runtime speed</h3><p>Talker int8 on the iGPU with KV cache and static shapes; thinker thread pinning and incremental prefill.</p>
+<div class="chips"><span class="lbl" style="margin:0">Needs</span><a class="chip" href="quantization.html#QZ2" title="must be done first">QZ2</a><a class="chip" href="architecture.html#AR2" title="must be done first">AR2</a><a class="chip soft" href="quantization.html#QZ3" title="same-week handoff">QZ3</a></div>
+<div class="chips"><span class="st todo">todo</span></div>
+<div class="links"></div>
+<div class="done"><b>Done when</b>Talker + head + codec ≤ 60 ms per 80 ms frame; thinker ≥ 5 tokens/s.</div></div>
+<div class="card" id="PF4"><div class="top"><span class="id">PF4</span><span class="wk">Week 4</span></div>
+<h3>Sustained run</h3><p>Both models live for 30 minutes; throttle the thinker to protect the frame deadline; record temperatures.</p>
+<div class="chips"><span class="lbl" style="margin:0">Needs</span><a class="chip" href="performance.html#PF3" title="must be done first">PF3</a><a class="chip" href="serving.html#SV3" title="must be done first">SV3</a></div>
+<div class="chips"><span class="st todo">todo</span></div>
+<div class="links"></div>
+<div class="done"><b>Done when</b>&lt; 1% missed frames over 30 minutes.</div></div></div>
+</div></section>
+<section><div class="wrap">
+<h2>Documents</h2>
+<p class="sub">Everything in <code>08-performance/</code> apart from its README: phase plans, design notes, data tables and reports.</p>
+<ul class="toc"><li><a href="#doc-08-performance-plans-PF1-md">PF1 · Baselines — week 1 plan</a><span>08-performance/plans/PF1.md</span></li></ul><article class="doc" id="doc-08-performance-plans-PF1-md"><div class="doc-h"><span>08-performance/plans/PF1.md</span><a href="https://github.com/TEJASKUMAR-REDDY-J/Formant/blob/main/08-performance/plans/PF1.md" target="_blank" rel="noopener">View on GitHub</a></div><div class="md" data-path="08-performance/plans/PF1.md"><pre class="raw"># PF1 · Baselines — week 1 plan
+
+**Goal:** measure every number the rest of the plan depends on, on the real machines, before anyone optimises.
+**Done when:** the baseline sheet exists and every later number is compared to it.
+**Needs:** nothing. **GPU:** 2 T4-hours.
+
+## Laptop (i3-10110U, UHD 620, 24 GB DDR4)
+
+| Measure | How | Feeds |
+|---|---|---|
+| Memory bandwidth | Done: 20.8 GB/s copy. Add read-only (STREAM triad), and CPU + iGPU at the same time. | All budgets |
+| Dense talker step | Qwen3-0.6B, OpenVINO GenAI, int4 and int8, batch 1, KV cache, static shapes: ms per token on the **GPU** and on the CPU | AR1 |
+| **MoE talker step** | A random-weight **Qwen2-MoE** config with AR1's shape (28 layers, d = 1024, 1 shared expert of 1,536 + 32 routed of 384, top-4), exported with optimum-intel at int4: ms per token on the GPU and on the CPU | AR1 go/no-go |
+| Codec decoder | Each TK1 candidate's decoder, OpenVINO fp16, streaming: ms per 80 ms frame | TK1, QZ2 |
+| Thinker | Sarvam 30B GGUFs from QZ1 with llama-bench: generation and prefill tokens/s, 2–4 threads | QZ1, SV1 |
+| Contention | Talker and thinker benchmarks run together; the slowdown of each | PF4, SV3 |
+| Thermals | 30-minute sustained run: CPU clock, package temperature, iGPU clock | PF4 |
+
+- **Every run uses the same machine setup:** on mains power, Windows &quot;Best performance&quot;, background apps closed, OpenVINO 2026.4, llama.cpp release build (AVX2).
+- **Known gap:** OpenVINO 2026.4 lists MoE support for CPUs and **Xe** GPUs; the UHD 620 is Gen9.5. The MoE row answers whether that matters.
+
+## Kaggle (2× T4)
+
+| Measure | How | Feeds |
+|---|---|---|
+| Training throughput | Qwen3-0.6B at seq 2,048, fp16, SDPA, with and without `torch.compile` and fused cross-entropy: tokens/s per T4 and MFU | TR1, TR2 |
+| MoE overhead | The ~1.4B upcycled shape at reduced depth, sort-and-loop dispatch vs ScatterMoE | TR2 |
+| Codec encode | Hours of audio per T4-hour per codec | DA2 |
+
+## Efficiency
+
+- **One script per machine.** It writes JSON to `08-performance/reports/baseline-v1.json`, so every later week reruns the same script and diffs the results.
+- **The random-weight MoE avoids waiting for a trained model.** Dispatch speed depends on shapes, not on the weight values.
+
+## Week
+
+| Day | Work |
+|---|---|
+| Mon | Laptop setup and bandwidth; dense talker step |
+| Tue | MoE step on GPU and CPU (the AR1 question) |
+| Wed | Codec decoders for TK1; thinker with QZ1 |
+| Thu | Contention and thermals; Kaggle throughput |
+| Fri | `reports/PF1.md` + `baseline-v1.json` |
+
+## Decision it unlocks
+
+If the MoE step is more than 1.3× the dense step on the UHD 620, AR1 keeps the dense talker for v0.1, and MoE moves to v0.2 behind a custom dispatch kernel.
+</pre></div></article>
+</div></section>
+<div class="wrap pager"><a href="quantization.html">← 07 Quantization</a><a href="serving.html">09 Serving →</a></div>
+<footer><div class="wrap">Generated from site/plan-data.js (plan v12, 2026-11-20) and the section folders by 10-infrastructure/scripts/gen-sections.js.</div></footer>
+<script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js"></script>
+<script>
+const MAP = {"01-data/DATA_PLAN.md":"data.html#doc-01-data-DATA-PLAN-md","01-data/sources/README.md":"data.html#doc-01-data-sources-README-md","01-data/sources/hf_datasets.csv":"data.html#doc-01-data-sources-hf-datasets-csv","01-data/reports/DA1.md":"data.html#doc-01-data-reports-DA1-md","02-tokenizer/plans/TK1.md":"tokenizer.html#doc-02-tokenizer-plans-TK1-md","03-architecture/plans/AR1.md":"architecture.html#doc-03-architecture-plans-AR1-md","04-training/plans/TR1.md":"training.html#doc-04-training-plans-TR1-md","05-post-training/plans/PT1.md":"post-training.html#doc-05-post-training-plans-PT1-md","06-evaluation/plans/EV1.md":"evaluation.html#doc-06-evaluation-plans-EV1-md","07-quantization/plans/QZ1.md":"quantization.html#doc-07-quantization-plans-QZ1-md","08-performance/plans/PF1.md":"performance.html#doc-08-performance-plans-PF1-md","09-serving/plans/SV1.md":"serving.html#doc-09-serving-plans-SV1-md","10-infrastructure/plans/IN1.md":"infrastructure.html#doc-10-infrastructure-plans-IN1-md","11-monitoring/plans/MO1.md":"monitoring.html#doc-11-monitoring-plans-MO1-md","12-release/plans/RL1.md":"release.html#doc-12-release-plans-RL1-md"}, REPO = "https://github.com/TEJASKUMAR-REDDY-J/Formant";
+document.querySelectorAll('.md[data-path]').forEach(el => {
+  if (!window.marked) return;
+  const p = el.dataset.path, dir = p.split('/').slice(0, -1).join('/');
+  el.innerHTML = marked.parse(el.querySelector('.raw').textContent);
+  el.querySelectorAll('table').forEach(t => { const w = document.createElement('div'); w.className = 'tw'; t.replaceWith(w); w.append(t); });
+  el.querySelectorAll('a[href]').forEach(a => {
+    const h = a.getAttribute('href');
+    if (/^(https?:|mailto:|#)/.test(h)) return;
+    const [file, hash] = h.split('#'), abs = new URL(file, 'https://x/' + dir + '/').pathname.slice(1);
+    a.href = MAP[abs] || REPO + '/blob/main/' + abs + (hash ? '#' + hash : '');
+  });
+});
+</script>
+</body>
+</html>

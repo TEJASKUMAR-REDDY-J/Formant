@@ -7,7 +7,7 @@ The shape of every model and how they connect: the talker, its codebook head, th
 
 ## Scope for v0.1
 
-- Talker: Qwen3-0.6B over 80 ms frames, user + own audio streams, inner-monologue text
+- Talker: Mixture-of-Experts upcycled from Qwen3-0.6B, ~1.4B total and ~0.5B active per 80 ms frame; user + own audio streams, inner-monologue text
 - Codebook head: depth transformer for RVQ codecs, parallel heads for FSQ codecs
 - Thinker: Sarvam 30B (2.4B active) on the CPU
 - Text-only thinker → talker coupling
@@ -19,7 +19,9 @@ The shape of every model and how they connect: the talker, its codebook head, th
 
 ## What to expect
 
-- The talker shape is well trodden (Moshi pattern) and low risk
+- The streams follow the well-trodden Moshi pattern; the MoE body follows Qwen3-Omni's MoE talker
+- MoE gives the talker ~3× the capacity of the dense 0.6B at the same bus traffic, because only the active experts are read each frame
+- Expert dispatch speed on the UHD 620 is unproven; the dense Qwen3-0.6B talker stays as the fallback on the same data and tables
 - Coupling is the novel part and the main design risk
 - A 2B talker such as LFM3-Audio-2B would read ~1 GB every 80 ms at 4 bits, about 12.5 GB/s, which is too much for the i3's shared bus
 
@@ -37,10 +39,11 @@ The shape of every model and how they connect: the talker, its codebook head, th
 
 ### AR1 · Week 1 · Talker spec
 
-Fix layers, width, streams, acoustic delay, context (3–5 min, sliding window) and the codebook head for the chosen codec; bytes and FLOPs per frame. Review 2026 duplex-adaptation recipes (D2, Awaken) for initialisation.
+Fix layers, width, streams, acoustic delay, context (3–5 min, sliding window) and the codebook head for the chosen codec. Fix the MoE: upcycle each Qwen3-0.6B FFN into one shared expert plus fine-grained routed experts (for example half the FFN shared, 32 routed experts of 384 width, top-4, so active width equals the dense FFN), router, load balancing. Bytes and FLOPs per frame, total and active. Review 2026 duplex-adaptation recipes (D2, Awaken) for initialisation.
 
-- **Done when:** Spec sheet that fits the talker's 4.4 GB/s share.
+- **Done when:** Spec sheet whose active bytes fit the talker's 4.4 GB/s share and whose total fits ≤ 1.5 GB at int8; dense fallback spec kept.
 - **Needs:** PF1 (same-week handoff), TK1 (same-week handoff)
+- **Plan:** [plans/AR1.md](plans/AR1.md)
 - **Status:** todo
 
 ### AR2 · Week 2 · Thinker and turn state
@@ -77,6 +80,7 @@ Create a subfolder the first time you need it.
 ├── configs/      run, filter and export configs (YAML), one per job
 ├── scripts/      code for this section's jobs
 ├── notebooks/    Kaggle notebooks, outputs cleared before commit
+├── plans/        one file per phase, written before the phase starts: AR1.md, AR2.md, AR3.md, AR4.md
 └── reports/      one file per phase: AR1.md, AR2.md, AR3.md, AR4.md
 ```
 

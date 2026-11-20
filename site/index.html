@@ -383,9 +383,9 @@ body::after,.hero::before,.hero::after,.glow-l::before,.glow-r::before,.spiral-b
       <img src="logo.webp" alt="Formant" width="1000" height="175">
     </a>
     <div class="links">
-      <a href="#why">Why</a><a href="#sarvam">vs Sarvam</a><a href="#data">Data</a><a href="#conversation">Conversation</a><a href="#how">How it works</a><a href="#inside">Inside the laptop</a><a href="#languages">Languages</a><a href="#targets">Targets</a><a href="#roadmap">Roadmap</a>
+      <a href="#why">Why</a><a href="#sarvam">vs Sarvam</a><a href="#data">Data</a><a href="#conversation">Conversation</a><a href="#how">How it works</a><a href="#inside">Inside the laptop</a><a href="#languages">Languages</a><a href="#targets">Targets</a><a href="#roadmap">Roadmap</a><a href="sections/">Sections</a>
     </div>
-    <a class="pill" href="plan.html" style="text-decoration:none">plan <b>v9</b> · 4 weeks</a>
+    <a class="pill" href="plan.html" style="text-decoration:none">plan <b>v12</b> · 4 weeks</a>
   </div>
 </nav>
 
@@ -487,7 +487,7 @@ body::after,.hero::before,.hero::after,.glow-l::before,.glow-r::before,.spiral-b
     <div class="gcard lesson mt-l">
       <div class="q">“</div>
       <div><h3>Why so many hours of plain speech?</h3>
-        <p>In September 2026 a developer trained a 600M Moshi-style duplex model, the same size as Formant's talker, on about 100 hours of dialogue. The text side learned fast. The voice did not: the fine acoustic detail stayed under-trained and the audio never decoded cleanly. So Formant learns to speak from thousands of hours first, and learns conversation second. <a href="https://huggingface.co/blog/edwixx/shrinking-full-duplex-speech-training-a-600m-moshi" target="_blank" rel="noopener">Read the write-up</a></p></div>
+        <p>In September 2026 a developer trained a 600M Moshi-style duplex model, the same active size as Formant's talker, on about 100 hours of dialogue. The text side learned fast. The voice did not: the fine acoustic detail stayed under-trained and the audio never decoded cleanly. So Formant learns to speak from thousands of hours first, and learns conversation second. <a href="https://huggingface.co/blog/edwixx/shrinking-full-duplex-speech-training-a-600m-moshi" target="_blank" rel="noopener">Read the write-up</a></p></div>
     </div>
 
     <h3 class="mt-l" style="font-size:26px;font-weight:700;letter-spacing:-.02em">The data factory</h3>
@@ -613,7 +613,7 @@ body::after,.hero::before,.hero::after,.glow-l::before,.glow-r::before,.spiral-b
         <text class="s" x="210" y="288">codec · iGPU</text>
         <rect class="hot" x="390" y="202" width="260" height="136" rx="18"/>
         <text class="t" x="414" y="240" style="font-size:22px">Talker</text>
-        <text class="s" x="414" y="266">~0.6B · Intel UHD 620 iGPU</text>
+        <text class="s" x="414" y="266">MoE · ~0.5B active · UHD 620</text>
         <text class="s" x="414" y="288">runs every 80 ms</text>
         <text class="s" x="414" y="310">listens, times, speaks</text>
         <rect class="box" x="690" y="228" width="160" height="84" rx="16"/>
@@ -631,7 +631,7 @@ body::after,.hero::before,.hero::after,.glow-l::before,.glow-r::before,.spiral-b
     </div>
 
     <div class="duo mt-l">
-      <div class="gcard t-or"><span class="tag" style="color:var(--accent)">Talker · the ears and voice</span><h3 class="fire">Owns the timing.</h3><p>A small model, about 0.6 billion parameters, that never stops running. It hears every frame, keeps a live transcript, and decides when to speak, backchannel or stop.</p>
+      <div class="gcard t-or"><span class="tag" style="color:var(--accent)">Talker · the ears and voice</span><h3 class="fire">Owns the timing.</h3><p>A small mixture-of-experts model, about 1.4 billion parameters with 0.5 billion active per frame, that never stops running. It hears every frame, keeps a live transcript, and decides when to speak, backchannel or stop.</p>
         <ul><li>Runs on the laptop's built-in Intel graphics, away from the thinker</li><li>Writes a running text of what you said, plus a turn signal</li><li>Covers short delays with natural fillers like "haan, ek second…"</li></ul></div>
       <div class="gcard t-ye"><span class="tag" style="color:var(--amber)">Thinker · the brain</span><h3 style="color:var(--amber)">Owns the content.</h3><p>A mixture-of-experts language model. It holds a lot of knowledge in RAM but reads only a small part of it for each word, which is what makes it fit this laptop.</p>
         <ul><li>Starts drafting while you are still speaking</li><li>Needs only ~5 tokens a second, the speed of speech</li><li>Candidates: Sarvam 30B, then a language slice of the course's 120B model</li></ul></div>
@@ -682,16 +682,16 @@ body::after,.hero::before,.hero::after,.glow-l::before,.glow-r::before,.spiral-b
       </div>
       <div class="gcard barcard">
         <div class="bar-h"><h3>Memory size budget</h3><span class="mono">up to ~21.5 of 24 GB</span></div>
-        <div class="bar" role="img" aria-label="Memory budget, upper estimate: thinker 14, talker and codec 0.5, caches 1, Windows and apps 6 GB, of 24 GB.">
+        <div class="bar" role="img" aria-label="Memory budget, upper estimate: thinker 14, talker and codec 1.5, caches 1, Windows and apps 6 GB, of 24 GB.">
           <div class="c-think" style="flex:14">thinker 14</div>
-          <div class="c-talk" style="flex:.5"></div>
+          <div class="c-talk" style="flex:1.5"></div>
           <div class="c-cache" style="flex:1"></div>
           <div class="c-os" style="flex:6">Windows 6</div>
-          <div class="free" style="flex:2.5"></div>
+          <div class="free" style="flex:1.5"></div>
         </div>
         <div class="keys">
           <span><i class="c-think"></i>Thinker, all experts <b>8–14</b></span>
-          <span><i class="c-talk"></i>Talker + codec <b>0.5</b></span>
+          <span><i class="c-talk"></i>Talker (all experts) + codec <b>1–1.5</b></span>
           <span><i class="c-cache"></i>Caches <b>0.5–1</b></span>
           <span><i class="c-os"></i>Windows and apps <b>5–6</b></span>
           <span>GB</span>
@@ -751,7 +751,7 @@ body::after,.hero::before,.hero::after,.glow-l::before,.glow-r::before,.spiral-b
     <img class="flogo" src="logo.webp" alt="Formant" width="1000" height="175">
     <div class="row">
       <span>Formant · project site · updated 20 Nov 2026</span>
-      <span>Full plan: <a href="plan.html">project plan</a> · Code: <a href="https://github.com/TEJASKUMAR-REDDY-J/Formant" target="_blank" rel="noopener">GitHub</a></span>
+      <span>Full plan: <a href="plan.html">project plan</a> · Every section: <a href="sections/">sections</a> · Code: <a href="https://github.com/TEJASKUMAR-REDDY-J/Formant" target="_blank" rel="noopener">GitHub</a></span>
     </div>
   </div>
 </footer>

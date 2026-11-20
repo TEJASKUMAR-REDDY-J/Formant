@@ -40,6 +40,7 @@ Score Sarvam 30B on Indic QA with spoken-style prompts; write the style spec: sh
 
 - **Done when:** Baseline scores and style spec.
 - **Needs:** EV1 (same-week handoff)
+- **Plan:** [plans/PT1.md](plans/PT1.md)
 - **Status:** todo
 
 ### PT2 · Week 2 · Thinker style tuning
@@ -53,7 +54,7 @@ QLoRA on 2× T4 with the spoken-style set.
 
 ### PT3 · Week 3 · Voice lock
 
-Fine-tune the talker on ~50–100 h of one voice with a clear licence or written consent.
+Fine-tune the talker on ~50–100 h of one voice. Preferred: a designed synthetic voice from an Apache-licensed Indic TTS, so no real person is imitated (the tiny-voca recipe); otherwise a Rasa speaker whose terms allow synthesis.
 
 - **Done when:** Speaker similarity ≥ 0.85 to the reference across languages.
 - **Needs:** TR2, DA2, RL1
@@ -79,6 +80,7 @@ Create a subfolder the first time you need it.
 ├── configs/      run, filter and export configs (YAML), one per job
 ├── scripts/      code for this section's jobs
 ├── notebooks/    Kaggle notebooks, outputs cleared before commit
+├── plans/        one file per phase, written before the phase starts: PT1.md, PT2.md, PT3.md, PT4.md
 └── reports/      one file per phase: PT1.md, PT2.md, PT3.md, PT4.md
 ```
 

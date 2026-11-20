@@ -34,10 +34,11 @@ How we know it works: automatic metrics, Indic-FDB (our Indian-language full-dup
 
 ### EV1 · Week 1 · Metrics and test speakers
 
-Define every metric; reserve test speakers per language before ingest; harness skeleton.
+Define every metric (two-recogniser CER, speaker similarity, DNSMOS and CMOS, Full-Duplex-Bench turn-taking metrics, barge-in and response latency); reserve test speakers per language before ingest; harness skeleton.
 
 - **Done when:** Metric spec and frozen test-speaker lists.
 - **Needs:** DA1 (same-week handoff)
+- **Plan:** [plans/EV1.md](plans/EV1.md)
 - **Status:** todo
 
 ### EV2 · Week 2 · Harness and Indic-FDB scripts
@@ -77,6 +78,7 @@ Create a subfolder the first time you need it.
 ├── configs/      run, filter and export configs (YAML), one per job
 ├── scripts/      code for this section's jobs
 ├── notebooks/    Kaggle notebooks, outputs cleared before commit
+├── plans/        one file per phase, written before the phase starts: EV1.md, EV2.md, EV3.md, EV4.md
 └── reports/      one file per phase: EV1.md, EV2.md, EV3.md, EV4.md
 ```
 

@@ -43,6 +43,7 @@ Round-trip 50 clips per language through each codec: CER, speaker similarity, PE
 - **Done when:** Codec chosen by Friday with per-language numbers; fertility table.
 - **Needs:** DA1 (same-week handoff), PF1 (same-week handoff)
 - **GPU:** 2 T4-hours
+- **Plan:** [plans/TK1.md](plans/TK1.md)
 - **Status:** todo
 
 ### TK2 · Week 2 · Freeze tokenizers
@@ -81,6 +82,7 @@ Create a subfolder the first time you need it.
 ├── configs/      run, filter and export configs (YAML), one per job
 ├── scripts/      code for this section's jobs
 ├── notebooks/    Kaggle notebooks, outputs cleared before commit
+├── plans/        one file per phase, written before the phase starts: TK1.md, TK2.md, TK3.md, TK4.md
 └── reports/      one file per phase: TK1.md, TK2.md, TK3.md, TK4.md
 ```
 

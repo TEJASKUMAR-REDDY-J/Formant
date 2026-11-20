@@ -43,7 +43,7 @@ Licence ledger per source. Run 10 h per language through every gate: language ID
 
 - **Done when:** Pilot manifest on the Hub; gate pass rate and cost per 1,000 h for each step; first timing statistics.
 - **Needs:** IN1 (same-week handoff), EV1 (same-week handoff), RL1 (same-week handoff)
-- **Status:** todo
+- **Status:** doing
 
 ### DA2 · Week 2 · Voice set and dialogues v0
 
@@ -81,6 +81,7 @@ Create a subfolder the first time you need it.
 ├── configs/      run, filter and export configs (YAML), one per job
 ├── scripts/      code for this section's jobs
 ├── notebooks/    Kaggle notebooks, outputs cleared before commit
+├── plans/        one file per phase, written before the phase starts: DA1.md, DA2.md, DA3.md, DA4.md
 └── reports/      one file per phase: DA1.md, DA2.md, DA3.md, DA4.md
 ```
 
