@@ -31,14 +31,14 @@ LANG = {"hindi": "hi", "hi": "hi", "hin": "hi", "hi_in": "hi",
 
 # sub: folder holding language dirs ("" = repo root, None = single-language repo).
 # hours: reported hours for the whole repo (used for GB per hour). keep_h: fixed hours kept instead of the
-# ORDER allocation. keep_gb: fixed stored size (text, eval, timing tables). extra_gb: added to stored size.
+# ORDER allocation. keep_gb: fixed stored size (text, timing tables; 0 = manifest only).
 S = lambda **k: k
 SOURCES = [
     # --- P1: what v0.1 is built from ---
     S(id="ai4bharat/indicvoices_r", sub="", prio="P1", style="natural, studio-clean",
       what="TTS-quality cut of IndicVoices: natural speech re-recorded clean. 10,496 speakers, 22 languages.",
-      use="Talker training speech (first pick); 10 h per language kept as FLAC for the codec decoder fine-tune (TK1)",
-      hours=1704, extra_gb=6.0, rule="train split of our 5 languages; filters; tokens + 60 h FLAC 24 kHz mono"),
+      use="Talker training speech (first pick); TK3 codec decoder fine-tune re-streams it from the manifest",
+      hours=1704, rule="train split of our 5 languages; filters; tokens"),
     S(id="ai4bharat/IndicVoices", sub="", prio="P1", style="read 8%, extempore 76%, conversation 16%",
       what="AI4Bharat's large natural-speech set from 16k+ speakers across districts. Hours on the Hub assumed = 11.2k transcribed (est.).",
       use="Talker training speech (bulk); real conversations for turn-timing statistics",
@@ -96,13 +96,13 @@ SOURCES = [
     # --- EVAL: test only, never trained on ---
     S(id="google/fleurs", sub="data", prio="EVAL", style="read",
       what="Google's standard multilingual read-speech benchmark, 102 languages.", use="ASR / codec round-trip tests (EV1, TK1)",
-      keep_gb=3.2, rule="test split of hi_in, bn_in, mr_in, ta_in, te_in, en_us, audio as-is"),
+      keep_gb=0.0, rule="test split of hi_in, bn_in, mr_in, ta_in, te_in, en_us; manifest only"),
     S(id="ai4bharat/Svarah", sub=None, prio="EVAL", style="read + extempore",
-      what="Indian-accented English benchmark, 117 speakers.", use="Indian English test", keep_gb=1.1, rule="all, audio as-is"),
+      what="Indian-accented English benchmark, 117 speakers.", use="Indian English test", keep_gb=0.0, rule="all; manifest only"),
     S(id="ai4bharat/Lahaja", sub=None, prio="EVAL", style="read + extempore",
-      what="Hindi accent benchmark, 132 speakers from many regions.", use="Hindi accent test", keep_gb=1.4, rule="all, audio as-is"),
+      what="Hindi accent benchmark, 132 speakers from many regions.", use="Hindi accent test", keep_gb=0.0, rule="all; manifest only"),
     S(id="ARTPARK-IISc/Vaani-Benchmark-V1.0", sub="", prio="EVAL", style="spontaneous",
-      what="Vaani dialect benchmark.", use="Dialect robustness test", keep_gb=None, rule="our languages only, audio as-is"),
+      what="Vaani dialect benchmark.", use="Dialect robustness test", keep_gb=0.0, rule="our languages only; manifest only"),
     S(id="ai4bharat/IN22-Conv", sub=None, prio="EVAL", style="text",
       what="Conversational translation benchmark, 22 languages.", use="Thinker conversation check", keep_gb=0.0, rule="all"),
 ]
@@ -176,13 +176,11 @@ def main():
     for r in rows.values():
         keep_h = r.get("keep_h", sum(r["kept"].values()))
         pull_gb = keep_h / PASS * r["gb_h"] if r["gb_h"] else None
-        stored = r["keep_gb"] if "keep_gb" in r else keep_h * TOKEN_MB_PER_H / 1000 + r.get("extra_gb", 0)
-        if stored is None:  # eval set kept as-is in our languages
-            stored = r["ours"] / 1e9
+        stored = r["keep_gb"] if "keep_gb" in r else keep_h * TOKEN_MB_PER_H / 1000
         raw = r["ours"] / 1e9
         hours_ours = {k: v / 1e9 / r["gb_h"] for k, v in r["per"].items()} if r["gb_h"] and r["per"] else {}
         store_as = ("timing table" if r["style"].startswith("two-person") else "text, Parquet zstd" if "text" in r["style"]
-                    else "audio as-is" if r["prio"] == "EVAL" else "codec tokens + transcript, Parquet zstd" if keep_h else "-")
+                    else "manifest: pinned revision, audio pulled on demand" if r["prio"] == "EVAL" else "codec tokens + transcript, Parquet zstd" if keep_h else "-")
         out.append({
             "priority": r["prio"],
             "dataset": r["id"],

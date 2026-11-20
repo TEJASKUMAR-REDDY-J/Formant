@@ -8,6 +8,7 @@ Built the list of datasets Formant keeps. **Rule: Hugging Face only.** Every sou
 
 - List: [`01-data/sources/hf_datasets.csv`](../sources/hf_datasets.csv), 22 rows.
 - Column guide: [`01-data/sources/README.md`](../sources/README.md).
+- Sharding, storage and training mixtures: [`01-data/DATA_PLAN.md`](../DATA_PLAN.md).
 - Script: [`01-data/scripts/hf_inventory.py`](../scripts/hf_inventory.py) rebuilds the CSV from the public Hub API, with no login needed.
 
 ## How small it gets
@@ -17,11 +18,10 @@ We keep only our six languages (hi, bn, mr, ta, te, en), only the clips that pas
 | | Raw, our languages | Stored after transform |
 |---|---|---|
 | Speech for the talker, 2.57k h kept | 1.19 TB | **1.4 GB** of codec tokens + transcripts |
-| Codec fine-tune audio, 60 h (TK1) | | 6 GB FLAC |
 | Text: tokenizer sample, instruction and seed text | 172 GB | 3 GB |
-| Test sets | 21 GB | 10.6 GB (audio as published) |
+| Test sets, plus TK3 codec fine-tune audio | 21 GB | ~0: pinned manifests, audio re-streamed on demand |
 | English turn timing | 374 GB | 0.1 GB |
-| **Total** | **~1.76 TB** | **~21 GB, about 80× smaller** |
+| **Total** | **~1.76 TB** | **~4.5 GB, about 390× smaller** |
 
 **Training speech: 0.54 MB per hour,** measured. One hour of 6 s clips was stored as Mimi codes (8 codebooks, 12.5 Hz, uint16) plus transcript, speaker, gender and duration, in Parquet with zstd-9. The codes were uniformly random, so this is the worst case; with 12 codebooks it is 0.79 MB per hour.
 
@@ -52,9 +52,9 @@ Tokens are so small that storage stops mattering. If v0.1 needs more speech, tok
 
 | Priority | Meaning | Datasets | Raw, our languages | Stored |
 |---|---|---|---|---|
-| P1 | Pulled for v0.1 | 7 | 885.5 GB | 9.15 GB |
+| P1 | Pulled for v0.1 | 7 | 885.5 GB | 3.15 GB |
 | P2 | Reserve: only if P1 falls short or once the licence clears | 10 | 851.2 GB | 1.33 GB |
-| EVAL | Test only, never trained on | 5 | 21.3 GB | 10.59 GB |
+| EVAL | Test only, never trained on | 5 | 21.3 GB | ~0 (manifests) |
 
 ## Dropped from the list
 

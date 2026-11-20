@@ -2,6 +2,8 @@
 
 `hf_datasets.csv` lists every dataset Formant keeps. All of them are on Hugging Face, and nothing comes from anywhere else. Each row also says how small the dataset gets once we keep only our languages and convert it to what training reads.
 
+How the data is sharded and mixed for training: [`../DATA_PLAN.md`](../DATA_PLAN.md).
+
 Rebuild: `python 01-data/scripts/hf_inventory.py`. Sizes, licences, clip counts, fields, dates and downloads come live from the Hub API.
 
 ## What we store, and how small it gets
@@ -9,8 +11,7 @@ Rebuild: `python 01-data/scripts/hf_inventory.py`. Sizes, licences, clip counts,
 | What | Stored as | Size per hour |
 |---|---|---|
 | Training speech | Codec tokens (Mimi: 8 codebooks at 12.5 Hz, uint16) + transcript + speaker, gender, duration. Parquet, zstd. | **0.54 MB** (measured, worst case) |
-| Codec fine-tune audio (60 h, TK1) | FLAC, 24 kHz, mono | ~100 MB (est.) |
-| Test sets | The audio as published, our languages and test splits only | As published |
+| Test sets, codec fine-tune audio (TK3) | Manifest only: repo, commit and clip ids. The audio is re-streamed from the Hub when needed. | ~0 |
 | Text | Parquet, zstd, sampled | Fixed budget per row |
 | English turn timing | Speech/silence start and end times per speaker, no audio | ~0.1 GB in total |
 
