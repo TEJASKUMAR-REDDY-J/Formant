@@ -9,7 +9,7 @@ Shrinking every model to fit the laptop's RAM and memory bandwidth, measuring th
 
 - Thinker GGUF sweep with Indic calibration
 - Codec decoder in OpenVINO on the iGPU
-- Talker int8 (int4 where it holds)
+- Talker int8 (int4 where it holds), with calibration covering every expert
 - Final quantised bundle
 
 **Not in v0.1:**
@@ -51,7 +51,7 @@ Export the chosen codec decoder to OpenVINO fp16; save fp16 reference outputs fo
 
 ### QZ3 · Week 3 · Talker int8
 
-NNCF int8 on the week-2 checkpoint (shapes are fixed); try int4.
+NNCF int8 on the week-2 checkpoint (shapes are fixed); calibrate on all six languages so rarely used experts see data; try int4.
 
 - **Done when:** CER within 2 points of fp16 on the probe set.
 - **Needs:** TR2, QZ2, TR3 (same-week handoff)

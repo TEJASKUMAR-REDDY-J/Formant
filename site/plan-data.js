@@ -6,7 +6,7 @@
    status: "todo" | "doing" | "done" | "cut" */
 window.PLAN = {
   name: "Formant",
-  version: "v9",
+  version: "v10",
   updated: "2026-11-20",
   goal: "Formant v0.1 in four weeks: an offline voice agent on one i3 laptop that holds a full-duplex conversation in Hindi, English and Hinglish, with Bengali, Marathi, Tamil and Telugu answered through the cascade fallback until v0.2.",
   constraints: [
@@ -56,13 +56,13 @@ window.PLAN = {
     {
       code: "AR", num: "03", folder: "03-architecture", name: "Architecture",
       means: "The shape of every model and how they connect: the talker, its codebook head, the thinker, the turn-state signals and the thinker–talker link.",
-      scope: ["Talker: Qwen3-0.6B over 80 ms frames, user + own audio streams, inner-monologue text", "Codebook head: depth transformer for RVQ codecs, parallel heads for FSQ codecs", "Thinker: Sarvam 30B (2.4B active) on the CPU", "Text-only thinker → talker coupling"],
+      scope: ["Talker: Mixture-of-Experts upcycled from Qwen3-0.6B, ~1.4B total and ~0.5B active per 80 ms frame; user + own audio streams, inner-monologue text", "Codebook head: depth transformer for RVQ codecs, parallel heads for FSQ codecs", "Thinker: Sarvam 30B (2.4B active) on the CPU", "Text-only thinker → talker coupling"],
       out: ["Hidden-state coupling adapters (v0.2)", "Course 120B slice as the thinker (v0.2, depends on the course run)"],
-      expect: ["The talker shape is well trodden (Moshi pattern) and low risk", "Coupling is the novel part and the main design risk", "A 2B talker such as LFM3-Audio-2B would read ~1 GB every 80 ms at 4 bits, about 12.5 GB/s, which is too much for the i3's shared bus"],
+      expect: ["The streams follow the well-trodden Moshi pattern; the MoE body follows Qwen3-Omni's MoE talker", "MoE gives the talker ~3× the capacity of the dense 0.6B at the same bus traffic, because only the active experts are read each frame", "Expert dispatch speed on the UHD 620 is unproven; the dense Qwen3-0.6B talker stays as the fallback on the same data and tables", "Coupling is the novel part and the main design risk", "A 2B talker such as LFM3-Audio-2B would read ~1 GB every 80 ms at 4 bits, about 12.5 GB/s, which is too much for the i3's shared bus"],
       inputs: ["Measured budgets (08-performance)", "Codec choice (02-tokenizer)", "Thinker speed (07-quantization)"],
       outputs: ["Spec sheets and interface definitions → 04-training, 05-post-training, 09-serving"],
       cells: [
-        { id: "AR1", title: "Talker spec", goal: "Fix layers, width, streams, acoustic delay, context (3–5 min, sliding window) and the codebook head for the chosen codec; bytes and FLOPs per frame. Review 2026 duplex-adaptation recipes (D2, Awaken) for initialisation.", done: "Spec sheet that fits the talker's 4.4 GB/s share.", needs: ["~PF1", "~TK1"], gpu: "", status: "todo" },
+        { id: "AR1", title: "Talker spec", goal: "Fix layers, width, streams, acoustic delay, context (3–5 min, sliding window) and the codebook head for the chosen codec. Fix the MoE: upcycle each Qwen3-0.6B FFN into one shared expert plus fine-grained routed experts (for example half the FFN shared, 32 routed experts of 384 width, top-4, so active width equals the dense FFN), router, load balancing. Bytes and FLOPs per frame, total and active. Review 2026 duplex-adaptation recipes (D2, Awaken) for initialisation.", done: "Spec sheet whose active bytes fit the talker's 4.4 GB/s share and whose total fits ≤ 1.5 GB at int8; dense fallback spec kept.", needs: ["~PF1", "~TK1"], gpu: "", status: "todo" },
         { id: "AR2", title: "Thinker and turn state", goal: "Confirm Sarvam 30B at the QZ1 setting. Define the talker's turn-state outputs (end-of-turn, backchannel, barge-in), following plug-in turn detectors such as SoulX-Duplug and X2-Turn.", done: "Thinker fixed for v0.1: ≥ 5 tokens/s on the i3, fits ≤ 14 GB. Turn-state spec written.", needs: ["AR1", "QZ1", "PT1"], gpu: "", status: "todo" },
         { id: "AR3", title: "Coupling interface", goal: "Thinker streams its reply plan as text into the talker's monologue slot; turn-state goes back; the thinker drafts while the user is still talking. Compare with 2026 designs for linking duplex models to external LLMs (Context Spanning, MoshiRAG).", done: "Protocol spec and a working text-coupled loop on a T4.", needs: ["AR2", "TK2"], gpu: "", status: "todo" },
         { id: "AR4", title: "Review and v0.2 design", goal: "Use week-3 results to decide v0.2: adapters, five-language duplex, bigger voice set.", done: "Architecture note with v0.2 decisions.", needs: ["AR3", "TR3", "EV3"], gpu: "", status: "todo" }
@@ -72,15 +72,15 @@ window.PLAN = {
       code: "TR", num: "04", folder: "04-training", name: "Training",
       merged: "New section: the first draft had post-training but no pre-training, which is the largest GPU cost.",
       means: "Pre-training the talker: smoke runs, speech pre-training on the voice set, two-stream dialogue training, robustness.",
-      scope: ["Smoke runs on a small model", "0.6B speech pre-training on ~2–2.4k h, 2–3 epochs", "Hindi, English and Hinglish two-stream dialogue training", "Noise, crosstalk and echo robustness"],
+      scope: ["Smoke runs on a small model, dense vs MoE, and the data-mixture search", "MoE talker speech pre-training on ~2–2.4k h, 2–3 epochs, upcycled from Qwen3-0.6B", "Hindi, English and Hinglish two-stream dialogue training", "Noise, crosstalk and echo robustness"],
       out: ["Training on 5–10k h (v0.2)", "Duplex training in Bengali, Marathi, Tamil and Telugu (v0.2)"],
-      expect: ["About 20–30 T4-hours per epoch on ~2k h at realistic T4 efficiency", "fp16 only, so loss scaling must be watched", "Expect intelligible Hindi and English speech with natural turn timing; voice quality below Sarvam's Bulbul"],
+      expect: ["About 25–40 T4-hours per epoch on ~2k h at realistic T4 efficiency; expert dispatch costs ~20–30% over dense", "fp16 only, so loss scaling must be watched; the router runs in fp32 with a z-loss", "Upcycling, not training from scratch: ~334M frames is too little data for a fresh MoE", "Expect intelligible Hindi and English speech with natural turn timing; voice quality below Sarvam's Bulbul"],
       inputs: ["Token shards (01-data)", "Frozen tokenizers (02-tokenizer)", "Runner (10-infrastructure)", "Dashboards (11-monitoring)"],
       outputs: ["Talker checkpoints on the Hub → 05-post-training, 07-quantization, 09-serving"],
       cells: [
-        { id: "TR1", title: "Smoke runs", goal: "~50M talker on pilot or public codec tokens: check fp16 stability, loss per codebook, resume after a killed session.", done: "Loss falls on every codebook; resume reproduces the curve.", needs: ["~IN1", "~MO1"], gpu: "5", status: "todo" },
-        { id: "TR2", title: "Launch pre-training", goal: "Initialise from Qwen3-0.6B with the frozen tables; stream shards as they land; DDP on 2× T4.", done: "Run passes 1 epoch with stable loss; checkpoint every 30–45 min on the Hub.", needs: ["TR1", "AR1", "~TK2", "~DA2", "~PF2"], gpu: "25–35", status: "todo" },
-        { id: "TR3", title: "Finish pre-training, dialogue", goal: "Complete 2–3 epochs; then train both streams on Hindi, English and Hinglish dialogues (synthetic + split real).", done: "Probe CER ≤ 25% in all six languages; takeover rate ≥ 0.8 in Hindi and English on held-out clips.", needs: ["TR2", "DA2", "TK2"], gpu: "70–110", status: "todo" },
+        { id: "TR1", title: "Smoke runs", goal: "~50M talker on pilot or public codec tokens, dense and MoE: check fp16 stability, router balance, loss per codebook, resume after a killed session. Run 8 tiny mixture-search runs and pick the language weights with the best worst-language dev loss (01-data/DATA_PLAN.md).", done: "Loss falls on every codebook; experts stay balanced; resume reproduces the curve; mixture weights fixed.", needs: ["~IN1", "~MO1"], gpu: "8–10", status: "todo" },
+        { id: "TR2", title: "Launch pre-training", goal: "Upcycle Qwen3-0.6B into the AR1 MoE with the frozen tables; ZeRO-2 across 2× T4 with 8-bit AdamW; global-batch load balancing (bias-based, no auxiliary loss); single-language micro-batches mixed to the DATA_PLAN ratios; add shards as they land.", done: "Run passes 1 epoch with stable loss and no dead experts; checkpoint every 30–45 min on the Hub.", needs: ["TR1", "AR1", "~TK2", "~DA2", "~PF2"], gpu: "30–45", status: "todo" },
+        { id: "TR3", title: "Finish pre-training, dialogue", goal: "Complete 2–3 epochs; then train both streams on Hindi, English and Hinglish dialogues (synthetic + split real).", done: "Probe CER ≤ 25% in all six languages; takeover rate ≥ 0.8 in Hindi and English on held-out clips.", needs: ["TR2", "DA2", "TK2"], gpu: "80–125", status: "todo" },
         { id: "TR4", title: "Robustness", goal: "Add noise, far-field audio, crosstalk and echo-like leakage; pick the final checkpoint with evaluation.", done: "Noisy CER within 5 points of clean; final checkpoint tagged.", needs: ["TR3", "EV3"], gpu: "10", status: "todo" }
       ]
     },
@@ -117,7 +117,7 @@ window.PLAN = {
     {
       code: "QZ", num: "07", folder: "07-quantization", name: "Quantization",
       means: "Shrinking every model to fit the laptop's RAM and memory bandwidth, measuring the quality each step costs.",
-      scope: ["Thinker GGUF sweep with Indic calibration", "Codec decoder in OpenVINO on the iGPU", "Talker int8 (int4 where it holds)", "Final quantised bundle"],
+      scope: ["Thinker GGUF sweep with Indic calibration", "Codec decoder in OpenVINO on the iGPU", "Talker int8 (int4 where it holds), with calibration covering every expert", "Final quantised bundle"],
       out: ["Quantisation-aware training (only if a language drops too far)"],
       expect: ["Talker int8 is close to free; int4 may hurt audio", "Thinker at ~3.5 bits loses some quality; Indic calibration text matters"],
       inputs: ["Checkpoints (04, 05)", "Harness (06-evaluation)"],
@@ -125,7 +125,7 @@ window.PLAN = {
       cells: [
         { id: "QZ1", title: "Thinker sweep", goal: "Sarvam 30B at Q4_K_M, Q3_K_M and IQ3 with an Indic importance matrix; tokens/s on the i3 and Indic quality.", done: "Speed–quality curve; one setting chosen.", needs: ["~PF1", "~EV1"], gpu: "", status: "todo" },
         { id: "QZ2", title: "Codec on the iGPU", goal: "Export the chosen codec decoder to OpenVINO fp16; save fp16 reference outputs for every component.", done: "Decoder runs well inside one 80 ms frame on the UHD 620.", needs: ["TK1", "PF1"], gpu: "1", status: "todo" },
-        { id: "QZ3", title: "Talker int8", goal: "NNCF int8 on the week-2 checkpoint (shapes are fixed); try int4.", done: "CER within 2 points of fp16 on the probe set.", needs: ["TR2", "QZ2", "~TR3"], gpu: "2", status: "todo" },
+        { id: "QZ3", title: "Talker int8", goal: "NNCF int8 on the week-2 checkpoint (shapes are fixed); calibrate on all six languages so rarely used experts see data; try int4.", done: "CER within 2 points of fp16 on the probe set.", needs: ["TR2", "QZ2", "~TR3"], gpu: "2", status: "todo" },
         { id: "QZ4", title: "Release bundle", goal: "Quantise the final talker and tuned thinker; run the full system against the references.", done: "Every language within 2 CER points of fp16; bundle tagged.", needs: ["QZ3", "~TR4", "~PT4"], gpu: "2", status: "todo" }
       ]
     },
@@ -138,7 +138,7 @@ window.PLAN = {
       inputs: ["Specs (03-architecture)", "Quantised models (07-quantization)"],
       outputs: ["Budgets and measurements → every section"],
       cells: [
-        { id: "PF1", title: "Baselines", goal: "Bandwidth (done: 20.8 GB/s). OpenVINO step time for a 0.6B model on the UHD 620; llama.cpp tokens/s for Sarvam 30B; T4 training tokens/s for Qwen3-0.6B.", done: "Baseline sheet every later number is compared to.", needs: [], gpu: "2", status: "doing" },
+        { id: "PF1", title: "Baselines", goal: "Bandwidth (done: 20.8 GB/s). OpenVINO step time on the UHD 620 for a dense 0.6B model and for an MoE with the same active size (expert dispatch); llama.cpp tokens/s for Sarvam 30B; T4 training tokens/s for Qwen3-0.6B.", done: "Baseline sheet every later number is compared to.", needs: [], gpu: "2", status: "doing" },
         { id: "PF2", title: "Training speed", goal: "Sequence packing, SDPA, chunked cross-entropy, gradient checkpointing, DDP on 2× T4, 8-bit AdamW.", done: "≥ 1.5× PF1 tokens/s with an unchanged loss curve.", needs: ["TR1", "PF1"], gpu: "5", status: "todo" },
         { id: "PF3", title: "Runtime speed", goal: "Talker int8 on the iGPU with KV cache and static shapes; thinker thread pinning and incremental prefill.", done: "Talker + head + codec ≤ 60 ms per 80 ms frame; thinker ≥ 5 tokens/s.", needs: ["QZ2", "AR2", "~QZ3"], gpu: "", status: "todo" },
         { id: "PF4", title: "Sustained run", goal: "Both models live for 30 minutes; throttle the thinker to protect the frame deadline; record temperatures.", done: "< 1% missed frames over 30 minutes.", needs: ["PF3", "SV3"], gpu: "", status: "todo" }
@@ -183,8 +183,8 @@ window.PLAN = {
       inputs: ["Runs (04, 05)", "Harness (06)", "Runtime (09)"],
       outputs: ["Dashboards and alerts → every section"],
       cells: [
-        { id: "MO1", title: "Training metrics", goal: "Loss per codebook, text loss, loss per language, grad norm, fp16 loss scale and overflows, tokens/s, memory.", done: "Every run logs the same metric set.", needs: ["~IN1"], gpu: "", status: "todo" },
-        { id: "MO2", title: "Alarms", goal: "Auto-stop on NaN, loss spikes and falling codebook entropy; roll back to the last good checkpoint; data-gate pass-rate dashboard.", done: "A deliberately broken run is stopped automatically.", needs: ["MO1", "~TR2"], gpu: "", status: "todo" },
+        { id: "MO1", title: "Training metrics", goal: "Loss per codebook, text loss, loss per language, grad norm, fp16 loss scale and overflows, tokens/s, memory; expert use per language, router entropy and load imbalance.", done: "Every run logs the same metric set.", needs: ["~IN1"], gpu: "", status: "todo" },
+        { id: "MO2", title: "Alarms", goal: "Auto-stop on NaN, loss spikes, falling codebook entropy and dead or collapsed experts; roll back to the last good checkpoint; data-gate pass-rate dashboard.", done: "A deliberately broken run is stopped automatically.", needs: ["MO1", "~TR2"], gpu: "", status: "todo" },
         { id: "MO3", title: "Listening probes", goal: "Every N steps generate 10 fixed prompts per language; auto CER and speaker similarity; audio on the dashboard.", done: "Probe trends visible for TR3.", needs: ["MO2", "EV2"], gpu: "", status: "todo" },
         { id: "MO4", title: "Runtime telemetry", goal: "Missed frames, latency p50/p95, CPU clock and temperature, leftover echo, logged for every demo session.", done: "Telemetry attached to the release demo.", needs: ["MO3", "SV3"], gpu: "", status: "todo" }
       ]
@@ -208,6 +208,7 @@ window.PLAN = {
   critical: ["DA1", "TK1", "DA2", "TK2", "TR2", "TR3", "TR4", "QZ4", "RL4"],
   sota: [
     { name: "LiquidCodec", who: "Liquid AI · Nov 2026", what: "~74M causal codec, 12.5 Hz, 12 FSQ groups, 24 kHz; trained on 107 languages; reported ~13× faster encoding and ~3× faster decoding than Mimi at matching quality.", use: "TK1 candidate. If chosen, the talker can predict its groups in parallel instead of with a depth transformer. Licence must be checked in RL1." },
+    { name: "Qwen3-Omni", who: "Alibaba Qwen · 2025", what: "Thinker–talker omni model whose talker is itself a Mixture-of-Experts, predicting multi-codebook speech; trained in stages from broad to high-quality data, speaker fine-tune last.", use: "Pattern for Formant's MoE talker (AR1) and its training stages (01-data/DATA_PLAN.md)." },
     { name: "Mimi", who: "Kyutai", what: "12.5 Hz, 8 RVQ codebooks; the codec behind Moshi and most open duplex models.", use: "TK1 incumbent; the safest choice if LiquidCodec's licence or Indic quality fails." },
     { name: "LFM3-Audio-2B", who: "Liquid AI · 2026", what: "2B audio model that runs on laptops and phones; 18 speech languages, none Indian; LFM Open License.", use: "Reference only: as a talker it would need ~12.5 GB/s on the i3's bus. A laptop full-duplex fine-tune of it (Alba) is useful prior art." },
     { name: "Human-1", who: "Josh Talks · 2026", what: "Hindi full-duplex model trained on real conversations; open weights.", use: "Hindi baseline in EV4." },
@@ -231,11 +232,12 @@ window.PLAN = {
   ],
   risks: [
     ["Data in week 2", "Ingest, tokenising and synthetic dialogues all land in one week. Start downloads in week 1; cut to Hindi + English if late."],
-    ["GPU budget", "v0.1 needs about 290–435 T4-hours; one account gives ~240 in four weeks. Plan on two teammates' accounts."],
+    ["GPU budget", "v0.1 needs about 305–465 T4-hours; one account gives ~240 in four weeks. Plan on two teammates' accounts."],
     ["Codec on Indian languages", "Retroflex and aspirated sounds may smear. TK1 catches it in week 1; the fix is a decoder-only fine-tune that keeps tokens valid."],
     ["Echo on laptop speakers", "Full duplex hears itself. AEC3 in SV2; headset fallback for demos."],
     ["Shared memory bus", "iGPU and CPU share 20.8 GB/s. PF4 throttles the thinker to protect the talker's frame."],
     ["Coupling quality", "Text-only coupling first; fallback is the talker as a timing controller over the cascade's TTS."],
+    ["MoE talker on the iGPU", "Expert dispatch may be slow in OpenVINO on the UHD 620. PF1 measures it in week 1; if it misses the frame, the dense Qwen3-0.6B talker takes over with the same data and tables."],
     ["Kaggle terms", "One account per person. Several accounts held by one person risk losing all of them."]
   ]
 };

@@ -2,7 +2,7 @@
 
 An offline, full-duplex voice agent for Indian languages that runs on a budget laptop.
 
-Formant listens and speaks at the same time, the way people do. A small **talker** (~0.6B) runs every 80 ms on the laptop's built-in graphics and owns the timing: when to speak, when to say "haan", when to stop because you cut in. A larger **thinker** (a mixture-of-experts LLM, Sarvam 30B for v0.1) runs on the CPU cores and decides what to say. Everything runs on one Intel i3-10110U with no GPU and no internet.
+Formant listens and speaks at the same time, the way people do. A small mixture-of-experts **talker** (~1.4B total, ~0.5B active, upcycled from Qwen3-0.6B) runs every 80 ms on the laptop's built-in graphics and owns the timing: when to speak, when to say "haan", when to stop because you cut in. A larger **thinker** (a mixture-of-experts LLM, Sarvam 30B for v0.1) runs on the CPU cores and decides what to say. Everything runs on one Intel i3-10110U with no GPU and no internet.
 
 Named after formants: the resonances of the vocal tract that make each vowel sound like itself. Keeping them intact in every language, frame by frame, is what every part of this system is for.
 

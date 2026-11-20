@@ -35,7 +35,7 @@ Watching training, data and the live laptop runtime so problems show up in hours
 
 ### MO1 · Week 1 · Training metrics
 
-Loss per codebook, text loss, loss per language, grad norm, fp16 loss scale and overflows, tokens/s, memory.
+Loss per codebook, text loss, loss per language, grad norm, fp16 loss scale and overflows, tokens/s, memory; expert use per language, router entropy and load imbalance.
 
 - **Done when:** Every run logs the same metric set.
 - **Needs:** IN1 (same-week handoff)
@@ -43,7 +43,7 @@ Loss per codebook, text loss, loss per language, grad norm, fp16 loss scale and 
 
 ### MO2 · Week 2 · Alarms
 
-Auto-stop on NaN, loss spikes and falling codebook entropy; roll back to the last good checkpoint; data-gate pass-rate dashboard.
+Auto-stop on NaN, loss spikes, falling codebook entropy and dead or collapsed experts; roll back to the last good checkpoint; data-gate pass-rate dashboard.
 
 - **Done when:** A deliberately broken run is stopped automatically.
 - **Needs:** MO1, TR2 (same-week handoff)

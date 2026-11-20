@@ -35,7 +35,7 @@ Two things: training speed on T4s, and real-time speed on the i3 (80 ms frame de
 
 ### PF1 · Week 1 · Baselines
 
-Bandwidth (done: 20.8 GB/s). OpenVINO step time for a 0.6B model on the UHD 620; llama.cpp tokens/s for Sarvam 30B; T4 training tokens/s for Qwen3-0.6B.
+Bandwidth (done: 20.8 GB/s). OpenVINO step time on the UHD 620 for a dense 0.6B model and for an MoE with the same active size (expert dispatch); llama.cpp tokens/s for Sarvam 30B; T4 training tokens/s for Qwen3-0.6B.
 
 - **Done when:** Baseline sheet every later number is compared to.
 - **Needs:** nothing

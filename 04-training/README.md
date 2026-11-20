@@ -9,8 +9,8 @@ Pre-training the talker: smoke runs, speech pre-training on the voice set, two-s
 
 ## Scope for v0.1
 
-- Smoke runs on a small model
-- 0.6B speech pre-training on ~2–2.4k h, 2–3 epochs
+- Smoke runs on a small model, dense vs MoE, and the data-mixture search
+- MoE talker speech pre-training on ~2–2.4k h, 2–3 epochs, upcycled from Qwen3-0.6B
 - Hindi, English and Hinglish two-stream dialogue training
 - Noise, crosstalk and echo robustness
 
@@ -21,8 +21,9 @@ Pre-training the talker: smoke runs, speech pre-training on the voice set, two-s
 
 ## What to expect
 
-- About 20–30 T4-hours per epoch on ~2k h at realistic T4 efficiency
-- fp16 only, so loss scaling must be watched
+- About 25–40 T4-hours per epoch on ~2k h at realistic T4 efficiency; expert dispatch costs ~20–30% over dense
+- fp16 only, so loss scaling must be watched; the router runs in fp32 with a z-loss
+- Upcycling, not training from scratch: ~334M frames is too little data for a fresh MoE
 - Expect intelligible Hindi and English speech with natural turn timing; voice quality below Sarvam's Bulbul
 
 ## Takes in
@@ -40,20 +41,20 @@ Pre-training the talker: smoke runs, speech pre-training on the voice set, two-s
 
 ### TR1 · Week 1 · Smoke runs
 
-~50M talker on pilot or public codec tokens: check fp16 stability, loss per codebook, resume after a killed session.
+~50M talker on pilot or public codec tokens, dense and MoE: check fp16 stability, router balance, loss per codebook, resume after a killed session. Run 8 tiny mixture-search runs and pick the language weights with the best worst-language dev loss (01-data/DATA_PLAN.md).
 
-- **Done when:** Loss falls on every codebook; resume reproduces the curve.
+- **Done when:** Loss falls on every codebook; experts stay balanced; resume reproduces the curve; mixture weights fixed.
 - **Needs:** IN1 (same-week handoff), MO1 (same-week handoff)
-- **GPU:** 5 T4-hours
+- **GPU:** 8–10 T4-hours
 - **Status:** todo
 
 ### TR2 · Week 2 · Launch pre-training
 
-Initialise from Qwen3-0.6B with the frozen tables; stream shards as they land; DDP on 2× T4.
+Upcycle Qwen3-0.6B into the AR1 MoE with the frozen tables; ZeRO-2 across 2× T4 with 8-bit AdamW; global-batch load balancing (bias-based, no auxiliary loss); single-language micro-batches mixed to the DATA_PLAN ratios; add shards as they land.
 
-- **Done when:** Run passes 1 epoch with stable loss; checkpoint every 30–45 min on the Hub.
+- **Done when:** Run passes 1 epoch with stable loss and no dead experts; checkpoint every 30–45 min on the Hub.
 - **Needs:** TR1, AR1, TK2 (same-week handoff), DA2 (same-week handoff), PF2 (same-week handoff)
-- **GPU:** 25–35 T4-hours
+- **GPU:** 30–45 T4-hours
 - **Status:** todo
 
 ### TR3 · Week 3 · Finish pre-training, dialogue
@@ -62,7 +63,7 @@ Complete 2–3 epochs; then train both streams on Hindi, English and Hinglish di
 
 - **Done when:** Probe CER ≤ 25% in all six languages; takeover rate ≥ 0.8 in Hindi and English on held-out clips.
 - **Needs:** TR2, DA2, TK2
-- **GPU:** 70–110 T4-hours
+- **GPU:** 80–125 T4-hours
 - **Status:** todo
 
 ### TR4 · Week 4 · Robustness
