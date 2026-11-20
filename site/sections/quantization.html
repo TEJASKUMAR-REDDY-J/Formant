@@ -5,22 +5,22 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Formant · Quantization</title>
 <meta name="description" content="Quantization: Shrinking every model to fit the laptop's RAM and memory bandwidth, measuring the quality each step costs.">
-<link rel="icon" href="../favicon.png" type="image/png">
-<link rel="apple-touch-icon" href="../apple-touch-icon.png">
+<link rel="icon" href="/favicon.png" type="image/png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="sections.css">
+<link rel="stylesheet" href="/sections/sections.css">
 </head>
 <body>
-<nav aria-label="Sections"><div class="wrap"><b><img src="../logo.webp" alt="Formant" width="1000" height="175">Sections</b><a href="index.html">All</a><a href="data.html">Data</a><a href="tokenizer.html">Tokenizer &amp; embeddings</a><a href="architecture.html">Architecture</a><a href="training.html">Training</a><a href="post-training.html">Post-training</a><a href="evaluation.html">Evaluation</a><a href="quantization.html" aria-current="page">Quantization</a><a href="performance.html">Performance</a><a href="serving.html">Serving</a><a href="infrastructure.html">Infrastructure</a><a href="monitoring.html">Monitoring</a><a href="release.html">Release</a><a href="../plan.html">Plan board</a><a href="../index.html">Project site</a><a href="https://github.com/TEJASKUMAR-REDDY-J/Formant" target="_blank" rel="noopener">GitHub</a></div></nav>
+<nav aria-label="Sections"><div class="wrap"><b><img src="/logo.webp" alt="Formant" width="1000" height="175">Sections</b><a href="/sections/">All</a><a href="/sections/data.html">Data</a><a href="/sections/tokenizer.html">Tokenizer &amp; embeddings</a><a href="/sections/architecture.html">Architecture</a><a href="/sections/training.html">Training</a><a href="/sections/post-training.html">Post-training</a><a href="/sections/evaluation.html">Evaluation</a><a href="/sections/quantization.html" aria-current="page">Quantization</a><a href="/sections/performance.html">Performance</a><a href="/sections/serving.html">Serving</a><a href="/sections/infrastructure.html">Infrastructure</a><a href="/sections/monitoring.html">Monitoring</a><a href="/sections/release.html">Release</a><a href="/plan.html">Plan board</a><a href="/">Project site</a><a href="https://github.com/TEJASKUMAR-REDDY-J/Formant" target="_blank" rel="noopener">GitHub</a></div></nav>
 
 <header><div class="wrap">
 <div class="kicker">07 · Section QZ · <a href="https://github.com/TEJASKUMAR-REDDY-J/Formant/tree/main/07-quantization" target="_blank" rel="noopener">07-quantization/</a></div>
 <h1>Quantization</h1>
 <p class="lede">Shrinking every model to fit the laptop's RAM and memory bandwidth, measuring the quality each step costs.</p>
 
-<div class="facts"><span>Phases <b>QZ1 · QZ2 · QZ3 · QZ4</b></span><span>GPU <b>5–5 T4-hours</b></span><span>Documents <b>1</b></span><span><a href="../plan.html#view=section&section=QZ">Open on the plan board</a></span></div>
+<div class="facts"><span>Phases <b>QZ1 · QZ2 · QZ3 · QZ4</b></span><span>GPU <b>5–5 T4-hours</b></span><span>Documents <b>1</b></span><span><a href="/plan.html#view=section&section=QZ">Open on the plan board</a></span></div>
 </div></header>
 <section><div class="wrap">
 <h2>Scope</h2>
@@ -32,25 +32,25 @@
 <p class="sub">One week each. Solid chips must be done before the phase starts; dashed chips are same-week handoffs.</p>
 <div class="cards"><div class="card" id="QZ1"><div class="top"><span class="id">QZ1</span><span class="wk">Week 1</span></div>
 <h3>Thinker sweep</h3><p>Sarvam 30B at Q3_K_M, IQ3_S, IQ4_XS and a mixed MoE recipe (routed experts low-bit; attention, router and shared parts at Q6–Q8) with an Indic importance matrix; KL divergence against a Q6_K reference per language; tokens/s on the i3 alone and under talker load; MTP or n-gram speculative decoding.</p>
-<div class="chips"><span class="lbl" style="margin:0">Needs</span><a class="chip soft" href="performance.html#PF1" title="same-week handoff">PF1</a><a class="chip soft" href="evaluation.html#EV1" title="same-week handoff">EV1</a></div>
+<div class="chips"><span class="lbl" style="margin:0">Needs</span><a class="chip soft" href="/sections/performance.html#PF1" title="same-week handoff">PF1</a><a class="chip soft" href="/sections/evaluation.html#EV1" title="same-week handoff">EV1</a></div>
 <div class="chips"><span class="st todo">todo</span></div>
 <div class="links"><a href="#doc-07-quantization-plans-QZ1-md">Week plan</a></div>
 <div class="done"><b>Done when</b>Speed–quality curve; one setting chosen.</div></div>
 <div class="card" id="QZ2"><div class="top"><span class="id">QZ2</span><span class="wk">Week 2</span></div>
 <h3>Codec on the iGPU</h3><p>Export the chosen codec decoder to OpenVINO fp16; save fp16 reference outputs for every component.</p>
-<div class="chips"><span class="lbl" style="margin:0">Needs</span><a class="chip" href="tokenizer.html#TK1" title="must be done first">TK1</a><a class="chip" href="performance.html#PF1" title="must be done first">PF1</a></div>
+<div class="chips"><span class="lbl" style="margin:0">Needs</span><a class="chip" href="/sections/tokenizer.html#TK1" title="must be done first">TK1</a><a class="chip" href="/sections/performance.html#PF1" title="must be done first">PF1</a></div>
 <div class="chips"><span class="st todo">todo</span><span class="lbl" style="margin:0">1 T4-h</span></div>
 <div class="links"></div>
 <div class="done"><b>Done when</b>Decoder runs well inside one 80 ms frame on the UHD 620.</div></div>
 <div class="card" id="QZ3"><div class="top"><span class="id">QZ3</span><span class="wk">Week 3</span></div>
 <h3>Talker int8</h3><p>NNCF int8 on the week-2 checkpoint (shapes are fixed); calibrate on all six languages so rarely used experts see data; try int4.</p>
-<div class="chips"><span class="lbl" style="margin:0">Needs</span><a class="chip" href="training.html#TR2" title="must be done first">TR2</a><a class="chip" href="quantization.html#QZ2" title="must be done first">QZ2</a><a class="chip soft" href="training.html#TR3" title="same-week handoff">TR3</a></div>
+<div class="chips"><span class="lbl" style="margin:0">Needs</span><a class="chip" href="/sections/training.html#TR2" title="must be done first">TR2</a><a class="chip" href="/sections/quantization.html#QZ2" title="must be done first">QZ2</a><a class="chip soft" href="/sections/training.html#TR3" title="same-week handoff">TR3</a></div>
 <div class="chips"><span class="st todo">todo</span><span class="lbl" style="margin:0">2 T4-h</span></div>
 <div class="links"></div>
 <div class="done"><b>Done when</b>CER within 2 points of fp16 on the probe set.</div></div>
 <div class="card" id="QZ4"><div class="top"><span class="id">QZ4 · critical</span><span class="wk">Week 4</span></div>
 <h3>Release bundle</h3><p>Quantise the final talker and tuned thinker; run the full system against the references.</p>
-<div class="chips"><span class="lbl" style="margin:0">Needs</span><a class="chip" href="quantization.html#QZ3" title="must be done first">QZ3</a><a class="chip soft" href="training.html#TR4" title="same-week handoff">TR4</a><a class="chip soft" href="post-training.html#PT4" title="same-week handoff">PT4</a></div>
+<div class="chips"><span class="lbl" style="margin:0">Needs</span><a class="chip" href="/sections/quantization.html#QZ3" title="must be done first">QZ3</a><a class="chip soft" href="/sections/training.html#TR4" title="same-week handoff">TR4</a><a class="chip soft" href="/sections/post-training.html#PT4" title="same-week handoff">PT4</a></div>
 <div class="chips"><span class="st todo">todo</span><span class="lbl" style="margin:0">2 T4-h</span></div>
 <div class="links"></div>
 <div class="done"><b>Done when</b>Every language within 2 CER points of fp16; bundle tagged.</div></div></div>
@@ -112,11 +112,11 @@
 3. **Smallest mean KL divergence,** with no language more than 2× the best.
 </pre></div></article>
 </div></section>
-<div class="wrap pager"><a href="evaluation.html">← 06 Evaluation</a><a href="performance.html">08 Performance →</a></div>
+<div class="wrap pager"><a href="/sections/evaluation.html">← 06 Evaluation</a><a href="/sections/performance.html">08 Performance →</a></div>
 <footer><div class="wrap">Generated from site/plan-data.js (plan v12, 2026-11-20) and the section folders by 10-infrastructure/scripts/gen-sections.js.</div></footer>
 <script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js"></script>
 <script>
-const MAP = {"01-data/DATA_PLAN.md":"data.html#doc-01-data-DATA-PLAN-md","01-data/sources/README.md":"data.html#doc-01-data-sources-README-md","01-data/sources/hf_datasets.csv":"data.html#doc-01-data-sources-hf-datasets-csv","01-data/reports/DA1.md":"data.html#doc-01-data-reports-DA1-md","02-tokenizer/plans/TK1.md":"tokenizer.html#doc-02-tokenizer-plans-TK1-md","03-architecture/plans/AR1.md":"architecture.html#doc-03-architecture-plans-AR1-md","04-training/plans/TR1.md":"training.html#doc-04-training-plans-TR1-md","05-post-training/plans/PT1.md":"post-training.html#doc-05-post-training-plans-PT1-md","06-evaluation/plans/EV1.md":"evaluation.html#doc-06-evaluation-plans-EV1-md","07-quantization/plans/QZ1.md":"quantization.html#doc-07-quantization-plans-QZ1-md","08-performance/plans/PF1.md":"performance.html#doc-08-performance-plans-PF1-md","09-serving/plans/SV1.md":"serving.html#doc-09-serving-plans-SV1-md","10-infrastructure/plans/IN1.md":"infrastructure.html#doc-10-infrastructure-plans-IN1-md","11-monitoring/plans/MO1.md":"monitoring.html#doc-11-monitoring-plans-MO1-md","12-release/plans/RL1.md":"release.html#doc-12-release-plans-RL1-md"}, REPO = "https://github.com/TEJASKUMAR-REDDY-J/Formant";
+const MAP = {"01-data/DATA_PLAN.md":"/sections/data.html#doc-01-data-DATA-PLAN-md","01-data/sources/README.md":"/sections/data.html#doc-01-data-sources-README-md","01-data/sources/hf_datasets.csv":"/sections/data.html#doc-01-data-sources-hf-datasets-csv","01-data/reports/DA1.md":"/sections/data.html#doc-01-data-reports-DA1-md","02-tokenizer/plans/TK1.md":"/sections/tokenizer.html#doc-02-tokenizer-plans-TK1-md","03-architecture/plans/AR1.md":"/sections/architecture.html#doc-03-architecture-plans-AR1-md","04-training/plans/TR1.md":"/sections/training.html#doc-04-training-plans-TR1-md","05-post-training/plans/PT1.md":"/sections/post-training.html#doc-05-post-training-plans-PT1-md","06-evaluation/plans/EV1.md":"/sections/evaluation.html#doc-06-evaluation-plans-EV1-md","07-quantization/plans/QZ1.md":"/sections/quantization.html#doc-07-quantization-plans-QZ1-md","08-performance/plans/PF1.md":"/sections/performance.html#doc-08-performance-plans-PF1-md","09-serving/plans/SV1.md":"/sections/serving.html#doc-09-serving-plans-SV1-md","10-infrastructure/plans/IN1.md":"/sections/infrastructure.html#doc-10-infrastructure-plans-IN1-md","11-monitoring/plans/MO1.md":"/sections/monitoring.html#doc-11-monitoring-plans-MO1-md","12-release/plans/RL1.md":"/sections/release.html#doc-12-release-plans-RL1-md"}, REPO = "https://github.com/TEJASKUMAR-REDDY-J/Formant";
 document.querySelectorAll('.md[data-path]').forEach(el => {
   if (!window.marked) return;
   const p = el.dataset.path, dir = p.split('/').slice(0, -1).join('/');
