@@ -46,8 +46,12 @@ p{margin:0}
 .brand img{height:20px;width:auto;display:block}
 .hero-logo{display:block;width:min(440px,78%);height:auto;margin-bottom:28px}
 footer .flogo{height:22px;width:auto;display:block;margin-bottom:22px}
-.links{display:flex;gap:24px;overflow-x:auto;scrollbar-width:none;font-size:13.5px;color:var(--muted);min-width:0}
+.links{display:flex;gap:16px;overflow-x:auto;scrollbar-width:none;font-size:13.5px;color:var(--muted);min-width:0}
 .links::-webkit-scrollbar{display:none}
+.links{-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 28px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 28px),transparent);padding-right:28px}
+.navx{margin-left:auto;flex:none;font-size:13.5px;color:var(--ink);text-decoration:none;white-space:nowrap}
+.navx:hover{color:var(--accent)}
+.navx+.pill{margin-left:0}
 .links a{text-decoration:none;white-space:nowrap;padding:6px 0;transition:color .2s;position:relative}
 .links a:hover{color:var(--ink)}
 .links a.on{color:var(--ink)}
@@ -383,8 +387,9 @@ body::after,.hero::before,.hero::after,.glow-l::before,.glow-r::before,.spiral-b
       <img src="logo.webp" alt="Formant" width="1000" height="175">
     </a>
     <div class="links">
-      <a href="#why">Why</a><a href="#sarvam">vs Sarvam</a><a href="#data">Data</a><a href="#conversation">Conversation</a><a href="#how">How it works</a><a href="#inside">Inside the laptop</a><a href="#languages">Languages</a><a href="#targets">Targets</a><a href="#roadmap">Roadmap</a><a href="sections/">Sections</a>
+      <a href="#why">Why</a><a href="#sarvam">vs Sarvam</a><a href="#data">Data</a><a href="#conversation">Conversation</a><a href="#how">How it works</a><a href="#inside">Inside the laptop</a><a href="#languages">Languages</a><a href="#targets">Targets</a><a href="#roadmap">Roadmap</a>
     </div>
+    <a class="navx" href="/sections/">Sections</a>
     <a class="pill" href="plan.html" style="text-decoration:none">plan <b>v12</b> · 4 weeks</a>
   </div>
 </nav>
@@ -751,7 +756,7 @@ body::after,.hero::before,.hero::after,.glow-l::before,.glow-r::before,.spiral-b
     <img class="flogo" src="logo.webp" alt="Formant" width="1000" height="175">
     <div class="row">
       <span>Formant · project site · updated 20 Nov 2026</span>
-      <span>Full plan: <a href="plan.html">project plan</a> · Every section: <a href="sections/">sections</a> · Code: <a href="https://github.com/TEJASKUMAR-REDDY-J/Formant" target="_blank" rel="noopener">GitHub</a></span>
+      <span>Full plan: <a href="plan.html">project plan</a> · Every section: <a href="/sections/">sections</a> · Code: <a href="https://github.com/TEJASKUMAR-REDDY-J/Formant" target="_blank" rel="noopener">GitHub</a></span>
     </div>
   </div>
 </footer>

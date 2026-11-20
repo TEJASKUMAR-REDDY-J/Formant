@@ -5,22 +5,22 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Formant · Architecture</title>
 <meta name="description" content="Architecture: The shape of every model and how they connect: the talker, its codebook head, the thinker, the turn-state signals and the thinker–talker link.">
-<link rel="icon" href="../favicon.png" type="image/png">
-<link rel="apple-touch-icon" href="../apple-touch-icon.png">
+<link rel="icon" href="/favicon.png" type="image/png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="sections.css">
+<link rel="stylesheet" href="/sections/sections.css">
 </head>
 <body>
-<nav aria-label="Sections"><div class="wrap"><b><img src="../logo.webp" alt="Formant" width="1000" height="175">Sections</b><a href="index.html">All</a><a href="data.html">Data</a><a href="tokenizer.html">Tokenizer &amp; embeddings</a><a href="architecture.html" aria-current="page">Architecture</a><a href="training.html">Training</a><a href="post-training.html">Post-training</a><a href="evaluation.html">Evaluation</a><a href="quantization.html">Quantization</a><a href="performance.html">Performance</a><a href="serving.html">Serving</a><a href="infrastructure.html">Infrastructure</a><a href="monitoring.html">Monitoring</a><a href="release.html">Release</a><a href="../plan.html">Plan board</a><a href="../index.html">Project site</a><a href="https://github.com/TEJASKUMAR-REDDY-J/Formant" target="_blank" rel="noopener">GitHub</a></div></nav>
+<nav aria-label="Sections"><div class="wrap"><b><img src="/logo.webp" alt="Formant" width="1000" height="175">Sections</b><a href="/sections/">All</a><a href="/sections/data.html">Data</a><a href="/sections/tokenizer.html">Tokenizer &amp; embeddings</a><a href="/sections/architecture.html" aria-current="page">Architecture</a><a href="/sections/training.html">Training</a><a href="/sections/post-training.html">Post-training</a><a href="/sections/evaluation.html">Evaluation</a><a href="/sections/quantization.html">Quantization</a><a href="/sections/performance.html">Performance</a><a href="/sections/serving.html">Serving</a><a href="/sections/infrastructure.html">Infrastructure</a><a href="/sections/monitoring.html">Monitoring</a><a href="/sections/release.html">Release</a><a href="/plan.html">Plan board</a><a href="/">Project site</a><a href="https://github.com/TEJASKUMAR-REDDY-J/Formant" target="_blank" rel="noopener">GitHub</a></div></nav>
 
 <header><div class="wrap">
 <div class="kicker">03 · Section AR · <a href="https://github.com/TEJASKUMAR-REDDY-J/Formant/tree/main/03-architecture" target="_blank" rel="noopener">03-architecture/</a></div>
 <h1>Architecture</h1>
 <p class="lede">The shape of every model and how they connect: the talker, its codebook head, the thinker, the turn-state signals and the thinker–talker link.</p>
 
-<div class="facts"><span>Phases <b>AR1 · AR2 · AR3 · AR4</b></span><span>GPU <b>none</b></span><span>Documents <b>1</b></span><span><a href="../plan.html#view=section&section=AR">Open on the plan board</a></span></div>
+<div class="facts"><span>Phases <b>AR1 · AR2 · AR3 · AR4</b></span><span>GPU <b>none</b></span><span>Documents <b>1</b></span><span><a href="/plan.html#view=section&section=AR">Open on the plan board</a></span></div>
 </div></header>
 <section><div class="wrap">
 <h2>Scope</h2>
@@ -32,25 +32,25 @@
 <p class="sub">One week each. Solid chips must be done before the phase starts; dashed chips are same-week handoffs.</p>
 <div class="cards"><div class="card" id="AR1"><div class="top"><span class="id">AR1</span><span class="wk">Week 1</span></div>
 <h3>Talker spec</h3><p>Fix layers, width, streams, acoustic delay, context (3–5 min, sliding window) and the codebook head for the chosen codec. Fix the MoE: upcycle each Qwen3-0.6B FFN into one shared expert plus fine-grained routed experts (for example half the FFN shared, 32 routed experts of 384 width, top-4, so active width equals the dense FFN), router, load balancing. Bytes and FLOPs per frame, total and active. Review 2026 duplex-adaptation recipes (D2, Awaken) for initialisation.</p>
-<div class="chips"><span class="lbl" style="margin:0">Needs</span><a class="chip soft" href="performance.html#PF1" title="same-week handoff">PF1</a><a class="chip soft" href="tokenizer.html#TK1" title="same-week handoff">TK1</a></div>
+<div class="chips"><span class="lbl" style="margin:0">Needs</span><a class="chip soft" href="/sections/performance.html#PF1" title="same-week handoff">PF1</a><a class="chip soft" href="/sections/tokenizer.html#TK1" title="same-week handoff">TK1</a></div>
 <div class="chips"><span class="st todo">todo</span></div>
 <div class="links"><a href="#doc-03-architecture-plans-AR1-md">Week plan</a></div>
 <div class="done"><b>Done when</b>Spec sheet whose active bytes fit the talker's 4.4 GB/s share and whose total fits ≤ 1.5 GB at int8; dense fallback spec kept.</div></div>
 <div class="card" id="AR2"><div class="top"><span class="id">AR2</span><span class="wk">Week 2</span></div>
 <h3>Thinker and turn state</h3><p>Confirm Sarvam 30B at the QZ1 setting. Define the talker's turn-state outputs (end-of-turn, backchannel, barge-in), following plug-in turn detectors such as SoulX-Duplug and X2-Turn.</p>
-<div class="chips"><span class="lbl" style="margin:0">Needs</span><a class="chip" href="architecture.html#AR1" title="must be done first">AR1</a><a class="chip" href="quantization.html#QZ1" title="must be done first">QZ1</a><a class="chip" href="post-training.html#PT1" title="must be done first">PT1</a></div>
+<div class="chips"><span class="lbl" style="margin:0">Needs</span><a class="chip" href="/sections/architecture.html#AR1" title="must be done first">AR1</a><a class="chip" href="/sections/quantization.html#QZ1" title="must be done first">QZ1</a><a class="chip" href="/sections/post-training.html#PT1" title="must be done first">PT1</a></div>
 <div class="chips"><span class="st todo">todo</span></div>
 <div class="links"></div>
 <div class="done"><b>Done when</b>Thinker fixed for v0.1: ≥ 5 tokens/s on the i3, fits ≤ 14 GB. Turn-state spec written.</div></div>
 <div class="card" id="AR3"><div class="top"><span class="id">AR3</span><span class="wk">Week 3</span></div>
 <h3>Coupling interface</h3><p>Thinker streams its reply plan as text into the talker's monologue slot; turn-state goes back; the thinker drafts while the user is still talking. Compare with 2026 designs for linking duplex models to external LLMs (Context Spanning, MoshiRAG).</p>
-<div class="chips"><span class="lbl" style="margin:0">Needs</span><a class="chip" href="architecture.html#AR2" title="must be done first">AR2</a><a class="chip" href="tokenizer.html#TK2" title="must be done first">TK2</a></div>
+<div class="chips"><span class="lbl" style="margin:0">Needs</span><a class="chip" href="/sections/architecture.html#AR2" title="must be done first">AR2</a><a class="chip" href="/sections/tokenizer.html#TK2" title="must be done first">TK2</a></div>
 <div class="chips"><span class="st todo">todo</span></div>
 <div class="links"></div>
 <div class="done"><b>Done when</b>Protocol spec and a working text-coupled loop on a T4.</div></div>
 <div class="card" id="AR4"><div class="top"><span class="id">AR4</span><span class="wk">Week 4</span></div>
 <h3>Review and v0.2 design</h3><p>Use week-3 results to decide v0.2: adapters, five-language duplex, bigger voice set.</p>
-<div class="chips"><span class="lbl" style="margin:0">Needs</span><a class="chip" href="architecture.html#AR3" title="must be done first">AR3</a><a class="chip" href="training.html#TR3" title="must be done first">TR3</a><a class="chip" href="evaluation.html#EV3" title="must be done first">EV3</a></div>
+<div class="chips"><span class="lbl" style="margin:0">Needs</span><a class="chip" href="/sections/architecture.html#AR3" title="must be done first">AR3</a><a class="chip" href="/sections/training.html#TR3" title="must be done first">TR3</a><a class="chip" href="/sections/evaluation.html#EV3" title="must be done first">EV3</a></div>
 <div class="chips"><span class="st todo">todo</span></div>
 <div class="links"></div>
 <div class="done"><b>Done when</b>Architecture note with v0.2 decisions.</div></div></div>
@@ -114,11 +114,11 @@
 - **Sliding-window retrofit.** Qwen3 was pre-trained with full attention; the ~2.5k h pre-training adapts it. If the TR1 smoke runs show damage, use 8 global layers.
 </pre></div></article>
 </div></section>
-<div class="wrap pager"><a href="tokenizer.html">← 02 Tokenizer &amp; embeddings</a><a href="training.html">04 Training →</a></div>
+<div class="wrap pager"><a href="/sections/tokenizer.html">← 02 Tokenizer &amp; embeddings</a><a href="/sections/training.html">04 Training →</a></div>
 <footer><div class="wrap">Generated from site/plan-data.js (plan v12, 2026-11-20) and the section folders by 10-infrastructure/scripts/gen-sections.js.</div></footer>
 <script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js"></script>
 <script>
-const MAP = {"01-data/DATA_PLAN.md":"data.html#doc-01-data-DATA-PLAN-md","01-data/sources/README.md":"data.html#doc-01-data-sources-README-md","01-data/sources/hf_datasets.csv":"data.html#doc-01-data-sources-hf-datasets-csv","01-data/reports/DA1.md":"data.html#doc-01-data-reports-DA1-md","02-tokenizer/plans/TK1.md":"tokenizer.html#doc-02-tokenizer-plans-TK1-md","03-architecture/plans/AR1.md":"architecture.html#doc-03-architecture-plans-AR1-md","04-training/plans/TR1.md":"training.html#doc-04-training-plans-TR1-md","05-post-training/plans/PT1.md":"post-training.html#doc-05-post-training-plans-PT1-md","06-evaluation/plans/EV1.md":"evaluation.html#doc-06-evaluation-plans-EV1-md","07-quantization/plans/QZ1.md":"quantization.html#doc-07-quantization-plans-QZ1-md","08-performance/plans/PF1.md":"performance.html#doc-08-performance-plans-PF1-md","09-serving/plans/SV1.md":"serving.html#doc-09-serving-plans-SV1-md","10-infrastructure/plans/IN1.md":"infrastructure.html#doc-10-infrastructure-plans-IN1-md","11-monitoring/plans/MO1.md":"monitoring.html#doc-11-monitoring-plans-MO1-md","12-release/plans/RL1.md":"release.html#doc-12-release-plans-RL1-md"}, REPO = "https://github.com/TEJASKUMAR-REDDY-J/Formant";
+const MAP = {"01-data/DATA_PLAN.md":"/sections/data.html#doc-01-data-DATA-PLAN-md","01-data/sources/README.md":"/sections/data.html#doc-01-data-sources-README-md","01-data/sources/hf_datasets.csv":"/sections/data.html#doc-01-data-sources-hf-datasets-csv","01-data/reports/DA1.md":"/sections/data.html#doc-01-data-reports-DA1-md","02-tokenizer/plans/TK1.md":"/sections/tokenizer.html#doc-02-tokenizer-plans-TK1-md","03-architecture/plans/AR1.md":"/sections/architecture.html#doc-03-architecture-plans-AR1-md","04-training/plans/TR1.md":"/sections/training.html#doc-04-training-plans-TR1-md","05-post-training/plans/PT1.md":"/sections/post-training.html#doc-05-post-training-plans-PT1-md","06-evaluation/plans/EV1.md":"/sections/evaluation.html#doc-06-evaluation-plans-EV1-md","07-quantization/plans/QZ1.md":"/sections/quantization.html#doc-07-quantization-plans-QZ1-md","08-performance/plans/PF1.md":"/sections/performance.html#doc-08-performance-plans-PF1-md","09-serving/plans/SV1.md":"/sections/serving.html#doc-09-serving-plans-SV1-md","10-infrastructure/plans/IN1.md":"/sections/infrastructure.html#doc-10-infrastructure-plans-IN1-md","11-monitoring/plans/MO1.md":"/sections/monitoring.html#doc-11-monitoring-plans-MO1-md","12-release/plans/RL1.md":"/sections/release.html#doc-12-release-plans-RL1-md"}, REPO = "https://github.com/TEJASKUMAR-REDDY-J/Formant";
 document.querySelectorAll('.md[data-path]').forEach(el => {
   if (!window.marked) return;
   const p = el.dataset.path, dir = p.split('/').slice(0, -1).join('/');

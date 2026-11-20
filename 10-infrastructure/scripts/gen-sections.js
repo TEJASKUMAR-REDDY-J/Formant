@@ -1,3 +1,4 @@
+// Links are root-absolute (/sections/...) so /sections and /sections/ both work on Vercel.
 // Generate site/sections/: one page per section with everything in its folder (plan data, phase plans,
 // docs, reports, CSV tables) plus an index page. Run after editing plan-data.js or any section doc:
 //   node 10-infrastructure/scripts/gen-sections.js
@@ -9,8 +10,13 @@ const P = window.PLAN;
 const REPO = 'https://github.com/TEJASKUMAR-REDDY-J/Formant';
 const OUT = path.join(root, 'site', 'sections');
 const MARKED = 'https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js';
-const CSV_COLS = ['priority', 'dataset', 'style', 'used_for', 'licence', 'access', 'hours_our_languages_est',
-  'raw_gb_our_languages', 'v01_hours_kept', 'v01_stored_gb', 'keep_rule'];
+// Dataset table: the columns a reader needs, with plain labels. Sizes keep "available", "read" and "stored" apart.
+const CSV_LABELS = { dataset: 'Dataset', priority: 'Priority', style: 'Style', used_for: 'Used for', licence: 'Licence',
+  access: 'Access', hours_our_languages_est: 'Hours in our languages (est.)', raw_gb_our_languages: 'Available, GB',
+  raw_gb_scope: 'Available covers', v01_hours_kept: 'v0.1 hours kept', v01_raw_gb_streamed: 'v0.1 read once, GB',
+  v01_stored_gb: 'v0.1 stored, GB', shrink_per_hour: 'Smaller per hour', keep_rule: 'What we keep' };
+const CSV_COLS = Object.keys(CSV_LABELS), NUM = new Set(['hours_our_languages_est', 'raw_gb_our_languages',
+  'v01_hours_kept', 'v01_raw_gb_streamed', 'v01_stored_gb', 'shrink_per_hour']);
 
 const esc = s => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const slug = s => s.folder.slice(3);
@@ -33,7 +39,7 @@ function docs(s) {
   const rank = p => p.includes('/plans/') ? 0 : p.includes('/reports/') ? 3 : p.endsWith('.csv') ? 2 : 1;
   return out.sort((a, b) => rank(a) - rank(b) || a.localeCompare(b));
 }
-const DOCS = Object.fromEntries(P.sections.flatMap(s => docs(s).map(p => [p, `${slug(s)}.html#${anchor(p)}`])));
+const DOCS = Object.fromEntries(P.sections.flatMap(s => docs(s).map(p => [p, `/sections/${slug(s)}.html#${anchor(p)}`])));
 const title = (p, text) => (p.endsWith('.md') && (text.match(/^# (.+)$/m) || [])[1]) || p.split('/').pop();
 
 function csvRows(text) {  // RFC 4180-ish: quoted fields, doubled quotes, commas and newlines inside quotes
@@ -53,9 +59,11 @@ function csvTable(text) {
   const [head, ...rows] = csvRows(text);
   const keep = CSV_COLS.every(c => head.includes(c)) ? CSV_COLS.map(c => head.indexOf(c)) : head.map((_, i) => i);
   const url = head.indexOf('url');
-  const td = (r, i) => head[i] === 'dataset' && url >= 0 ? `<a href="${esc(r[url])}">${esc(r[i])}</a>` : esc(r[i]);
-  return `<div class="tw"><table><thead><tr>${keep.map(i => `<th>${esc(head[i])}</th>`).join('')}</tr></thead><tbody>` +
-    rows.map(r => `<tr>${keep.map(i => `<td>${td(r, i)}</td>`).join('')}</tr>`).join('') + '</tbody></table></div>' +
+  const td = (r, i) => head[i] === 'dataset' && url >= 0 ? `<a href="${esc(r[url])}">${esc(r[i])}</a>` : esc(r[i] || '—');
+  const cls = i => NUM.has(head[i]) ? ' class="n"' : '';
+  return `<div class="tw sticky"><table><thead><tr>${keep.map(i => `<th${cls(i)}>${esc(CSV_LABELS[head[i]] || head[i])}</th>`).join('')}</tr></thead><tbody>` +
+    rows.map(r => `<tr>${keep.map(i => `<td${cls(i)}>${td(r, i)}</td>`).join('')}</tr>`).join('') + '</tbody></table></div>' +
+    `<p class="sub">— means not applicable or not known yet. Column meanings are in the column guide on this page.</p>` +
     (keep.length < head.length ? `<p class="sub">Showing ${keep.length} of ${head.length} columns; the full file is on GitHub.</p>` : '');
 }
 
@@ -66,23 +74,23 @@ const head = (t, d) => `<!doctype html>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>${esc(t)}</title>
 <meta name="description" content="${esc(d)}">
-<link rel="icon" href="../favicon.png" type="image/png">
-<link rel="apple-touch-icon" href="../apple-touch-icon.png">
+<link rel="icon" href="/favicon.png" type="image/png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="sections.css">
+<link rel="stylesheet" href="/sections/sections.css">
 </head>
 <body>
 `;
-const nav = cur => `<nav aria-label="Sections"><div class="wrap"><b><img src="../logo.webp" alt="Formant" width="1000" height="175">Sections</b>` +
-  `<a href="index.html"${cur ? '' : ' aria-current="page"'}>All</a>` +
-  P.sections.map(s => `<a href="${slug(s)}.html"${cur === s ? ' aria-current="page"' : ''}>${esc(s.name)}</a>`).join('') +
-  `<a href="../plan.html">Plan board</a><a href="../index.html">Project site</a><a href="${REPO}" target="_blank" rel="noopener">GitHub</a></div></nav>\n`;
+const nav = cur => `<nav aria-label="Sections"><div class="wrap"><b><img src="/logo.webp" alt="Formant" width="1000" height="175">Sections</b>` +
+  `<a href="/sections/"${cur ? '' : ' aria-current="page"'}>All</a>` +
+  P.sections.map(s => `<a href="/sections/${slug(s)}.html"${cur === s ? ' aria-current="page"' : ''}>${esc(s.name)}</a>`).join('') +
+  `<a href="/plan.html">Plan board</a><a href="/">Project site</a><a href="${REPO}" target="_blank" rel="noopener">GitHub</a></div></nav>\n`;
 const foot = `<footer><div class="wrap">Generated from site/plan-data.js (plan ${P.version}, ${P.updated}) and the section folders by 10-infrastructure/scripts/gen-sections.js.</div></footer>\n`;
 const status = c => `<span class="st ${c.status}">${c.status}</span>`;
 const chip = d => { const id = d.replace('~', ''), s = cellSec[id];
-  return `<a class="chip${d[0] === '~' ? ' soft' : ''}" href="${s ? slug(s) + '.html#' + id : '#'}" title="${d[0] === '~' ? 'same-week handoff' : 'must be done first'}">${esc(id)}</a>`; };
+  return `<a class="chip${d[0] === '~' ? ' soft' : ''}" href="${s ? '/sections/' + slug(s) + '.html#' + id : '#'}" title="${d[0] === '~' ? 'same-week handoff' : 'must be done first'}">${esc(id)}</a>`; };
 
 // Markdown is rendered in the browser with marked; the raw text stays in the page as a no-JS fallback.
 const script = `<script src="${MARKED}"></script>
@@ -127,7 +135,7 @@ P.sections.forEach((s, i) => {
 <h1>${esc(s.name)}</h1>
 <p class="lede">${esc(s.means)}</p>
 ${s.merged ? `<p class="note">${esc(s.merged)}</p>` : ''}
-<div class="facts"><span>Phases <b>${s.cells.map(c => c.id).join(' · ')}</b></span><span>GPU <b>${hi ? `${lo}–${hi} T4-hours` : 'none'}</b></span><span>Documents <b>${ds.length}</b></span><span><a href="../plan.html#view=section&section=${s.code}">Open on the plan board</a></span></div>
+<div class="facts"><span>Phases <b>${s.cells.map(c => c.id).join(' · ')}</b></span><span>GPU <b>${hi ? `${lo}–${hi} T4-hours` : 'none'}</b></span><span>Documents <b>${ds.length}</b></span><span><a href="/plan.html#view=section&section=${s.code}">Open on the plan board</a></span></div>
 </div></header>
 <section><div class="wrap">
 <h2>Scope</h2>
@@ -144,7 +152,7 @@ ${s.merged ? `<p class="note">${esc(s.merged)}</p>` : ''}
 <p class="sub">Everything in <code>${s.folder}/</code> apart from its README: phase plans, design notes, data tables and reports.</p>
 ${ds.length ? `<ul class="toc">${ds.map(p => `<li><a href="#${anchor(p)}">${esc(title(p, fs.readFileSync(path.join(root, p), 'utf8')))}</a><span>${esc(p)}</span></li>`).join('')}</ul>${docHtml}` : '<p class="sub">No documents yet.</p>'}
 </div></section>
-<div class="wrap pager">${prev ? `<a href="${slug(prev)}.html">← ${esc(prev.num)} ${esc(prev.name)}</a>` : '<span></span>'}${next ? `<a href="${slug(next)}.html">${esc(next.num)} ${esc(next.name)} →</a>` : '<span></span>'}</div>
+<div class="wrap pager">${prev ? `<a href="/sections/${slug(prev)}.html">← ${esc(prev.num)} ${esc(prev.name)}</a>` : '<span></span>'}${next ? `<a href="/sections/${slug(next)}.html">${esc(next.num)} ${esc(next.name)} →</a>` : '<span></span>'}</div>
 ` + foot + script + '</body>\n</html>\n';
   fs.writeFileSync(path.join(OUT, slug(s) + '.html'), html);
   console.log('wrote sections/' + slug(s) + '.html', ds.length, 'docs');
@@ -162,13 +170,13 @@ const idx = head('Formant · Sections', 'Formant v0.1 by section: scope, phases,
 </div></header>
 <section><div class="wrap">
 <h2>Weeks</h2>
-<div class="cards">${P.phases.map((p, k) => `<div class="card"><div class="top"><span class="id">${esc(p.week)}</span></div><h3>${esc(p.title)}</h3><p>${esc(p.theme)}</p><div class="chips">${P.sections.map(s => s.cells[k]).map(c => `<a class="chip${P.critical.includes(c.id) ? ' crit' : ''}" href="${slug(cellSec[c.id])}.html#${c.id}">${c.id}</a>`).join('')}</div></div>`).join('')}</div>
+<div class="cards">${P.phases.map((p, k) => `<div class="card"><div class="top"><span class="id">${esc(p.week)}</span></div><h3>${esc(p.title)}</h3><p>${esc(p.theme)}</p><div class="chips">${P.sections.map(s => s.cells[k]).map(c => `<a class="chip${P.critical.includes(c.id) ? ' crit' : ''}" href="/sections/${slug(cellSec[c.id])}.html#${c.id}">${c.id}</a>`).join('')}</div></div>`).join('')}</div>
 <p class="sub" style="margin-top:14px">Red chips are on the critical path: ${P.critical.join(' → ')}.</p>
 </div></section>
 <section><div class="wrap">
 <h2>Sections</h2>
 <div class="cards">${P.sections.map(s => { const now = s.cells.find(c => c.status !== 'done') || s.cells.at(-1), [lo, hi] = gpuSum(s.cells);
-  return `<a class="card" href="${slug(s)}.html"><div class="top"><span class="id">${s.num} · ${esc(s.code)}</span>${status(now)}</div><h3>${esc(s.name)}</h3><p>${esc(s.means)}</p><div class="done"><b>Now: ${now.id}</b>${esc(now.title)}${hi ? ` · ${lo}–${hi} T4-h in total` : ''} · ${docs(s).length} docs</div></a>`; }).join('')}</div>
+  return `<a class="card" href="/sections/${slug(s)}.html"><div class="top"><span class="id">${s.num} · ${esc(s.code)}</span>${status(now)}</div><h3>${esc(s.name)}</h3><p>${esc(s.means)}</p><div class="done"><b>Now: ${now.id}</b>${esc(now.title)}${hi ? ` · ${lo}–${hi} T4-h in total` : ''} · ${docs(s).length} docs</div></a>`; }).join('')}</div>
 </div></section>
 ` + foot + '</body>\n</html>\n';
 fs.writeFileSync(path.join(OUT, 'index.html'), idx);

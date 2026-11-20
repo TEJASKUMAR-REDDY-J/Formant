@@ -5,22 +5,22 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Formant · Tokenizer &amp; embeddings</title>
 <meta name="description" content="Tokenizer &amp; embeddings: The audio codec that turns speech into tokens and back, the text vocabulary for the talker's inner-monologue stream, and the embedding tables both feed.">
-<link rel="icon" href="../favicon.png" type="image/png">
-<link rel="apple-touch-icon" href="../apple-touch-icon.png">
+<link rel="icon" href="/favicon.png" type="image/png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="sections.css">
+<link rel="stylesheet" href="/sections/sections.css">
 </head>
 <body>
-<nav aria-label="Sections"><div class="wrap"><b><img src="../logo.webp" alt="Formant" width="1000" height="175">Sections</b><a href="index.html">All</a><a href="data.html">Data</a><a href="tokenizer.html" aria-current="page">Tokenizer &amp; embeddings</a><a href="architecture.html">Architecture</a><a href="training.html">Training</a><a href="post-training.html">Post-training</a><a href="evaluation.html">Evaluation</a><a href="quantization.html">Quantization</a><a href="performance.html">Performance</a><a href="serving.html">Serving</a><a href="infrastructure.html">Infrastructure</a><a href="monitoring.html">Monitoring</a><a href="release.html">Release</a><a href="../plan.html">Plan board</a><a href="../index.html">Project site</a><a href="https://github.com/TEJASKUMAR-REDDY-J/Formant" target="_blank" rel="noopener">GitHub</a></div></nav>
+<nav aria-label="Sections"><div class="wrap"><b><img src="/logo.webp" alt="Formant" width="1000" height="175">Sections</b><a href="/sections/">All</a><a href="/sections/data.html">Data</a><a href="/sections/tokenizer.html" aria-current="page">Tokenizer &amp; embeddings</a><a href="/sections/architecture.html">Architecture</a><a href="/sections/training.html">Training</a><a href="/sections/post-training.html">Post-training</a><a href="/sections/evaluation.html">Evaluation</a><a href="/sections/quantization.html">Quantization</a><a href="/sections/performance.html">Performance</a><a href="/sections/serving.html">Serving</a><a href="/sections/infrastructure.html">Infrastructure</a><a href="/sections/monitoring.html">Monitoring</a><a href="/sections/release.html">Release</a><a href="/plan.html">Plan board</a><a href="/">Project site</a><a href="https://github.com/TEJASKUMAR-REDDY-J/Formant" target="_blank" rel="noopener">GitHub</a></div></nav>
 
 <header><div class="wrap">
 <div class="kicker">02 · Section TK · <a href="https://github.com/TEJASKUMAR-REDDY-J/Formant/tree/main/02-tokenizer" target="_blank" rel="noopener">02-tokenizer/</a></div>
 <h1>Tokenizer &amp; embeddings</h1>
 <p class="lede">The audio codec that turns speech into tokens and back, the text vocabulary for the talker's inner-monologue stream, and the embedding tables both feed.</p>
 <p class="note">Embedding is merged in here: it is the vocabulary and code tables these tokenizers feed, about two days of work on its own.</p>
-<div class="facts"><span>Phases <b>TK1 · TK2 · TK3 · TK4</b></span><span>GPU <b>7–37 T4-hours</b></span><span>Documents <b>1</b></span><span><a href="../plan.html#view=section&section=TK">Open on the plan board</a></span></div>
+<div class="facts"><span>Phases <b>TK1 · TK2 · TK3 · TK4</b></span><span>GPU <b>7–37 T4-hours</b></span><span>Documents <b>1</b></span><span><a href="/plan.html#view=section&section=TK">Open on the plan board</a></span></div>
 </div></header>
 <section><div class="wrap">
 <h2>Scope</h2>
@@ -32,25 +32,25 @@
 <p class="sub">One week each. Solid chips must be done before the phase starts; dashed chips are same-week handoffs.</p>
 <div class="cards"><div class="card" id="TK1"><div class="top"><span class="id">TK1 · critical</span><span class="wk">Week 1</span></div>
 <h3>Codec and vocabulary audit</h3><p>Round-trip 50 clips per language through each codec: CER, speaker similarity, PESQ/STOI, plus decode speed on the UHD 620. Count tokens per word and per second for the Qwen3, Sarvam and Gemma tokenizers.</p>
-<div class="chips"><span class="lbl" style="margin:0">Needs</span><a class="chip soft" href="data.html#DA1" title="same-week handoff">DA1</a><a class="chip soft" href="performance.html#PF1" title="same-week handoff">PF1</a></div>
+<div class="chips"><span class="lbl" style="margin:0">Needs</span><a class="chip soft" href="/sections/data.html#DA1" title="same-week handoff">DA1</a><a class="chip soft" href="/sections/performance.html#PF1" title="same-week handoff">PF1</a></div>
 <div class="chips"><span class="st todo">todo</span><span class="lbl" style="margin:0">2 T4-h</span></div>
 <div class="links"><a href="#doc-02-tokenizer-plans-TK1-md">Week plan</a></div>
 <div class="done"><b>Done when</b>Codec chosen by Friday with per-language numbers; fertility table.</div></div>
 <div class="card" id="TK2"><div class="top"><span class="id">TK2 · critical</span><span class="wk">Week 2</span></div>
 <h3>Freeze tokenizers</h3><p>Trim the vocabulary to the tokens Indic + English text uses, add Indic merges, initialise new rows as the mean of their old pieces; build audio code tables; short warm-up with the body frozen.</p>
-<div class="chips"><span class="lbl" style="margin:0">Needs</span><a class="chip" href="tokenizer.html#TK1" title="must be done first">TK1</a><a class="chip" href="architecture.html#AR1" title="must be done first">AR1</a></div>
+<div class="chips"><span class="lbl" style="margin:0">Needs</span><a class="chip" href="/sections/tokenizer.html#TK1" title="must be done first">TK1</a><a class="chip" href="/sections/architecture.html#AR1" title="must be done first">AR1</a></div>
 <div class="chips"><span class="st todo">todo</span><span class="lbl" style="margin:0">5 T4-h</span></div>
 <div class="links"></div>
 <div class="done"><b>Done when</b>Both tokenizers hashed and versioned; ≤ 2 text tokens per word in every language; Hindi text loss within 5% after warm-up.</div></div>
 <div class="card" id="TK3"><div class="top"><span class="id">TK3</span><span class="wk">Week 3</span></div>
 <h3>Decoder fix if needed</h3><p>Only if a language failed TK1: fine-tune the codec decoder on IndicVoices-R with the encoder frozen.</p>
-<div class="chips"><span class="lbl" style="margin:0">Needs</span><a class="chip" href="tokenizer.html#TK1" title="must be done first">TK1</a><a class="chip" href="data.html#DA2" title="must be done first">DA2</a></div>
+<div class="chips"><span class="lbl" style="margin:0">Needs</span><a class="chip" href="/sections/tokenizer.html#TK1" title="must be done first">TK1</a><a class="chip" href="/sections/data.html#DA2" title="must be done first">DA2</a></div>
 <div class="chips"><span class="st todo">todo</span><span class="lbl" style="margin:0">0–30 T4-h</span></div>
 <div class="links"></div>
 <div class="done"><b>Done when</b>Round-trip CER within 2 points of the original audio for every language, or no fix needed.</div></div>
 <div class="card" id="TK4"><div class="top"><span class="id">TK4</span><span class="wk">Week 4</span></div>
 <h3>Tokenizer card</h3><p>Publish both tokenizers with round-trip and fertility tables; list v0.2 vocabulary changes for more languages.</p>
-<div class="chips"><span class="lbl" style="margin:0">Needs</span><a class="chip" href="tokenizer.html#TK2" title="must be done first">TK2</a><a class="chip" href="tokenizer.html#TK3" title="must be done first">TK3</a></div>
+<div class="chips"><span class="lbl" style="margin:0">Needs</span><a class="chip" href="/sections/tokenizer.html#TK2" title="must be done first">TK2</a><a class="chip" href="/sections/tokenizer.html#TK3" title="must be done first">TK3</a></div>
 <div class="chips"><span class="st todo">todo</span></div>
 <div class="links"></div>
 <div class="done"><b>Done when</b>Tokenizer card in the release.</div></div></div>
@@ -130,11 +130,11 @@ Per codec, 50 clips per language. The clips come from FLEURS **validation** (nev
 - **LiquidCodec or the NVIDIA codec has an unusable licence.** It drops at RL1, before it can be chosen.
 </pre></div></article>
 </div></section>
-<div class="wrap pager"><a href="data.html">← 01 Data</a><a href="architecture.html">03 Architecture →</a></div>
+<div class="wrap pager"><a href="/sections/data.html">← 01 Data</a><a href="/sections/architecture.html">03 Architecture →</a></div>
 <footer><div class="wrap">Generated from site/plan-data.js (plan v12, 2026-11-20) and the section folders by 10-infrastructure/scripts/gen-sections.js.</div></footer>
 <script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js"></script>
 <script>
-const MAP = {"01-data/DATA_PLAN.md":"data.html#doc-01-data-DATA-PLAN-md","01-data/sources/README.md":"data.html#doc-01-data-sources-README-md","01-data/sources/hf_datasets.csv":"data.html#doc-01-data-sources-hf-datasets-csv","01-data/reports/DA1.md":"data.html#doc-01-data-reports-DA1-md","02-tokenizer/plans/TK1.md":"tokenizer.html#doc-02-tokenizer-plans-TK1-md","03-architecture/plans/AR1.md":"architecture.html#doc-03-architecture-plans-AR1-md","04-training/plans/TR1.md":"training.html#doc-04-training-plans-TR1-md","05-post-training/plans/PT1.md":"post-training.html#doc-05-post-training-plans-PT1-md","06-evaluation/plans/EV1.md":"evaluation.html#doc-06-evaluation-plans-EV1-md","07-quantization/plans/QZ1.md":"quantization.html#doc-07-quantization-plans-QZ1-md","08-performance/plans/PF1.md":"performance.html#doc-08-performance-plans-PF1-md","09-serving/plans/SV1.md":"serving.html#doc-09-serving-plans-SV1-md","10-infrastructure/plans/IN1.md":"infrastructure.html#doc-10-infrastructure-plans-IN1-md","11-monitoring/plans/MO1.md":"monitoring.html#doc-11-monitoring-plans-MO1-md","12-release/plans/RL1.md":"release.html#doc-12-release-plans-RL1-md"}, REPO = "https://github.com/TEJASKUMAR-REDDY-J/Formant";
+const MAP = {"01-data/DATA_PLAN.md":"/sections/data.html#doc-01-data-DATA-PLAN-md","01-data/sources/README.md":"/sections/data.html#doc-01-data-sources-README-md","01-data/sources/hf_datasets.csv":"/sections/data.html#doc-01-data-sources-hf-datasets-csv","01-data/reports/DA1.md":"/sections/data.html#doc-01-data-reports-DA1-md","02-tokenizer/plans/TK1.md":"/sections/tokenizer.html#doc-02-tokenizer-plans-TK1-md","03-architecture/plans/AR1.md":"/sections/architecture.html#doc-03-architecture-plans-AR1-md","04-training/plans/TR1.md":"/sections/training.html#doc-04-training-plans-TR1-md","05-post-training/plans/PT1.md":"/sections/post-training.html#doc-05-post-training-plans-PT1-md","06-evaluation/plans/EV1.md":"/sections/evaluation.html#doc-06-evaluation-plans-EV1-md","07-quantization/plans/QZ1.md":"/sections/quantization.html#doc-07-quantization-plans-QZ1-md","08-performance/plans/PF1.md":"/sections/performance.html#doc-08-performance-plans-PF1-md","09-serving/plans/SV1.md":"/sections/serving.html#doc-09-serving-plans-SV1-md","10-infrastructure/plans/IN1.md":"/sections/infrastructure.html#doc-10-infrastructure-plans-IN1-md","11-monitoring/plans/MO1.md":"/sections/monitoring.html#doc-11-monitoring-plans-MO1-md","12-release/plans/RL1.md":"/sections/release.html#doc-12-release-plans-RL1-md"}, REPO = "https://github.com/TEJASKUMAR-REDDY-J/Formant";
 document.querySelectorAll('.md[data-path]').forEach(el => {
   if (!window.marked) return;
   const p = el.dataset.path, dir = p.split('/').slice(0, -1).join('/');

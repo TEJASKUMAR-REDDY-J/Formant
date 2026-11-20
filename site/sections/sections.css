@@ -88,6 +88,9 @@ a.card:hover{background:var(--alt)}
 .tw th,.tw td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
 .tw th{font:500 11.5px var(--mono);color:var(--faint);letter-spacing:.04em;background:var(--alt);white-space:nowrap}
 .tw tr:last-child td{border-bottom:0}
+.tw .n{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.tw.sticky th:first-child,.tw.sticky td:first-child{position:sticky;left:0;z-index:1;background:var(--bg);box-shadow:1px 0 0 var(--line-2);min-width:200px}
+.tw.sticky th:first-child{background:var(--alt)}
 .pager{display:flex;justify-content:space-between;gap:16px;padding:28px 0 48px;font-size:15px}
 .pager a{text-decoration:none}
 footer{font:400 12.5px var(--mono);color:var(--faint);padding:0 0 40px}

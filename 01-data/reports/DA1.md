@@ -15,19 +15,30 @@ Built the list of datasets Formant keeps. **Rule: Hugging Face only.** Every sou
 
 We keep only our six languages (hi, bn, mr, ta, te, en), only the clips that pass the filters, and only in the form training reads.
 
-| | Raw, our languages | Stored after transform |
-|---|---|---|
-| Speech for the talker, 2.57k h kept | 1.19 TB | **1.4 GB** of codec tokens + transcripts |
-| Text: tokenizer sample, instruction and seed text | 172 GB | 3 GB |
-| Test sets, plus TK3 codec fine-tune audio | 21 GB | ~0: pinned manifests, audio re-streamed on demand |
-| English turn timing | 374 GB | 0.1 GB |
-| **Total** | **~1.76 TB** | **~4.5 GB, about 390× smaller** |
+Two separate reductions happen, and they are reported separately so neither inflates the other:
 
-**Training speech: 0.54 MB per hour,** measured. One hour of 6 s clips was stored as Mimi codes (8 codebooks, 12.5 Hz, uint16) plus transcript, speaker, gender and duration, in Parquet with zstd-9. The codes were uniformly random, so this is the worst case; with 12 codebooks it is 0.79 MB per hour.
+1. **Selection:** v0.1 reads only the slices it needs.
+2. **Transform:** what it reads becomes tokens or text.
 
-**Raw audio: 42–615 MB per hour,** depending on the dataset. So tokenising alone makes speech 80–1,100× smaller.
+| | Available in our languages | Read once for v0.1 | Stored |
+|---|---|---|---|
+| Speech for the talker (2.57k h kept) | 915 GB | 459 GB + the NPTEL and Rasa slices (their GB per hour is measured in the pilot) | **1.4 GB** of codec tokens + transcripts |
+| Text: tokenizer sample, instruction and seed text | 172 GB | 3.0 GB | 3.0 GB |
+| Test sets | 21 GB | 10.6 GB, re-read on demand per evaluation run | ~0 (pinned manifests) |
+| English turn timing (Seamless, 200 h sample) | 374 GB | 18.7 GB | 0.01 GB |
+| Reserves not used in v0.1 (Vaani transcribed, IndicTTS) | 276 GB | 0 | 0 |
+| **Total** | **1.76 TB** | **~490 GB + NPTEL/Rasa slices** | **~4.4 GB** |
 
-**Streamed:** about 460 GB of raw audio goes through Kaggle, shard by shard, plus the NPTEL and Rasa slices, whose hours per GB the pilot measures. Each shard is streamed, filtered, tokenised and uploaded, then its audio is deleted. Nothing raw is ever stored.
+**Transform, per hour of speech: raw audio is 42–615 MB per hour depending on the dataset; stored tokens are 0.54 MB per hour.** So tokenising alone makes speech **78–1,139×** smaller per hour (`shrink_per_hour` in the CSV).
+
+The 0.54 MB figure is measured:
+- one hour of 6 s clips stored as Mimi codes (8 codebooks, 12.5 Hz, uint16);
+- plus transcript, speaker, gender and duration;
+- in Parquet with zstd-9.
+
+The codes were uniformly random, so this is the worst case. With 12 codebooks it is 0.79 MB per hour.
+
+**Streamed, never stored:** each Kaggle shard is streamed, filtered, tokenised and uploaded, then its audio is deleted.
 
 **Only what fits is kept.** Every clip passes language ID, SNR, length and transcript agreement (CER against an ASR pass). The pass rate is assumed to be 75% until the pilot measures it.
 
@@ -50,11 +61,13 @@ Tokens are so small that storage stops mattering. If v0.1 needs more speech, tok
 
 ## Result by priority
 
-| Priority | Meaning | Datasets | Raw, our languages | Stored |
-|---|---|---|---|---|
-| P1 | Pulled for v0.1 | 7 | 885.5 GB | 3.15 GB |
-| P2 | Reserve: only if P1 falls short or once the licence clears | 10 | 851.2 GB | 1.33 GB |
-| EVAL | Test only, never trained on | 5 | 21.3 GB | ~0 (manifests) |
+| Priority | Meaning | Datasets | Available, our languages | Read once for v0.1 | Stored |
+|---|---|---|---|---|---|
+| P1 | Pulled for v0.1 | 7 | 885.5 GB | 457.5 GB + NPTEL/Rasa slices | 3.15 GB |
+| P2 | Reserve: only if P1 falls short or once the licence clears; Seamless timing sample | 10 | 851.2 GB | 23.3 GB | 1.22 GB |
+| EVAL | Test only, never trained on | 5 | 21.3 GB | 10.6 GB per evaluation run | ~0 (manifests) |
+
+"Available" for P1 includes all 143.8 GB of Sangraha, of which only a 1.8 GB sample is read.
 
 ## Dropped from the list
 
