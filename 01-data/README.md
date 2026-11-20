@@ -43,7 +43,7 @@ Licence ledger per source. Run 10 h per language through every gate: language ID
 
 - **Done when:** Pilot manifest on the Hub; gate pass rate and cost per 1,000 h for each step; first timing statistics.
 - **Needs:** IN1 (same-week handoff), EV1 (same-week handoff), RL1 (same-week handoff)
-- **Status:** todo
+- **Status:** doing
 
 ### DA2 · Week 2 · Voice set and dialogues v0
 
