@@ -4,6 +4,7 @@ The audio codec that turns speech into tokens and back, the text vocabulary for 
 
 - **Owner:** _unassigned_
 - **Board:** [site/plan.html](../site/plan.html#view=section&section=TK) (phase IDs start with `TK`)
+- **Branch:** `sec/02-tokenizer`. Cut feature branches from it and open PRs into it; it merges into `main` when a phase is done ([GUIDELINES.md](../GUIDELINES.md) section 5).
 
 > Embedding is merged in here: it is the vocabulary and code tables these tokenizers feed, about two days of work on its own.
 

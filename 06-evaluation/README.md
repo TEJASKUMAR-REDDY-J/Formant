@@ -4,6 +4,7 @@ How we know it works: automatic metrics, Indic-FDB (our Indian-language full-dup
 
 - **Owner:** _unassigned_
 - **Board:** [site/plan.html](../site/plan.html#view=section&section=EV) (phase IDs start with `EV`)
+- **Branch:** `sec/06-evaluation`. Cut feature branches from it and open PRs into it; it merges into `main` when a phase is done ([GUIDELINES.md](../GUIDELINES.md) section 5).
 
 ## Scope for v0.1
 

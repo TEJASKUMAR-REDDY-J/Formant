@@ -4,6 +4,7 @@ Kaggle, the Hugging Face Hub, the laptop and this repo working as one pipeline.
 
 - **Owner:** _unassigned_
 - **Board:** [site/plan.html](../site/plan.html#view=section&section=IN) (phase IDs start with `IN`)
+- **Branch:** `sec/10-infrastructure`. Cut feature branches from it and open PRs into it; it merges into `main` when a phase is done ([GUIDELINES.md](../GUIDELINES.md) section 5).
 
 ## Scope for v0.1
 

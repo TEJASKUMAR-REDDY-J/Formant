@@ -4,6 +4,7 @@ All audio and text the models learn from: licensed sources, quality gates, speak
 
 - **Owner:** _unassigned_
 - **Board:** [site/plan.html](../site/plan.html#view=section&section=DA) (phase IDs start with `DA`)
+- **Branch:** `sec/01-data`. Cut feature branches from it and open PRs into it; it merges into `main` when a phase is done ([GUIDELINES.md](../GUIDELINES.md) section 5).
 
 ## Scope for v0.1
 

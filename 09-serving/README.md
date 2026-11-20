@@ -4,6 +4,7 @@ The real-time program on the laptop, not a server: audio in and out every 80 ms,
 
 - **Owner:** _unassigned_
 - **Board:** [site/plan.html](../site/plan.html#view=section&section=SV) (phase IDs start with `SV`)
+- **Branch:** `sec/09-serving`. Cut feature branches from it and open PRs into it; it merges into `main` when a phase is done ([GUIDELINES.md](../GUIDELINES.md) section 5).
 
 ## Scope for v0.1
 
