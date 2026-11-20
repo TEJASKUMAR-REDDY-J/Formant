@@ -4,6 +4,7 @@ Making trained models behave: spoken-style tuning for the thinker, one consisten
 
 - **Owner:** _unassigned_
 - **Board:** [site/plan.html](../site/plan.html#view=section&section=PT) (phase IDs start with `PT`)
+- **Branch:** `sec/05-post-training`. Cut feature branches from it and open PRs into it; it merges into `main` when a phase is done ([GUIDELINES.md](../GUIDELINES.md) section 5).
 
 ## Scope for v0.1
 

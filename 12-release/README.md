@@ -4,6 +4,7 @@ What goes public and on what terms: licences, consent, cards, the site, and the 
 
 - **Owner:** _unassigned_
 - **Board:** [site/plan.html](../site/plan.html#view=section&section=RL) (phase IDs start with `RL`)
+- **Branch:** `sec/12-release`. Cut feature branches from it and open PRs into it; it merges into `main` when a phase is done ([GUIDELINES.md](../GUIDELINES.md) section 5).
 
 ## Scope for v0.1
 

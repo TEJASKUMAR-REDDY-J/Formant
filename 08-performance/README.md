@@ -4,6 +4,7 @@ Two things: training speed on T4s, and real-time speed on the i3 (80 ms frame de
 
 - **Owner:** _unassigned_
 - **Board:** [site/plan.html](../site/plan.html#view=section&section=PF) (phase IDs start with `PF`)
+- **Branch:** `sec/08-performance`. Cut feature branches from it and open PRs into it; it merges into `main` when a phase is done ([GUIDELINES.md](../GUIDELINES.md) section 5).
 
 ## Scope for v0.1
 

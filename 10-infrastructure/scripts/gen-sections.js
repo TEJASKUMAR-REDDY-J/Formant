@@ -135,7 +135,7 @@ P.sections.forEach((s, i) => {
 <h1>${esc(s.name)}</h1>
 <p class="lede">${esc(s.means)}</p>
 ${s.merged ? `<p class="note">${esc(s.merged)}</p>` : ''}
-<div class="facts"><span>Phases <b>${s.cells.map(c => c.id).join(' · ')}</b></span><span>GPU <b>${hi ? `${lo}–${hi} T4-hours` : 'none'}</b></span><span>Documents <b>${ds.length}</b></span><span><a href="/plan.html#view=section&section=${s.code}">Open on the plan board</a></span></div>
+<div class="facts"><span>Phases <b>${s.cells.map(c => c.id).join(' · ')}</b></span><span>GPU <b>${hi ? `${lo}–${hi} T4-hours` : 'none'}</b></span><span>Documents <b>${ds.length}</b></span><span>Branch <a href="${REPO}/tree/sec/${s.folder}" target="_blank" rel="noopener"><b>sec/${s.folder}</b></a></span><span><a href="/plan.html#view=section&section=${s.code}">Open on the plan board</a></span></div>
 </div></header>
 <section><div class="wrap">
 <h2>Scope</h2>
