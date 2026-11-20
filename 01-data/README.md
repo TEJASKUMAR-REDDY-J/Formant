@@ -7,8 +7,8 @@ All audio and text the models learn from: licensed sources, quality gates, speak
 
 ## Scope for v0.1
 
-- ~1.5–2k h single-speaker speech as codec tokens (Hindi ~800 h, 300 h each other language)
-- ≥ 200 h two-channel Hindi/Hinglish dialogue (synthetic + split real)
+- ~2–2.4k h single-speaker speech as codec tokens (Hindi ~800 h, Indian English ~400 h, ~300 h each other language)
+- ≥ 250 h two-channel Hindi, English and Hinglish dialogue (synthetic + split real)
 - Spoken-style Q&A text for the thinker
 - Speaker-disjoint test sets
 
@@ -19,7 +19,8 @@ All audio and text the models learn from: licensed sources, quality gates, speak
 
 ## What to expect
 
-- Hindi is the strongest language; Tamil and Telugu have fewer clean hours
+- English is the cheapest language to add: open speech is plentiful and the codec, backbone and thinker are all strongest in it. The work is Indian-accented English, not English itself
+- Hindi is the strongest Indian language; Tamil and Telugu have fewer clean hours
 - Real two-party Indic conversation is scarce, so synthetic speech carries most of the duplex signal
 - Data is the biggest schedule risk in week 2
 
@@ -46,11 +47,11 @@ Licence ledger per source. Run 10 h per language through every gate: language ID
 
 ### DA2 · Week 2 · Voice set and dialogues v0
 
-Ingest ~1.5–2k h and tokenise with the chosen codec. Generate ≥ 200 h of Hindi/Hinglish two-channel dialogue: LLM-written scripts, open Indic TTS voices, DA1 timings. Split real conversations with the speaker splitter. Build the thinker's spoken-style text set.
+Ingest ~2–2.4k h and tokenise with the chosen codec. Generate ≥ 250 h of Hindi, English and Hinglish two-channel dialogue: LLM-written scripts, open Indic TTS voices, DA1 timings. Split real conversations with the speaker splitter. Build the thinker's spoken-style text set.
 
-- **Done when:** ≥ 1.5k h of tokens and ≥ 200 h of dialogue on the Hub, every shard tagged with source, licence and tokenizer hash.
+- **Done when:** ≥ 2k h of tokens and ≥ 250 h of dialogue on the Hub, every shard tagged with source, licence and tokenizer hash.
 - **Needs:** DA1, TK1, EV1
-- **GPU:** 60–80 T4-hours
+- **GPU:** 65–90 T4-hours
 - **Status:** todo
 
 ### DA3 · Week 3 · Grow and check

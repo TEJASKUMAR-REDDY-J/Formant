@@ -8,7 +8,7 @@ Named after formants: the resonances of the vocal tract that make each vowel sou
 
 ## Status
 
-**v0.1 in four weeks.** Full-duplex Hindi and Hinglish; Bengali, Marathi, Tamil and Telugu through the cascade fallback until v0.2.
+**v0.1 in four weeks.** Full-duplex Hindi, English and Hinglish; Bengali, Marathi, Tamil and Telugu through the cascade fallback until v0.2.
 
 - Code: https://github.com/TEJASKUMAR-REDDY-J/Formant
 - Project site: `site/index.html`

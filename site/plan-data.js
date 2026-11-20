@@ -8,7 +8,7 @@ window.PLAN = {
   name: "Formant",
   version: "v9",
   updated: "2026-11-20",
-  goal: "Formant v0.1 in four weeks: an offline voice agent on one i3 laptop that holds a full-duplex conversation in Hindi and Hinglish, with Bengali, Marathi, Tamil and Telugu answered through the cascade fallback until v0.2.",
+  goal: "Formant v0.1 in four weeks: an offline voice agent on one i3 laptop that holds a full-duplex conversation in Hindi, English and Hinglish, with Bengali, Marathi, Tamil and Telugu answered through the cascade fallback until v0.2.",
   constraints: [
     "Runtime: Intel i3-10110U, 2 cores, UHD 620 graphics, 24 GB DDR4, measured 20.8 GB/s memory copy. No GPU, no cloud.",
     "Training: Kaggle 2× T4 (fp16 only, no bf16), 12-hour sessions, ~30 session-hours a week per account (~60 T4-hours).",
@@ -25,14 +25,14 @@ window.PLAN = {
     {
       code: "DA", num: "01", folder: "01-data", name: "Data",
       means: "All audio and text the models learn from: licensed sources, quality gates, speaker splitting, conversation timing statistics, synthetic dialogues, thinker text and the held-out tests.",
-      scope: ["~1.5–2k h single-speaker speech as codec tokens (Hindi ~800 h, 300 h each other language)", "≥ 200 h two-channel Hindi/Hinglish dialogue (synthetic + split real)", "Spoken-style Q&A text for the thinker", "Speaker-disjoint test sets"],
+      scope: ["~2–2.4k h single-speaker speech as codec tokens (Hindi ~800 h, Indian English ~400 h, ~300 h each other language)", "≥ 250 h two-channel Hindi, English and Hinglish dialogue (synthetic + split real)", "Spoken-style Q&A text for the thinker", "Speaker-disjoint test sets"],
       out: ["5–10k h voice set and all-language dialogue (v0.2)", "Buying data or recording new conversations"],
-      expect: ["Hindi is the strongest language; Tamil and Telugu have fewer clean hours", "Real two-party Indic conversation is scarce, so synthetic speech carries most of the duplex signal", "Data is the biggest schedule risk in week 2"],
+      expect: ["English is the cheapest language to add: open speech is plentiful and the codec, backbone and thinker are all strongest in it. The work is Indian-accented English, not English itself", "Hindi is the strongest Indian language; Tamil and Telugu have fewer clean hours", "Real two-party Indic conversation is scarce, so synthetic speech carries most of the duplex signal", "Data is the biggest schedule risk in week 2"],
       inputs: ["Licence ledger (12-release)", "Frozen codec (02-tokenizer)", "Test-speaker lists (06-evaluation)"],
       outputs: ["Token shards and manifests on the Hub → 04-training, 05-post-training", "Timing statistics → 03-architecture, 06-evaluation"],
       cells: [
         { id: "DA1", title: "Licences and pilot", goal: "Licence ledger per source. Run 10 h per language through every gate: language ID ≥ 0.9, SNR ≥ 15 dB, 2–30 s clips, two-recogniser CER agreement ≤ 15%, PII masking. Measure gaps, overlaps and backchannels on pilot conversations.", done: "Pilot manifest on the Hub; gate pass rate and cost per 1,000 h for each step; first timing statistics.", needs: ["~IN1", "~EV1", "~RL1"], gpu: "", status: "todo" },
-        { id: "DA2", title: "Voice set and dialogues v0", goal: "Ingest ~1.5–2k h and tokenise with the chosen codec. Generate ≥ 200 h of Hindi/Hinglish two-channel dialogue: LLM-written scripts, open Indic TTS voices, DA1 timings. Split real conversations with the speaker splitter. Build the thinker's spoken-style text set.", done: "≥ 1.5k h of tokens and ≥ 200 h of dialogue on the Hub, every shard tagged with source, licence and tokenizer hash.", needs: ["DA1", "TK1", "EV1"], gpu: "60–80", status: "todo" },
+        { id: "DA2", title: "Voice set and dialogues v0", goal: "Ingest ~2–2.4k h and tokenise with the chosen codec. Generate ≥ 250 h of Hindi, English and Hinglish two-channel dialogue: LLM-written scripts, open Indic TTS voices, DA1 timings. Split real conversations with the speaker splitter. Build the thinker's spoken-style text set.", done: "≥ 2k h of tokens and ≥ 250 h of dialogue on the Hub, every shard tagged with source, licence and tokenizer hash.", needs: ["DA1", "TK1", "EV1"], gpu: "65–90", status: "todo" },
         { id: "DA3", title: "Grow and check", goal: "Keep shards flowing into training runs; top up the weaker languages; native-speaker spot-check of 100 synthetic clips per language.", done: "Naturalness spot-check ≥ 3.5/5; hours report per language.", needs: ["DA2"], gpu: "20–30", status: "todo" },
         { id: "DA4", title: "Freeze and document", goal: "Freeze v0.1 splits; write data cards; publish the recipe (scripts and manifests, not audio).", done: "Data cards and recipe in the repo; someone else can rebuild the manifests.", needs: ["DA3", "RL3"], gpu: "", status: "todo" }
       ]
@@ -72,15 +72,15 @@ window.PLAN = {
       code: "TR", num: "04", folder: "04-training", name: "Training",
       merged: "New section: the first draft had post-training but no pre-training, which is the largest GPU cost.",
       means: "Pre-training the talker: smoke runs, speech pre-training on the voice set, two-stream dialogue training, robustness.",
-      scope: ["Smoke runs on a small model", "0.6B speech pre-training on ~1.5–2k h, 2–3 epochs", "Hindi/Hinglish two-stream dialogue training", "Noise, crosstalk and echo robustness"],
-      out: ["Training on 5–10k h (v0.2)", "Duplex training in all five languages (v0.2)"],
-      expect: ["About 20–30 T4-hours per epoch on ~2k h at realistic T4 efficiency", "fp16 only, so loss scaling must be watched", "Expect intelligible Hindi speech with natural turn timing; voice quality below Sarvam's Bulbul"],
+      scope: ["Smoke runs on a small model", "0.6B speech pre-training on ~2–2.4k h, 2–3 epochs", "Hindi, English and Hinglish two-stream dialogue training", "Noise, crosstalk and echo robustness"],
+      out: ["Training on 5–10k h (v0.2)", "Duplex training in Bengali, Marathi, Tamil and Telugu (v0.2)"],
+      expect: ["About 20–30 T4-hours per epoch on ~2k h at realistic T4 efficiency", "fp16 only, so loss scaling must be watched", "Expect intelligible Hindi and English speech with natural turn timing; voice quality below Sarvam's Bulbul"],
       inputs: ["Token shards (01-data)", "Frozen tokenizers (02-tokenizer)", "Runner (10-infrastructure)", "Dashboards (11-monitoring)"],
       outputs: ["Talker checkpoints on the Hub → 05-post-training, 07-quantization, 09-serving"],
       cells: [
         { id: "TR1", title: "Smoke runs", goal: "~50M talker on pilot or public codec tokens: check fp16 stability, loss per codebook, resume after a killed session.", done: "Loss falls on every codebook; resume reproduces the curve.", needs: ["~IN1", "~MO1"], gpu: "5", status: "todo" },
         { id: "TR2", title: "Launch pre-training", goal: "Initialise from Qwen3-0.6B with the frozen tables; stream shards as they land; DDP on 2× T4.", done: "Run passes 1 epoch with stable loss; checkpoint every 30–45 min on the Hub.", needs: ["TR1", "AR1", "~TK2", "~DA2", "~PF2"], gpu: "25–35", status: "todo" },
-        { id: "TR3", title: "Finish pre-training, dialogue", goal: "Complete 2–3 epochs; then train both streams on Hindi/Hinglish dialogues (synthetic + split real).", done: "Probe CER ≤ 25% in all five languages; Hindi takeover rate ≥ 0.8 on held-out clips.", needs: ["TR2", "DA2", "TK2"], gpu: "60–100", status: "todo" },
+        { id: "TR3", title: "Finish pre-training, dialogue", goal: "Complete 2–3 epochs; then train both streams on Hindi, English and Hinglish dialogues (synthetic + split real).", done: "Probe CER ≤ 25% in all six languages; takeover rate ≥ 0.8 in Hindi and English on held-out clips.", needs: ["TR2", "DA2", "TK2"], gpu: "70–110", status: "todo" },
         { id: "TR4", title: "Robustness", goal: "Add noise, far-field audio, crosstalk and echo-like leakage; pick the final checkpoint with evaluation.", done: "Noisy CER within 5 points of clean; final checkpoint tagged.", needs: ["TR3", "EV3"], gpu: "10", status: "todo" }
       ]
     },
@@ -102,7 +102,7 @@ window.PLAN = {
     {
       code: "EV", num: "06", folder: "06-evaluation", name: "Evaluation",
       means: "How we know it works: automatic metrics, Indic-FDB (our Indian-language full-duplex benchmark), small human panels and comparison with baselines.",
-      scope: ["Metric spec and speaker-disjoint test sets", "One-command harness", "Indic-FDB v0 for Hindi/Hinglish", "Comparison with the cascade, Human-1 and a Sarvam cloud sample"],
+      scope: ["Metric spec and speaker-disjoint test sets", "One-command harness", "Indic-FDB v0 for Hindi, English and Hinglish; Full-Duplex-Bench in English", "Comparison with the cascade, Human-1 and a Sarvam cloud sample"],
       out: ["Full blind head-to-head against Sarvam with many raters (v0.2)"],
       expect: ["Automatic MOS predictors are not validated for Indian languages, so they only compare our own versions", "Panels of 2–3 raters per language give direction, not proof"],
       inputs: ["Test speakers (01-data)", "Builds to test (04, 07, 09)"],
@@ -111,7 +111,7 @@ window.PLAN = {
         { id: "EV1", title: "Metrics and test speakers", goal: "Define every metric; reserve test speakers per language before ingest; harness skeleton.", done: "Metric spec and frozen test-speaker lists.", needs: ["~DA1"], gpu: "", status: "todo" },
         { id: "EV2", title: "Harness and Indic-FDB scripts", goal: "CER from two recognisers, speaker similarity, relative MOS, turn-taking metrics, latency logs. Write Indic-FDB v0 scenarios (pauses, backchannels, barge-in, code-switching, noise) using the methods of Full-Duplex-Bench v3 and M3-DuplexBench.", done: "One command scores the cascade and any checkpoint.", needs: ["EV1", "SV1"], gpu: "5", status: "todo" },
         { id: "EV3", title: "Evaluate during training", goal: "Score probe checkpoints, the tuned thinker and each quantisation step.", done: "Weekly score sheet that TR4 and QZ4 decide on.", needs: ["EV2", "~MO3"], gpu: "5", status: "todo" },
-        { id: "EV4", title: "Indic-FDB v0 run", goal: "Run the benchmark on the cascade, Formant duplex, Human-1 (Hindi) and a small Sarvam cloud sample; 2 native raters per language for naturalness.", done: "v0.1 results page with targets and results clearly labelled.", needs: ["EV3", "SV3", "~QZ4"], gpu: "10", status: "todo" }
+        { id: "EV4", title: "Indic-FDB v0 run", goal: "Run the benchmark on the cascade, Formant duplex, Human-1 (Hindi) and a small Sarvam cloud sample; 2 native raters per language for naturalness. Run Full-Duplex-Bench in English so the results sit next to published open models.", done: "v0.1 results page with targets and results clearly labelled.", needs: ["EV3", "SV3", "~QZ4"], gpu: "10", status: "todo" }
       ]
     },
     {
@@ -153,9 +153,9 @@ window.PLAN = {
       inputs: ["Quantised models (07)", "Runtime speed work (08)", "Coupling spec (03)"],
       outputs: ["The demo and the runtime → 06-evaluation, 12-release"],
       cells: [
-        { id: "SV1", title: "Cascade floor", goal: "Offline recogniser (IndicConformer class) → Sarvam 30B in llama.cpp → open Indic TTS (Indic Parler-TTS or IndicF5), push-to-talk, all five languages.", done: "≤ 1.5 s p50 response latency on the i3.", needs: ["~PF1", "~QZ1"], gpu: "", status: "todo" },
+        { id: "SV1", title: "Cascade floor", goal: "Offline recogniser (IndicConformer class) → Sarvam 30B in llama.cpp → open Indic TTS (Indic Parler-TTS or IndicF5), push-to-talk, all six languages.", done: "≤ 1.5 s p50 response latency on the i3.", needs: ["~PF1", "~QZ1"], gpu: "", status: "todo" },
         { id: "SV2", title: "Duplex audio loop", goal: "80 ms frame clock, mic and speaker I/O, WebRTC AEC3, codec decoder on the iGPU, replayed talker output to test the loop.", done: "Plays and listens at once on laptop speakers without hearing itself.", needs: ["SV1", "~QZ2"], gpu: "", status: "todo" },
-        { id: "SV3", title: "Talker in the loop", goal: "int8 talker on the iGPU; barge-in stops speech within 300 ms; falls back to the cascade when frames are late.", done: "Live Hindi duplex conversation on the i3.", needs: ["SV2", "~QZ3", "~PF3"], gpu: "", status: "todo" },
+        { id: "SV3", title: "Talker in the loop", goal: "int8 talker on the iGPU; barge-in stops speech within 300 ms; falls back to the cascade when frames are late.", done: "Live Hindi and English duplex conversation on the i3.", needs: ["SV2", "~QZ3", "~PF3"], gpu: "", status: "todo" },
         { id: "SV4", title: "Coupled agent", goal: "Thinker streams into the talker live; one command starts everything; 30-minute soak.", done: "Full offline conversation recorded for the release video.", needs: ["SV3", "~PT4", "~PF4"], gpu: "", status: "todo" }
       ]
     },
@@ -220,7 +220,7 @@ window.PLAN = {
     { name: "Sarvam 2026 stack", who: "Sarvam AI", what: "Saaras V4 recognition (22 languages), Bulbul V4 voices, Sarvam 30B and 105B open weights.", use: "Sarvam 30B is the v0.1 thinker; Sarvam's cloud stack is the comparison target." }
   ],
   backlog: [
-    "Voice set 5–10k h and duplex training in all five languages",
+    "Voice set 5–10k h and duplex training in all six languages",
     "Own voice from ≥ 500 h of one consenting speaker",
     "Hidden-state coupling adapters (~100M)",
     "Preference or RL tuning for turn timing",
@@ -230,8 +230,8 @@ window.PLAN = {
     "Windows installer; paper"
   ],
   risks: [
-    ["Data in week 2", "Ingest, tokenising and synthetic dialogues all land in one week. Start downloads in week 1; cut to Hindi + one more language if late."],
-    ["GPU budget", "v0.1 needs about 270–410 T4-hours; one account gives ~240 in four weeks. Plan on two teammates' accounts."],
+    ["Data in week 2", "Ingest, tokenising and synthetic dialogues all land in one week. Start downloads in week 1; cut to Hindi + English if late."],
+    ["GPU budget", "v0.1 needs about 290–435 T4-hours; one account gives ~240 in four weeks. Plan on two teammates' accounts."],
     ["Codec on Indian languages", "Retroflex and aspirated sounds may smear. TK1 catches it in week 1; the fix is a decoder-only fine-tune that keeps tokens valid."],
     ["Echo on laptop speakers", "Full duplex hears itself. AEC3 in SV2; headset fallback for demos."],
     ["Shared memory bus", "iGPU and CPU share 20.8 GB/s. PF4 throttles the thinker to protect the talker's frame."],

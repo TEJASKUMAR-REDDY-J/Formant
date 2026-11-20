@@ -9,7 +9,7 @@ How we know it works: automatic metrics, Indic-FDB (our Indian-language full-dup
 
 - Metric spec and speaker-disjoint test sets
 - One-command harness
-- Indic-FDB v0 for Hindi/Hinglish
+- Indic-FDB v0 for Hindi, English and Hinglish; Full-Duplex-Bench in English
 - Comparison with the cascade, Human-1 and a Sarvam cloud sample
 
 **Not in v0.1:**
@@ -60,7 +60,7 @@ Score probe checkpoints, the tuned thinker and each quantisation step.
 
 ### EV4 · Week 4 · Indic-FDB v0 run
 
-Run the benchmark on the cascade, Formant duplex, Human-1 (Hindi) and a small Sarvam cloud sample; 2 native raters per language for naturalness.
+Run the benchmark on the cascade, Formant duplex, Human-1 (Hindi) and a small Sarvam cloud sample; 2 native raters per language for naturalness. Run Full-Duplex-Bench in English so the results sit next to published open models.
 
 - **Done when:** v0.1 results page with targets and results clearly labelled.
 - **Needs:** EV3, SV3, QZ4 (same-week handoff)

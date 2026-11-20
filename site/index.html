@@ -210,7 +210,7 @@ section{padding-block:120px;position:relative;overflow-x:clip}
 .c-os{background:var(--line);color:var(--muted)!important}
 
 /* languages */
-.langs{display:grid;grid-template-columns:repeat(6,1fr);gap:14px}
+.langs{display:grid;grid-template-columns:repeat(7,1fr);gap:14px}
 .lang{padding:28px 18px 22px;display:flex;flex-direction:column;gap:12px;min-width:0;text-align:left}
 .lang h3{font-size:24px;font-weight:700;letter-spacing:-.02em}
 .lang .name{font-size:14px;color:var(--muted)}
@@ -325,7 +325,7 @@ footer a{color:var(--ink);text-decoration-color:var(--accent);text-underline-off
   .spiral-box{max-width:440px}
   .four{grid-template-columns:1fr 1fr}
   .specs,.targets,.steps,.events,.ms{grid-template-columns:1fr 1fr}
-  .langs{grid-template-columns:repeat(3,1fr)}
+  .langs{grid-template-columns:repeat(4,1fr)}
   .stats{grid-template-columns:1fr 1fr}
   .stat:nth-child(3){border-left:0}
   .stat:nth-child(n+3){border-top:1px solid var(--line)}
@@ -395,7 +395,7 @@ body::after,.hero::before,.hero::after,.glow-l::before,.glow-r::before,.spiral-b
       <img class="hero-logo" src="logo.webp" alt="Formant" width="1000" height="175">
       <span class="eyebrow"><span class="spark"></span>Full-duplex voice AI · Indian languages</span>
       <h1>Talks while it&nbsp;listens. <span class="l2 fire">Runs on a budget laptop.</span></h1>
-      <p class="lede">Formant hears you and speaks at the same time, the way people do. It answers in <b>Hindi, Bengali, Marathi, Tamil, Telugu and Hinglish</b>, and runs fully offline on a 2019 laptop with <b>two CPU cores and no graphics card</b>.</p>
+      <p class="lede">Formant hears you and speaks at the same time, the way people do. It answers in <b>English, Hindi, Bengali, Marathi, Tamil, Telugu and Hinglish</b>, and runs fully offline on a 2019 laptop with <b>two CPU cores and no graphics card</b>.</p>
       <div class="cta">
         <a class="btn primary" href="#how">See how it works</a>
         <a class="btn ghost" href="plan.html">Open the plan</a>
@@ -409,7 +409,7 @@ body::after,.hero::before,.hero::after,.glow-l::before,.glow-r::before,.spiral-b
   <div class="wrap">
     <div class="stats">
       <div class="stat"><div class="v fire">80<small>ms</small></div><div class="k">One listening-and-speaking frame</div></div>
-      <div class="stat"><div class="v fire">5<small>+ Hinglish</small></div><div class="k">Indian languages</div></div>
+      <div class="stat"><div class="v fire">6<small>+ Hinglish</small></div><div class="k">Languages, English included</div></div>
       <div class="stat"><div class="v fire">0<small>GPUs</small></div><div class="k">Runs on CPU and built-in graphics</div></div>
       <div class="stat"><div class="v fire">0<small>cloud calls</small></div><div class="k">Fully offline</div></div>
     </div>
@@ -422,7 +422,7 @@ body::after,.hero::before,.hero::after,.glow-l::before,.glow-r::before,.spiral-b
     <h2 class="h2">India needs four things at once. <span class="dim">No open system does all four.</span></h2>
     <p class="sub">Every big lab is building voice agents. The open ones each solve part of the problem. Formant is an attempt to solve all of it in one system, and to publish everything needed to reproduce it.</p>
     <div class="four mt-l">
-      <div class="gcard"><div class="ico"><svg viewBox="0 0 24 24"><path d="M4 6h10M9 4v2M6 6c0 4 3 7 7 8M12 6c-1 4-4 7-8 8"/><path d="M13 20l4-9 4 9M14.5 17h5"/></svg></div><h3>Indian languages and code-mixing</h3><p>Five major languages plus Hinglish, with switches mid-sentence, and Indian names and numbers said the way people say them.</p></div>
+      <div class="gcard"><div class="ico"><svg viewBox="0 0 24 24"><path d="M4 6h10M9 4v2M6 6c0 4 3 7 7 8M12 6c-1 4-4 7-8 8"/><path d="M13 20l4-9 4 9M14.5 17h5"/></svg></div><h3>Indian languages and code-mixing</h3><p>English and five major Indian languages plus Hinglish, with switches mid-sentence, and Indian names and numbers said the way people say them.</p></div>
       <div class="gcard"><div class="ico"><svg viewBox="0 0 24 24"><path d="M3 12h2M7 8v8M11 5v14M15 9v6M19 11v2"/></svg></div><h3>Full-duplex conversation</h3><p>Listens while speaking. Says "haan" while you talk, waits through your pauses, and stops when you cut in.</p></div>
       <div class="gcard"><div class="ico"><svg viewBox="0 0 24 24"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.8.8 1 1.5 1 2.5h6c0-1 .2-1.7 1-2.5A6 6 0 0 0 12 3z"/></svg></div><h3>Replies that make sense</h3><p>A separate thinker model decides what to say, so the voice is fluent and the answer is complete and on topic.</p></div>
       <div class="gcard"><div class="ico"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="11" rx="2"/><path d="M2 19h20"/></svg></div><h3>Offline on cheap hardware</h3><p>No internet and no GPU. If it runs on a 2-core laptop, it has headroom on any edge chip or phone.</p></div>
@@ -449,9 +449,9 @@ body::after,.hero::before,.hero::after,.glow-l::before,.glow-r::before,.spiral-b
       <div class="r"><div class="c">Openness</div><div class="c"><span class="lab">Sarvam today</span>Open-weight Sarvam 30B and 105B; speech models through a paid API</div><div class="c"><span class="lab">Formant target</span>Open weights for every part, plus the data recipe and benchmark</div><div class="c"><span class="lab">Call</span><span class="verdict v-beat">Beat</span></div></div>
       <div class="r"><div class="c">Cost per minute</div><div class="c"><span class="lab">Sarvam today</span>Paid per use. Bulbul V4 Flash: ₹20 per 10,000 characters</div><div class="c"><span class="lab">Formant target</span>₹0 at runtime</div><div class="c"><span class="lab">Call</span><span class="verdict v-beat">Beat</span></div></div>
       <div class="r"><div class="c">Duplex benchmark</div><div class="c"><span class="lab">Sarvam today</span>No public Indian-language duplex benchmark</div><div class="c"><span class="lab">Formant target</span>Indic-FDB, the first one</div><div class="c"><span class="lab">Call</span><span class="verdict v-beat">Beat</span></div></div>
-      <div class="r"><div class="c">Speech recognition</div><div class="c"><span class="lab">Sarvam today</span>Saaras V4: 22 languages, streaming under 150 ms, speaker diarisation</div><div class="c"><span class="lab">Formant target</span>Match on-device accuracy on 5 languages; within a few points of Saaras on conversational Hindi</div><div class="c"><span class="lab">Call</span><span class="verdict v-close">Close</span></div></div>
+      <div class="r"><div class="c">Speech recognition</div><div class="c"><span class="lab">Sarvam today</span>Saaras V4: 22 languages, streaming under 150 ms, speaker diarisation</div><div class="c"><span class="lab">Formant target</span>Match on-device accuracy on 6 languages; within a few points of Saaras on conversational Hindi</div><div class="c"><span class="lab">Call</span><span class="verdict v-close">Close</span></div></div>
       <div class="r"><div class="c">Voice quality</div><div class="c"><span class="lab">Sarvam today</span>Bulbul V4: expressive, with laughter and emphasis, 11 languages</div><div class="c"><span class="lab">Formant target</span>Within 0.3 MOS of Bulbul V4 Flash in conversation</div><div class="c"><span class="lab">Call</span><span class="verdict v-close">Close</span></div></div>
-      <div class="r"><div class="c">Language count</div><div class="c"><span class="lab">Sarvam today</span>22 for recognition, 11 for voice</div><div class="c"><span class="lab">Formant target</span>5 + Hinglish, built so more can be added</div><div class="c"><span class="lab">Call</span><span class="verdict v-trail">Trail</span></div></div>
+      <div class="r"><div class="c">Language count</div><div class="c"><span class="lab">Sarvam today</span>22 for recognition, 11 for voice</div><div class="c"><span class="lab">Formant target</span>English, 5 Indian languages and Hinglish, built so more can be added</div><div class="c"><span class="lab">Call</span><span class="verdict v-trail">Trail</span></div></div>
       <div class="r"><div class="c">General knowledge</div><div class="c"><span class="lab">Sarvam today</span>Sarvam 105B</div><div class="c"><span class="lab">Formant target</span>Uses Sarvam 30B or the course's 120B as its thinker</div><div class="c"><span class="lab">Call</span><span class="verdict v-trail">Trail</span></div></div>
       </div>
     <div class="gcard h2h mt-l">
@@ -705,9 +705,10 @@ body::after,.hero::before,.hero::after,.glow-l::before,.glow-r::before,.spiral-b
 <section id="languages" class="glow-r">
   <div class="wrap">
     <div class="kicker">Languages</div>
-    <h2 class="h2">Five languages <span class="fire">and the way people mix them.</span></h2>
-    <p class="sub">Two language families, Indo-Aryan and Dravidian, covering the largest speaker bases. Every language has open recordings in AI4Bharat's IndicVoices to learn from.</p>
+    <h2 class="h2">Six languages <span class="fire">and the way people mix them.</span></h2>
+    <p class="sub">English, the language that links the country, plus two Indian language families, Indo-Aryan and Dravidian, covering the largest speaker bases. Every Indian language has open recordings in AI4Bharat's IndicVoices; English is trained on Indian-accented speech.</p>
     <div class="langs mt-l">
+      <div class="gcard lang"><span class="fam">Link language</span><h3>English</h3><div class="name">Indian-accented</div></div>
       <div class="gcard lang"><span class="fam">Indo-Aryan</span><h3>Hindi</h3></div>
       <div class="gcard lang"><span class="fam">Indo-Aryan</span><h3>Bengali</h3></div>
       <div class="gcard lang"><span class="fam">Indo-Aryan</span><h3>Marathi</h3></div>
@@ -729,7 +730,7 @@ body::after,.hero::before,.hero::after,.glow-l::before,.glow-r::before,.spiral-b
       <div class="gcard tg"><div class="v fire">≥ 80%</div><div class="k">Complete replies</div><div class="r">And ≥ 75% that follow the prompt. Human-1: ~42% and ~53%.</div></div>
       <div class="gcard tg"><div class="v fire">≤ 10%</div><div class="k">Character error rate</div><div class="r">When Formant's Hindi speech is transcribed back to text.</div></div>
       <div class="gcard tg"><div class="v fire">≤ 15 GB/s</div><div class="k">Memory speed used</div><div class="r">About 70% of what this laptop measured.</div></div>
-      <div class="gcard tg"><div class="v fire">5 + 1</div><div class="k">Languages</div><div class="r">The only open Indian duplex model today covers Hindi only.</div></div>
+      <div class="gcard tg"><div class="v fire">6 + 1</div><div class="k">Languages</div><div class="r">The only open Indian duplex model today covers Hindi only.</div></div>
     </div>
   </div>
 </section>

@@ -10,20 +10,20 @@ Pre-training the talker: smoke runs, speech pre-training on the voice set, two-s
 ## Scope for v0.1
 
 - Smoke runs on a small model
-- 0.6B speech pre-training on ~1.5–2k h, 2–3 epochs
-- Hindi/Hinglish two-stream dialogue training
+- 0.6B speech pre-training on ~2–2.4k h, 2–3 epochs
+- Hindi, English and Hinglish two-stream dialogue training
 - Noise, crosstalk and echo robustness
 
 **Not in v0.1:**
 
 - Training on 5–10k h (v0.2)
-- Duplex training in all five languages (v0.2)
+- Duplex training in Bengali, Marathi, Tamil and Telugu (v0.2)
 
 ## What to expect
 
 - About 20–30 T4-hours per epoch on ~2k h at realistic T4 efficiency
 - fp16 only, so loss scaling must be watched
-- Expect intelligible Hindi speech with natural turn timing; voice quality below Sarvam's Bulbul
+- Expect intelligible Hindi and English speech with natural turn timing; voice quality below Sarvam's Bulbul
 
 ## Takes in
 
@@ -58,11 +58,11 @@ Initialise from Qwen3-0.6B with the frozen tables; stream shards as they land; D
 
 ### TR3 · Week 3 · Finish pre-training, dialogue
 
-Complete 2–3 epochs; then train both streams on Hindi/Hinglish dialogues (synthetic + split real).
+Complete 2–3 epochs; then train both streams on Hindi, English and Hinglish dialogues (synthetic + split real).
 
-- **Done when:** Probe CER ≤ 25% in all five languages; Hindi takeover rate ≥ 0.8 on held-out clips.
+- **Done when:** Probe CER ≤ 25% in all six languages; takeover rate ≥ 0.8 in Hindi and English on held-out clips.
 - **Needs:** TR2, DA2, TK2
-- **GPU:** 60–100 T4-hours
+- **GPU:** 70–110 T4-hours
 - **Status:** todo
 
 ### TR4 · Week 4 · Robustness

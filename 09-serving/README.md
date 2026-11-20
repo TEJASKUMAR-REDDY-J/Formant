@@ -35,7 +35,7 @@ The real-time program on the laptop, not a server: audio in and out every 80 ms,
 
 ### SV1 · Week 1 · Cascade floor
 
-Offline recogniser (IndicConformer class) → Sarvam 30B in llama.cpp → open Indic TTS (Indic Parler-TTS or IndicF5), push-to-talk, all five languages.
+Offline recogniser (IndicConformer class) → Sarvam 30B in llama.cpp → open Indic TTS (Indic Parler-TTS or IndicF5), push-to-talk, all six languages.
 
 - **Done when:** ≤ 1.5 s p50 response latency on the i3.
 - **Needs:** PF1 (same-week handoff), QZ1 (same-week handoff)
@@ -53,7 +53,7 @@ Offline recogniser (IndicConformer class) → Sarvam 30B in llama.cpp → open I
 
 int8 talker on the iGPU; barge-in stops speech within 300 ms; falls back to the cascade when frames are late.
 
-- **Done when:** Live Hindi duplex conversation on the i3.
+- **Done when:** Live Hindi and English duplex conversation on the i3.
 - **Needs:** SV2, QZ3 (same-week handoff), PF3 (same-week handoff)
 - **Status:** todo
 
