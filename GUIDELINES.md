@@ -28,7 +28,8 @@ Each phase is one week, and all twelve sections work on the same phase number at
 - One owner per folder. The owner reviews every change in it.
 - A folder talks to others only through what its README lists under "Takes in" and "Hands over": paths on the Hub, file formats, spec documents. Changing a handover means telling the folders that consume it.
 - Code shared by two or more folders moves to `src/formant/` when that first happens, not before.
-- Subfolders inside a section: `configs/`, `scripts/`, `notebooks/`, `reports/`. Create them only when needed.
+- Subfolders inside a section: `configs/`, `scripts/`, `notebooks/`, `plans/`, `reports/`. Create them only when needed.
+- Each phase gets `plans/<ID>.md` before it starts (what, how, SOTA picks, efficiency, day-by-day) and `reports/<ID>.md` when it ends.
 
 ## 5. Git
 

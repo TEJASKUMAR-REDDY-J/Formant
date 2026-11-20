@@ -43,6 +43,7 @@ Fix layers, width, streams, acoustic delay, context (3–5 min, sliding window) 
 
 - **Done when:** Spec sheet whose active bytes fit the talker's 4.4 GB/s share and whose total fits ≤ 1.5 GB at int8; dense fallback spec kept.
 - **Needs:** PF1 (same-week handoff), TK1 (same-week handoff)
+- **Plan:** [plans/AR1.md](plans/AR1.md)
 - **Status:** todo
 
 ### AR2 · Week 2 · Thinker and turn state
@@ -79,6 +80,7 @@ Create a subfolder the first time you need it.
 ├── configs/      run, filter and export configs (YAML), one per job
 ├── scripts/      code for this section's jobs
 ├── notebooks/    Kaggle notebooks, outputs cleared before commit
+├── plans/        one file per phase, written before the phase starts: AR1.md, AR2.md, AR3.md, AR4.md
 └── reports/      one file per phase: AR1.md, AR2.md, AR3.md, AR4.md
 ```
 

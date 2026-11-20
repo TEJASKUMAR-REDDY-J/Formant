@@ -46,6 +46,7 @@ Pre-training the talker: smoke runs, speech pre-training on the voice set, two-s
 - **Done when:** Loss falls on every codebook; experts stay balanced; resume reproduces the curve; mixture weights fixed.
 - **Needs:** IN1 (same-week handoff), MO1 (same-week handoff)
 - **GPU:** 8–10 T4-hours
+- **Plan:** [plans/TR1.md](plans/TR1.md)
 - **Status:** todo
 
 ### TR2 · Week 2 · Launch pre-training
@@ -85,6 +86,7 @@ Create a subfolder the first time you need it.
 ├── configs/      run, filter and export configs (YAML), one per job
 ├── scripts/      code for this section's jobs
 ├── notebooks/    Kaggle notebooks, outputs cleared before commit
+├── plans/        one file per phase, written before the phase starts: TR1.md, TR2.md, TR3.md, TR4.md
 └── reports/      one file per phase: TR1.md, TR2.md, TR3.md, TR4.md
 ```
 

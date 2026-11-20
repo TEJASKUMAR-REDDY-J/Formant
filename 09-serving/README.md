@@ -35,10 +35,11 @@ The real-time program on the laptop, not a server: audio in and out every 80 ms,
 
 ### SV1 · Week 1 · Cascade floor
 
-Offline recogniser (IndicConformer class) → Sarvam 30B in llama.cpp → open Indic TTS (Indic Parler-TTS or IndicF5), push-to-talk, all six languages.
+Silero VAD → IndicConformer on the iGPU (Whisper-turbo or Moonshine for English) → Sarvam 30B in llama.cpp with a cached system prompt → Kokoro-82M for Hindi and English on the CPU, Indic Parler-TTS on the iGPU for the other languages; push-to-talk, everything streamed, all six languages.
 
 - **Done when:** ≤ 1.5 s p50 response latency on the i3.
 - **Needs:** PF1 (same-week handoff), QZ1 (same-week handoff)
+- **Plan:** [plans/SV1.md](plans/SV1.md)
 - **Status:** todo
 
 ### SV2 · Week 2 · Duplex audio loop
@@ -75,6 +76,7 @@ Create a subfolder the first time you need it.
 ├── configs/      run, filter and export configs (YAML), one per job
 ├── scripts/      code for this section's jobs
 ├── notebooks/    Kaggle notebooks, outputs cleared before commit
+├── plans/        one file per phase, written before the phase starts: SV1.md, SV2.md, SV3.md, SV4.md
 └── reports/      one file per phase: SV1.md, SV2.md, SV3.md, SV4.md
 ```
 

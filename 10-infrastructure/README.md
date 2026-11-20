@@ -33,10 +33,11 @@ Kaggle, the Hugging Face Hub, the laptop and this repo working as one pipeline.
 
 ### IN1 · Week 1 · Repo, storage, runner v0
 
-This repo and guidelines; pinned Kaggle and laptop environments; private Hub repos for shards and checkpoints; manifest schema; checkpoint-and-resume runner.
+This repo and guidelines; uv-locked Kaggle and laptop environments (laptop on F:, offline wheels on Kaggle); private Hub repos with Xet transfers; manifest schema; Trackio tracking; checkpoint-and-resume runner.
 
 - **Done when:** Fresh clone sets up both environments; a killed run resumes.
 - **Needs:** nothing
+- **Plan:** [plans/IN1.md](plans/IN1.md)
 - **Status:** doing
 
 ### IN2 · Week 2 · Data jobs
@@ -73,6 +74,7 @@ Create a subfolder the first time you need it.
 ├── configs/      run, filter and export configs (YAML), one per job
 ├── scripts/      code for this section's jobs
 ├── notebooks/    Kaggle notebooks, outputs cleared before commit
+├── plans/        one file per phase, written before the phase starts: IN1.md, IN2.md, IN3.md, IN4.md
 └── reports/      one file per phase: IN1.md, IN2.md, IN3.md, IN4.md
 ```
 

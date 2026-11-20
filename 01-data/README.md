@@ -81,6 +81,7 @@ Create a subfolder the first time you need it.
 ├── configs/      run, filter and export configs (YAML), one per job
 ├── scripts/      code for this section's jobs
 ├── notebooks/    Kaggle notebooks, outputs cleared before commit
+├── plans/        one file per phase, written before the phase starts: DA1.md, DA2.md, DA3.md, DA4.md
 └── reports/      one file per phase: DA1.md, DA2.md, DA3.md, DA4.md
 ```
 

@@ -40,6 +40,7 @@ Bandwidth (done: 20.8 GB/s). OpenVINO step time on the UHD 620 for a dense 0.6B 
 - **Done when:** Baseline sheet every later number is compared to.
 - **Needs:** nothing
 - **GPU:** 2 T4-hours
+- **Plan:** [plans/PF1.md](plans/PF1.md)
 - **Status:** doing
 
 ### PF2 · Week 2 · Training speed
@@ -77,6 +78,7 @@ Create a subfolder the first time you need it.
 ├── configs/      run, filter and export configs (YAML), one per job
 ├── scripts/      code for this section's jobs
 ├── notebooks/    Kaggle notebooks, outputs cleared before commit
+├── plans/        one file per phase, written before the phase starts: PF1.md, PF2.md, PF3.md, PF4.md
 └── reports/      one file per phase: PF1.md, PF2.md, PF3.md, PF4.md
 ```
 

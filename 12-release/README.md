@@ -39,6 +39,7 @@ Ledger of every dataset and model licence (codec candidates included); voice con
 
 - **Done when:** Every source tagged train-only, shareable or excluded.
 - **Needs:** nothing
+- **Plan:** [plans/RL1.md](plans/RL1.md)
 - **Status:** todo
 
 ### RL2 · Week 2 · Public site
@@ -75,6 +76,7 @@ Create a subfolder the first time you need it.
 ├── configs/      run, filter and export configs (YAML), one per job
 ├── scripts/      code for this section's jobs
 ├── notebooks/    Kaggle notebooks, outputs cleared before commit
+├── plans/        one file per phase, written before the phase starts: RL1.md, RL2.md, RL3.md, RL4.md
 └── reports/      one file per phase: RL1.md, RL2.md, RL3.md, RL4.md
 ```
 
