@@ -5,23 +5,24 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Formant</title>
 <meta name="description" content="Formant: an offline, full-duplex voice agent for Indian languages that runs on a budget laptop.">
-<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" href="favicon.png" type="image/png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap">
 <style>
-/* Layout: white page, near-black ink, grey hairlines, one blue accent (LightningLM colour scale). Blue = talker, amber = thinker, green = you, red = key results. */
+/* Layout: pure black to match the logo, light grey text, hairlines, one violet accent from the logo. Violet = talker, amber = thinker, green = you, red = key results. */
 :root{
-  --bg:#FFFFFF; --bg-2:#FAFAFA; --surface:#FFFFFF; --surface-2:#FAFAFA;
-  --ink:#111111; --body:#1A1A1A; --muted:#555555; --faint:#888888;
-  --line:#E8E8E8; --line-2:#D0D0D0;
-  --accent:#2563EB; --accent-ink:#1D4ED8; --accent-soft:rgba(37,99,235,.08);
-  --amber:#D97706; --red:#DC2626; --green:#16A34A; --highlight:#FEF3C7;
+  --bg:#000000; --bg-2:#0A0A0A; --surface:#0A0A0A; --surface-2:#111111;
+  --ink:#F5F5F5; --body:#D4D4D4; --muted:#A3A3A3; --faint:#6B6B6B;
+  --line:#1C1C1C; --line-2:#2E2E2E;
+  --accent:#8B7BFF; --accent-fill:#5236FE; --accent-ink:#A99DFF; --accent-soft:rgba(82,54,254,.16);
+  --amber:#F59E0B; --red:#F05252; --green:#22C55E; --highlight:rgba(245,158,11,.14);
   --display:"Bricolage Grotesque","Segoe UI",ui-sans-serif,system-ui,sans-serif;
   --font:"Geist",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
   --mono:"Geist Mono",ui-monospace,"SF Mono",Consolas,monospace;
   --maxw:1160px;
-  color-scheme:light;
+  color-scheme:dark;
 }
 *{box-sizing:border-box}
 html{scroll-behavior:smooth;scroll-padding-top:72px;background:var(--bg)}
@@ -30,7 +31,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:40;opacity:.07;mix-blend-mode:overlay;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
 a{color:inherit}
-::selection{background:var(--accent);color:#fff}
+::selection{background:var(--accent-fill);color:#fff}
 :focus-visible{outline:2px solid var(--amber);outline-offset:3px;border-radius:6px}
 .wrap{max-width:var(--maxw);margin:0 auto;padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px));position:relative}
 .mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
@@ -39,10 +40,12 @@ p{margin:0}
 .fire{background:var(--accent);-webkit-background-clip:text;background-clip:text;color:transparent;padding-block:.06em .14em;-webkit-box-decoration-break:clone;box-decoration-break:clone}
 
 /* nav */
-.nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:25;background:rgba(255,255,255,.88);backdrop-filter:saturate(1.4) blur(20px);-webkit-backdrop-filter:saturate(1.4) blur(20px);border-bottom:1px solid var(--line)}
+.nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:25;background:rgba(0,0,0,.82);backdrop-filter:saturate(1.4) blur(20px);-webkit-backdrop-filter:saturate(1.4) blur(20px);border-bottom:1px solid var(--line)}
 .nav .wrap{display:flex;align-items:center;gap:26px;height:56px}
 .brand{display:flex;align-items:center;gap:9px;text-decoration:none;flex:none;font:700 19px/1 var(--display);color:var(--ink);letter-spacing:-.02em}
-.brand svg{width:22px;height:22px}
+.brand img{height:20px;width:auto;display:block}
+.hero-logo{display:block;width:min(440px,78%);height:auto;margin-bottom:28px}
+footer .flogo{height:22px;width:auto;display:block;margin-bottom:22px}
 .links{display:flex;gap:24px;overflow-x:auto;scrollbar-width:none;font-size:13.5px;color:var(--muted);min-width:0}
 .links::-webkit-scrollbar{display:none}
 .links a{text-decoration:none;white-space:nowrap;padding:6px 0;transition:color .2s;position:relative}
@@ -153,7 +156,7 @@ section{padding-block:120px;position:relative;overflow-x:clip}
 /* architecture */
 .arch{padding:26px}
 .arch svg{display:block;width:100%;min-width:780px;height:auto}
-.arch .box{fill:#fff;stroke:var(--line-2);stroke-width:1.2}
+.arch .box{fill:var(--surface);stroke:var(--line-2);stroke-width:1.2}
 .arch .hot{fill:var(--accent-soft);stroke:var(--accent);stroke-width:2}
 .arch .thk{fill:var(--highlight);stroke:var(--amber);stroke-width:1.6}
 .arch .t{fill:var(--ink);font:700 18px var(--display)}
@@ -348,11 +351,11 @@ body::after,.hero::before,.hero::after,.glow-l::before,.glow-r::before,.spiral-b
 .fire,.versus .side.us b{background:none!important;color:var(--accent)!important;-webkit-text-fill-color:currentColor}
 .gcard{background:var(--surface);border:1px solid var(--line-2)}
 .ico{background:none}
-.btn.primary,.steps li::before,.ph .id,.v-beat,.rbar.next,.hmin,.c-depth,.c-cache,.links a.on::after,.kicker::before{background:var(--accent)!important}
+.btn.primary,.steps li::before,.ph .id,.v-beat,.rbar.next,.hmin,.c-depth,.c-cache,.links a.on::after,.kicker::before{background:var(--accent-fill)!important}
 .btn.primary{color:#fff}
 .seg.u,.hmin.g{background:var(--green)!important}
 .seg.j{background:var(--accent)!important}
-.c-talk{background:var(--accent)} .c-depth,.c-cache{background:var(--red)!important} .c-codec{background:var(--ink)} .c-think{background:var(--amber)}
+.c-talk{background:var(--accent)} .c-depth,.c-cache{background:var(--red)!important} .c-codec{background:#BDBDBD;color:#000!important} .c-think{background:var(--amber)}
 .rbar{background:var(--line-2)} .rbar.key{background:var(--red)} .rbar.ev{background:var(--green)}
 .arch .hot{stroke:var(--accent)}
 .seg.cut{-webkit-mask:none;mask:none}
@@ -377,8 +380,7 @@ body::after,.hero::before,.hero::after,.glow-l::before,.glow-r::before,.spiral-b
 <nav class="nav" aria-label="Sections">
   <div class="wrap">
     <a class="brand" href="#top" aria-label="Formant, back to top">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15" r="6" fill="none" style="stroke:var(--accent)" stroke-width="2"/><circle cx="6.6" cy="15.6" r="2.3" style="fill:var(--accent)"/><circle cx="18" cy="7" r="4.4" fill="none" style="stroke:var(--accent)" stroke-width="2"/><circle cx="18" cy="7" r="1.7" style="fill:var(--accent)"/></svg>
-      Formant
+      <img src="logo.webp" alt="Formant" width="1000" height="175">
     </a>
     <div class="links">
       <a href="#why">Why</a><a href="#sarvam">vs Sarvam</a><a href="#data">Data</a><a href="#conversation">Conversation</a><a href="#how">How it works</a><a href="#inside">Inside the laptop</a><a href="#languages">Languages</a><a href="#targets">Targets</a><a href="#roadmap">Roadmap</a>
@@ -390,6 +392,7 @@ body::after,.hero::before,.hero::after,.glow-l::before,.glow-r::before,.spiral-b
 <header class="hero" id="top">
   <div class="wrap">
     <div>
+      <img class="hero-logo" src="logo.webp" alt="Formant" width="1000" height="175">
       <span class="eyebrow"><span class="spark"></span>Full-duplex voice AI · Indian languages</span>
       <h1>Talks while it&nbsp;listens. <span class="l2 fire">Runs on a budget laptop.</span></h1>
       <p class="lede">Formant hears you and speaks at the same time, the way people do. It answers in <b>Hindi, Bengali, Marathi, Tamil, Telugu and Hinglish</b>, and runs fully offline on a 2019 laptop with <b>two CPU cores and no graphics card</b>.</p>
@@ -744,6 +747,7 @@ body::after,.hero::before,.hero::after,.glow-l::before,.glow-r::before,.spiral-b
 
 <footer>
   <div class="wrap">
+    <img class="flogo" src="logo.webp" alt="Formant" width="1000" height="175">
     <div class="row">
       <span>Formant · project site · updated 20 Nov 2026</span>
       <span>Full plan: <a href="plan.html">project plan</a> · Code: <a href="https://github.com/TEJASKUMAR-REDDY-J/Formant" target="_blank" rel="noopener">GitHub</a></span>
@@ -762,8 +766,8 @@ body::after,.hero::before,.hero::after,.glow-l::before,.glow-r::before,.spiral-b
   let W = 0, H = 0, raf = 0, visible = true, lastD = -1, lastB = -1, lastU = -1;
   const rings = [];
   const drums = [
-    { x: .38, y: .58, r: .27, col: [217, 119, 6], sx: -.32, sy: .12, sr: .40, flash: 0 },
-    { x: .70, y: .36, r: .19, col: [37, 99, 235], sx: 0, sy: 0, sr: .42, flash: 0 }
+    { x: .38, y: .58, r: .27, col: [245, 158, 11], sx: -.32, sy: .12, sr: .40, flash: 0 },
+    { x: .70, y: .36, r: .19, col: [139, 123, 255], sx: 0, sy: 0, sr: .42, flash: 0 }
   ];
   const teental = [1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 0];
   const size = () => { const r = cv.getBoundingClientRect(), d = Math.min(devicePixelRatio || 1, 2);
@@ -772,11 +776,11 @@ body::after,.hero::before,.hero::after,.glow-l::before,.glow-r::before,.spiral-b
     rings.push({ x: dr.x, y: dr.y, r0: dr.r, t0: t, col: dr.col, life: strong ? 1900 : 1200, v: strong ? .00016 : .00024, w: strong ? 3 : 1.8 }); };
   const drawDrum = (dr) => {
     const S = Math.min(W, H), x = dr.x * W, y = dr.y * H, r = dr.r * S;
-    ctx.fillStyle = '#FAFAFA'; ctx.strokeStyle = '#111'; ctx.lineWidth = 1.5;
+    ctx.fillStyle = '#0A0A0A'; ctx.strokeStyle = '#D4D4D4'; ctx.lineWidth = 1.5;
     ctx.beginPath(); ctx.arc(x, y, r * 1.06, 0, 6.283); ctx.fill(); ctx.stroke();
-    ctx.strokeStyle = '#D0D0D0'; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(x, y, r * .88, 0, 6.283); ctx.stroke();
+    ctx.strokeStyle = '#2E2E2E'; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(x, y, r * .88, 0, 6.283); ctx.stroke();
     const sx = x + dr.sx * r, sy = y + dr.sy * r;
-    ctx.fillStyle = '#111'; ctx.beginPath(); ctx.arc(sx, sy, dr.sr * r, 0, 6.283); ctx.fill();
+    ctx.fillStyle = '#E5E5E5'; ctx.beginPath(); ctx.arc(sx, sy, dr.sr * r, 0, 6.283); ctx.fill();
     if (dr.flash > .01) { ctx.fillStyle = `rgba(${dr.col},${.18 * dr.flash})`; ctx.beginPath(); ctx.arc(x, y, r, 0, 6.283); ctx.fill(); }
   };
   const draw = (t) => {
@@ -785,7 +789,7 @@ body::after,.hero::before,.hero::after,.glow-l::before,.glow-r::before,.spiral-b
     const bi = Math.floor(t / 300), bb = Math.floor(t / 1200), ub = Math.floor(t / 2400);
     if (bi !== lastD) { lastD = bi; if (teental[bi % 16]) spawn(drums[1], t, bi % 4 === 0); }
     if (bb !== lastB) { lastB = bb; spawn(drums[0], t, true); }
-    if (ub !== lastU) { lastU = ub; rings.push({ x: .5, y: .5, r0: .62, t0: t, col: [22, 163, 74], life: 2200, v: -.00024, w: 2 }); }
+    if (ub !== lastU) { lastU = ub; rings.push({ x: .5, y: .5, r0: .62, t0: t, col: [34, 197, 94], life: 2200, v: -.00024, w: 2 }); }
     for (let i = rings.length - 1; i >= 0; i--) {
       const g = rings[i], age = t - g.t0;
       if (age > g.life) { rings.splice(i, 1); continue; }
