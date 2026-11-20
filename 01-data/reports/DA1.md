@@ -1,65 +1,87 @@
 # DA1 · Licences and pilot
 
-**Status:** in progress. This report covers part 1, the source inventory. The pilot run (10 h per language through every gate) is part 2.
+**Status:** in progress. This report covers part 1: which datasets we keep, and how small they get. Part 2 is the pilot run, 10 h per language through every gate.
 
 ## What was done
 
-Built the list of datasets Formant will pull. **Rule: Hugging Face only.** Every source is a Hub repository, so pulls are scriptable on Kaggle (`datasets` streaming or `huggingface_hub`) and every shard can be traced back to a repo and revision.
+Built the list of datasets Formant keeps. **Rule: Hugging Face only.** Every source is a Hub repository, so every pull is scriptable on Kaggle and every shard traces back to a repo and revision.
 
-- List: [`01-data/sources/hf_datasets.csv`](../sources/hf_datasets.csv), 32 rows.
-- Script: [`01-data/scripts/hf_inventory.py`](../scripts/hf_inventory.py). It rebuilds the CSV and refreshes licence, gating and sizes from the public Hub API (no login needed): `python 01-data/scripts/hf_inventory.py`
+- List: [`01-data/sources/hf_datasets.csv`](../sources/hf_datasets.csv), 22 rows.
+- Column guide: [`01-data/sources/README.md`](../sources/README.md).
+- Script: [`01-data/scripts/hf_inventory.py`](../scripts/hf_inventory.py) rebuilds the CSV from the public Hub API, with no login needed.
 
-## How the numbers were measured
+## How small it gets
 
-- **Sizes** are the bytes in each repo's `main` branch today (Hub `treesize` API), not the repo's storage history.
-- **`our_languages_size_gb`** sums only the folders for Hindi, Bengali, Marathi, Tamil, Telugu and English when the repo is split by language. Single-language repos count in full.
-- **Hours** are as reported on each dataset card for the whole dataset. Hours per language are measured in part 2, not guessed here.
-- **Licence** is the card's declared licence. "none on card" means the card declares nothing, so we cannot use it until RL1 confirms the terms.
+We keep only our six languages (hi, bn, mr, ta, te, en), only the clips that pass the filters, and only in the form training reads.
 
-## Result
-
-| Priority | Meaning | Datasets | Size in our languages |
-|---|---|---|---|
-| P1 | Pull for v0.1 | 7 | 885.5 GB |
-| P2 | Top-up or licence pending | 10 | 851.2 GB |
-| P3 | Only if P1 + P2 fall short | 9 | 4,466.5 GB |
-| EVAL | Test sets, never trained on | 5 | 21.3 GB |
-| X | Listed so nobody pulls it | 1 | 25.6 TB (video) |
-
-### P1: what v0.1 is built from
-
-| Dataset | Licence | Reported hours | Our languages (GB) | Role |
-|---|---|---|---|---|
-| ai4bharat/indicvoices_r | CC-BY-4.0 | 1,704 h (22 langs) | hi 47 · bn 72 · mr 31 · ta 63 · te 86 | Cleanest natural speech; codec tests |
-| ai4bharat/IndicVoices | CC-BY-4.0 | 11.2k h transcribed | hi 50 · bn 41 · mr 38 · ta 50 · te 34 | Natural speech + real conversations |
-| ai4bharat/Kathbath | CC-BY-4.0 | 1,684 h (12 langs) | hi 17 · bn 11 · mr 18 · ta 21 · te 17 | Read speech |
-| ai4bharat/Rasa | CC-BY-4.0 | ≥ 20 h per speaker | hi 18 · bn 18 · mr 18 · ta 20 · te 17 | Voice-lock candidates |
-| ai4bharat/NPTEL (En-Indic) | CC-BY-4.0 | 44.4k h (collection) | en 46 | Indian-accented English |
-| dianavdavidson/MUCS-Hinglish | CC-BY-4.0 | 89.9 h + 5.2 h | 10 | Hinglish speech |
-| ai4bharat/sangraha (verified) | CC-BY-4.0 | text | hi 37 · bn 30 · mr 13 · ta 19 · te 15 · en 30 | Vocabulary merges, thinker text |
-
-### Pull plan for v0.1 (~2–2.4k h)
-
-| Language | Target | Sources, in order |
+| | Raw, our languages | Stored after transform |
 |---|---|---|
-| Hindi | ~800 h | IndicVoices-R → IndicVoices → Kathbath → Shrutilipi |
-| English (Indian) | ~400 h | NPTEL En-Indic → IndicTTS-English (if RL1 clears it) |
-| Bengali, Marathi, Tamil, Telugu | ~300 h each | IndicVoices-R → IndicVoices → Kathbath |
-| Hinglish | all of it (~95 h) | MUCS-Hinglish + code-mixed IndicVoices clips |
+| Speech for the talker, 2.57k h kept | 1.19 TB | **1.4 GB** of codec tokens + transcripts |
+| Codec fine-tune audio, 60 h (TK1) | | 6 GB FLAC |
+| Text: tokenizer sample, instruction and seed text | 172 GB | 3 GB |
+| Test sets | 21 GB | 10.6 GB (audio as published) |
+| English turn timing | 374 GB | 0.1 GB |
+| **Total** | **~1.76 TB** | **~21 GB, about 80× smaller** |
 
-**We never store raw audio.** P1 alone is ~885 GB, and IndicVoices-R works out to roughly 0.6 GB per hour, so 2.4k h of raw audio would be over 1 TB, far more than a Kaggle session's disk. The DA2 job instead runs shard by shard on Kaggle: stream a shard → filter (language ID, SNR, length, CER agreement) → tokenise with the codec → upload tokens to the Hub → delete the audio. Tokens for 10k h are about 7 GB.
+**Training speech: 0.54 MB per hour,** measured. One hour of 6 s clips was stored as Mimi codes (8 codebooks, 12.5 Hz, uint16) plus transcript, speaker, gender and duration, in Parquet with zstd-9. The codes were uniformly random, so this is the worst case; with 12 codebooks it is 0.79 MB per hour.
+
+**Raw audio: 42–615 MB per hour,** depending on the dataset. So tokenising alone makes speech 80–1,100× smaller.
+
+**Streamed:** about 460 GB of raw audio goes through Kaggle, shard by shard, plus the NPTEL and Rasa slices, whose hours per GB the pilot measures. Each shard is streamed, filtered, tokenised and uploaded, then its audio is deleted. Nothing raw is ever stored.
+
+**Only what fits is kept.** Every clip passes language ID, SNR, length and transcript agreement (CER against an ASR pass). The pass rate is assumed to be 75% until the pilot measures it.
+
+### Hours kept for v0.1
+
+| Language | Kept | From |
+|---|---|---|
+| Hindi | 800 h | IndicVoices-R 58 → IndicVoices 562 → Kathbath 120 → Shrutilipi 60 |
+| English (Indian) | 400 h | NPTEL En-Indic |
+| Bengali | 300 h | IndicVoices-R 88 → IndicVoices 212 |
+| Marathi | 300 h | IndicVoices-R 38 → IndicVoices 262 |
+| Tamil | 300 h | IndicVoices-R 77 → IndicVoices 223 |
+| Telugu | 300 h | IndicVoices-R 105 → IndicVoices 195 |
+| Hinglish | 71 h | MUCS-Hinglish, all that passes |
+| Voice-lock candidates | 100 h | Rasa, 20 h per Indian language |
+
+Per-language hours are estimates: language GB ÷ the repo's GB per hour. The IndicVoices figure assumes the Hub copy holds the 11.2k transcribed hours. The pilot measures real hours.
+
+Tokens are so small that storage stops mattering. If v0.1 needs more speech, tokenising **all** ~4.6k estimated hours of IndicVoices-R, IndicVoices, Kathbath and MUCS in our languages would still be about 2.5 GB. The real limits are T4-hours and download time.
+
+## Result by priority
+
+| Priority | Meaning | Datasets | Raw, our languages | Stored |
+|---|---|---|---|---|
+| P1 | Pulled for v0.1 | 7 | 885.5 GB | 9.15 GB |
+| P2 | Reserve: only if P1 falls short or once the licence clears | 10 | 851.2 GB | 1.33 GB |
+| EVAL | Test only, never trained on | 5 | 21.3 GB | 10.59 GB |
+
+## Dropped from the list
+
+Ten datasets from the first pass are out. Each one is either not needed or not safe to use.
+
+| Dataset | Why it is out |
+|---|---|
+| ARTPARK-IISc/Vaani (full) | 7.2 TB, mostly untranscribed; the transcribed part is already a P2 reserve |
+| shiprocket-ai/nirantar | Needs owner approval; provenance unclear |
+| SPRINGLab/Hindi-1482Hrs | No licence on the card; Hindi is already covered |
+| SPRINGLab/SPRING_INX Bengali, Marathi, Tamil R1 | No licence on the card; those languages are already covered |
+| fsicoli/common_voice_22_0 | Community mirror; under 1 GB for hi, mr and te |
+| krutrim-ai-labs/IndicST | Repackages sources already listed; custom licence |
+| amphion/Emilia-Dataset | 1.5 TB of English, mixed NC/BY licences; NPTEL covers English |
+| facebook/seamless-interaction | 25.6 TB with video; the audio-only copy is the P2 row |
 
 ## Flags
 
-- **Gated repos** (ai4bharat, ARTPARK-IISc, Emilia): the team's Hugging Face account must click "accept" on each repo page once before Kaggle can pull. `shiprocket-ai/nirantar` needs manual approval and its provenance checked.
-- **No licence on the card:** SPRINGLab IndicTTS (English, Hindi, Telugu), Hindi-1482Hrs, SPRING-INX, Svarah. Unusable until RL1 confirms the terms with IIT Madras / AI4Bharat.
-- **Non-commercial:** Seamless Interaction (CC-BY-NC). Used only for English turn-timing statistics; its audio must not train shipped weights.
-- **Community mirrors**, not the original publishers: MUCS-Hinglish, Common Voice 22, Seamless audio-only. Keep them only if the original licence is confirmed.
-- **Evaluation sets** (FLEURS, Svarah, Lahaja, Vaani-Benchmark, IN22-Conv), plus the held-out speakers EV1 reserves, never enter training. The DA2 filter checks this.
+- **Gated repos** (ai4bharat, ARTPARK-IISc): the team's Hugging Face account must accept each repo once before Kaggle can pull.
+- **No licence on the card:** IndicTTS English, Hindi and Telugu, and Svarah. They are P2/EVAL and cannot be used until RL1 confirms their terms.
+- **Non-commercial:** Seamless Interaction (CC-BY-NC). It is used only for the turn-timing table, never for audio or weights.
+- **Community mirror:** MUCS-Hinglish. It is kept only if RL1 confirms the original MUCS licence.
+- **Test sets:** FLEURS, Svarah, Lahaja, Vaani-Benchmark and IN22-Conv, plus the held-out speakers EV1 reserves, never enter training. The DA2 filter checks this.
 
 ## Next (rest of DA1)
 
 1. Accept the gated repos with the team's Hugging Face account. Add the Hub token as a Kaggle secret.
-2. Pilot: stream 10 h per language from the P1 sets through every gate. Measure pass rate, GB per hour and T4-minutes per 1,000 h.
+2. Pilot: stream 10 h per language from the P1 sets through every gate. Measure real hours, pass rate, GB per hour and T4-minutes per 1,000 h. Then rerun the script with the measured numbers.
 3. Measure pause, overlap and backchannel statistics on the conversational part of IndicVoices (Indian languages) and on Seamless Interaction (English).
-4. RL1: confirm terms for every "none on card" row; mark each row train-only, shareable or excluded.
+4. RL1: confirm the terms for every `none on card` row, and mark each one train-only, shareable or excluded.

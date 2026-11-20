@@ -1,86 +1,110 @@
-"""Build 01-data/sources/hf_datasets.csv: candidate Hugging Face datasets for Formant.
+"""Build 01-data/sources/hf_datasets.csv: the Hugging Face datasets Formant keeps, and how small they get.
 
-Curated fields (category, use, priority, reported hours, notes) live in SOURCES below.
-Licence, gating and sizes are read live from the public Hub API, so re-running this
-script refreshes them. No login needed; gated repos still report size.
+Curated fields live in SOURCES. Licence, gating, sizes, clip counts, metadata fields, last update and
+downloads are read live from the public Hub API (no login; gated repos still report these).
+Hours per language are estimated from bytes (dataset GB per hour); the DA1 pilot replaces them with
+measured hours. Column meanings: 01-data/sources/README.md.
 
     python 01-data/scripts/hf_inventory.py
 """
-import csv, json, pathlib, re, urllib.parse, urllib.request
+import csv, json, pathlib, urllib.parse, urllib.request
 
 API = "https://huggingface.co/api/datasets/"
 OUT = pathlib.Path(__file__).resolve().parents[1] / "sources" / "hf_datasets.csv"
 
-# Language folders we care about, mapped to ISO codes.
+# Measured: 1 h of 6 s clips as Mimi codes (8 codebooks, 12.5 Hz, uint16) + transcript + speaker/gender/duration,
+# Parquet zstd-9, with uniform random codes (worst case; real codes compress a little better). 12 codebooks: 0.79.
+TOKEN_MB_PER_H = 0.54
+PASS = 0.75  # assumed share of audio that survives the filters (language ID, SNR, length, CER); the pilot measures it
+TARGET = {"hi": 800, "en": 400, "bn": 300, "mr": 300, "ta": 300, "te": 300}  # v0.1 hours kept, from the plan
+ORDER = {  # which datasets fill each language's target, in order
+    "hi": ["ai4bharat/indicvoices_r", "ai4bharat/IndicVoices", "ai4bharat/Kathbath", "ai4bharat/Shrutilipi"],
+    "en": ["ai4bharat/NPTEL"],
+    **{l: ["ai4bharat/indicvoices_r", "ai4bharat/IndicVoices", "ai4bharat/Kathbath"] for l in ("bn", "mr", "ta", "te")},
+}
 LANG = {"hindi": "hi", "hi": "hi", "hin": "hi", "hi_in": "hi",
         "bengali": "bn", "bn": "bn", "ben": "bn", "bn_in": "bn",
         "marathi": "mr", "mr": "mr", "mar": "mr", "mr_in": "mr",
         "tamil": "ta", "ta": "ta", "tam": "ta", "ta_in": "ta",
         "telugu": "te", "te": "te", "tel": "te", "te_in": "te",
-        "english": "en", "en": "en", "eng": "en", "en_us": "en"}
+        "english": "en", "en": "en", "eng": "en", "en_us": "en", "en-indic": "en", "en2indic": "en"}
 
-# id, subfolder holding language dirs ("" = repo root, None = single-language or no split),
-# category, languages, use in Formant, priority, reported hours (whole dataset), notes
+# sub: folder holding language dirs ("" = repo root, None = single-language repo).
+# hours: reported hours for the whole repo (used for GB per hour). keep_h: fixed hours kept instead of the
+# ORDER allocation. keep_gb: fixed stored size (text, eval, timing tables). extra_gb: added to stored size.
+S = lambda **k: k
 SOURCES = [
-    # --- Voice set: clean single-speaker speech ---
-    ("ai4bharat/indicvoices_r", "", "speech-tts", "hi bn mr ta te +17", "DA2 voice set (cleanest natural speech), TK1 codec tests", "P1",
-     "1,704 h (22 langs, 9-175 h each)", "TTS-quality subset of IndicVoices; 10,496 speakers."),
-    ("ai4bharat/IndicVoices", "", "speech-natural", "hi bn mr ta te +17", "DA2 voice set; DA1 conversation timing from its conversational part", "P1",
-     "23.7k h collected, 11.2k h transcribed (22 langs)", "Read 8%, extempore 76%, conversational 16%. Main source of real Indian conversation."),
-    ("ai4bharat/Kathbath", "", "speech-read", "hi bn mr ta te +7", "DA2 voice set (read speech)", "P1",
-     "1,684 h (12 langs)", "Human-labelled read speech."),
-    ("ai4bharat/Rasa", "", "speech-tts-expressive", "hi bn mr ta te +4", "PT3 voice-lock candidates; expressive prosody", "P1",
-     "≥ 20 h per speaker", "Expressive studio TTS speech; check per-speaker licence notes before voice lock."),
-    ("ai4bharat/NPTEL", "", "speech-english-indian", "en (Indian accent) + indic text", "DA2 Indian-accented English (En-Indic folder = English lectures)", "P1",
-     "44.4k h (whole BhasaAnuvaad collection)", "Lecture speech; use the En-Indic part for Indian English. Single-speaker, long-form, some room echo."),
-    ("SPRINGLab/IndicTTS-English", None, "speech-tts", "en (Indian accent)", "DA2 Indian English, clean studio", "P2",
-     "", "IIT Madras Indic TTS English. No licence on the card: confirm before use (RL1)."),
-    ("SPRINGLab/IndicTTS-Hindi", None, "speech-tts", "hi", "DA2 clean studio Hindi; SV1 cascade voice", "P2",
-     "~10.3 h", "No licence on the card: confirm before use (RL1)."),
-    ("SPRINGLab/IndicTTS_Bengali", None, "speech-tts", "bn", "DA2 clean studio Bengali", "P2", "", "CC-BY-4.0 on the card."),
-    ("SPRINGLab/IndicTTS_Tamil", None, "speech-tts", "ta", "DA2 clean studio Tamil", "P2", "", "CC-BY-4.0 on the card."),
-    ("SPRINGLab/IndicTTS_Telugu", None, "speech-tts", "te", "DA2 clean studio Telugu", "P2", "", "No licence on the card: confirm before use (RL1)."),
-    # --- More natural / found speech ---
-    ("ai4bharat/Shrutilipi", "", "speech-news", "hi bn mr ta te +7", "DA2 top-up (broadcast news)", "P2",
-     "6,400+ h (12 langs)", "All India Radio news; formal style, mixed audio quality. Hindi-heavy."),
-    ("ARTPARK-IISc/Vaani-transcription-part", "audio", "speech-spontaneous", "hi bn mr ta te en +80", "DA2 spontaneous, dialect-diverse speech", "P2",
-     "2,122 h transcribed (86 langs)", "Image-prompted spontaneous speech, phone-quality; good for robustness."),
-    ("ARTPARK-IISc/Vaani", "audio", "speech-spontaneous", "hi bn mr ta te en +100", "Pseudo-label pool only if transcribed part is not enough", "P3",
-     "~31.3k h (mostly untranscribed)", "7.2 TB total; Hindi alone 1.7 TB. Pull selected districts only."),
-    ("shiprocket-ai/nirantar", "", "speech-natural", "hi bn mr ta te +", "DA2 top-up", "P3",
-     "", "Manual approval gate. Check this is the AI4Bharat Nirantar release and its provenance before use."),
-    ("SPRINGLab/Hindi-1482Hrs", None, "speech-read", "hi", "DA2 Hindi top-up", "P3",
-     "~1,482 h (from name)", "No licence on the card: confirm before use (RL1)."),
-    ("SPRINGLab/SPRING_INX_Bengali_R1", None, "speech-asr", "bn", "DA2 Bengali top-up", "P3", "", "No licence on the card; R2 also exists."),
-    ("SPRINGLab/SPRING_INX_Marathi_R1", None, "speech-asr", "mr", "DA2 Marathi top-up", "P3", "", "No licence on the card; R2 also exists."),
-    ("SPRINGLab/SPRING_INX_Tamil_R1", None, "speech-asr", "ta", "DA2 Tamil top-up", "P3", "", "No licence on the card; R2 also exists."),
-    ("fsicoli/common_voice_22_0", "audio", "speech-read", "hi bn mr ta te en +", "DA2 top-up; more speakers", "P3",
-     "", "Community mirror of Mozilla Common Voice 22 (CC0). Official distribution moved off the Hub; verify against Mozilla's release."),
-    # --- Code-mixed ---
-    ("dianavdavidson/MUCS-Hinglish", None, "speech-codemixed", "hi-en", "DA2 Hinglish speech; EV Hinglish test", "P1",
-     "89.9 h train + 5.2 h test", "Community mirror of MUCS 2021 Hindi-English. Confirm original licence."),
-    ("krutrim-ai-labs/IndicST", "", "speech-asr-ast", "hi bn mr ta te en +", "Reference manifests (built from 14 public sets)", "P3",
-     "10.8k h train + 1.1k h eval", "Krutrim licence ('other'); mostly re-packages sources already listed."),
-    # --- Conversation / duplex ---
-    ("pengyizhou/seamless-interaction-audio-only", None, "speech-dyadic", "en", "DA1 English turn-taking statistics; TR3 English duplex", "P2",
-     "audio of ~4,000 h", "Audio-only copy of Meta Seamless Interaction. CC-BY-NC: research use only, cannot ship in commercial weights."),
-    ("facebook/seamless-interaction", None, "video-dyadic", "en", "Source of the audio-only copy; do not pull (video)", "X",
-     "4,000+ h", "25.6 TB with video. CC-BY-NC."),
-    ("amphion/Emilia-Dataset", "Emilia-YODAS", "speech-spontaneous", "en zh de fr ja ko", "English spontaneous speech subset if NPTEL + Svarah-style data fall short", "P3",
-     "215k h (Emilia 101k + YODAS 114k)", "Emilia-YODAS part is CC-BY-4.0; the original Emilia part is CC-BY-NC. Pull a few hundred hours of EN at most."),
-    # --- Evaluation only (never train) ---
-    ("google/fleurs", "data", "eval-speech", "hi bn mr ta te en +96", "EV1 test sets; TK1 codec round-trip", "EVAL",
-     "~10 h per language", "Read speech, standard benchmark."),
-    ("ai4bharat/Svarah", None, "eval-speech", "en (Indian accent)", "EV Indian English test", "EVAL", "9.6 h, 117 speakers", "No licence on the card: check terms."),
-    ("ai4bharat/Lahaja", None, "eval-speech", "hi (accents)", "EV Hindi accent test", "EVAL", "12.5 h, 132 speakers", "MIT."),
-    ("ARTPARK-IISc/Vaani-Benchmark-V1.0", "", "eval-speech", "multi", "EV dialect robustness", "EVAL", "", "CC-BY-4.0."),
-    # --- Text ---
-    ("ai4bharat/sangraha", "verified", "text-pretrain", "hi bn mr ta te en +16", "TK2 Indic vocabulary merges; thinker text", "P1",
-     "", "Verified web + PDF text. Pull only the six language folders listed."),
-    ("ai4bharat/indic-align", None, "text-instruct", "hi bn mr ta te +", "PT2 thinker spoken-style tuning", "P2", "", "Instruction and safety data."),
-    ("Abhishekcr448/Hinglish-Everyday-Conversations-1M", None, "text-dialogue", "hi-en (romanised)", "DA2 seed scripts for Hinglish synthetic dialogues", "P2",
-     "", "Synthetic text, MIT. Quality spot-check needed."),
-    ("ai4bharat/IN22-Conv", None, "eval-text", "hi bn mr ta te en +16", "EV conversational translation check for the thinker", "EVAL", "", "Small benchmark."),
+    # --- P1: what v0.1 is built from ---
+    S(id="ai4bharat/indicvoices_r", sub="", prio="P1", style="natural, studio-clean",
+      what="TTS-quality cut of IndicVoices: natural speech re-recorded clean. 10,496 speakers, 22 languages.",
+      use="Talker training speech (first pick); 10 h per language kept as FLAC for the codec decoder fine-tune (TK1)",
+      hours=1704, extra_gb=6.0, rule="train split of our 5 languages; filters; tokens + 60 h FLAC 24 kHz mono"),
+    S(id="ai4bharat/IndicVoices", sub="", prio="P1", style="read 8%, extempore 76%, conversation 16%",
+      what="AI4Bharat's large natural-speech set from 16k+ speakers across districts. Hours on the Hub assumed = 11.2k transcribed (est.).",
+      use="Talker training speech (bulk); real conversations for turn-timing statistics",
+      hours=11200, rule="train split of our 5 languages; filters; tokens; timing table from the conversational part"),
+    S(id="ai4bharat/Kathbath", sub="", prio="P1", style="read",
+      what="Read sentences from 1,218 speakers in 12 languages, human-checked.",
+      use="Talker training speech (read style, many speakers)",
+      hours=1684, rule="train split of our 5 languages; filters; tokens"),
+    S(id="ai4bharat/Rasa", sub="", prio="P1", style="expressive studio TTS",
+      what="Studio TTS recordings with emotions and styles, ≥ 20 h per speaker.",
+      use="Voice-lock candidates for the talker's own voice (PT3)",
+      keep_h=100, by="hi, bn, mr, ta, te: 20 each", rule="20 h per language from 1-2 candidate voices; tokens"),
+    S(id="ai4bharat/NPTEL", sub="", prio="P1", style="lectures",
+      what="IIT lecture speech (BhasaAnuvaad). The En-Indic part is Indian-accented English, ~1.6M clips.",
+      use="Indian-accented English for the talker",
+      hours=None, rule="en2indic config only (English audio); filters; tokens; drop translation columns"),
+    S(id="dianavdavidson/MUCS-Hinglish", sub=None, prio="P1", style="read, code-mixed",
+      what="MUCS 2021 Hindi-English code-mixed speech (community mirror).",
+      use="Hinglish talker speech; Hinglish test (its test split)",
+      hours=95.1, keep_h=95.1 * PASS, by="hi-en:71", rule="all of it; test split kept apart for EV"),
+    S(id="ai4bharat/sangraha", sub="verified", prio="P1", style="text",
+      what="Verified Indic web + PDF text corpus, 22 languages.",
+      use="Tokenizer vocabulary merges (TK2)",
+      keep_gb=1.8, rule="300 MB of text per language (6 languages), deduplicated sample"),
+    # --- P2: reserves (licence pending or only if P1 falls short) ---
+    S(id="ai4bharat/Shrutilipi", sub="", prio="P2", style="broadcast news",
+      what="All India Radio news bulletins with transcripts, 12 languages.",
+      use="Hindi top-up only if P1 falls short", hours=6400, rule="Hindi only, as needed; tokens"),
+    S(id="ARTPARK-IISc/Vaani-transcription-part", sub="audio", prio="P2", style="spontaneous, phone quality",
+      what="Image-prompted spontaneous speech from many districts, transcribed part.",
+      use="Robustness top-up (accents, noisy phones)", hours=2122, keep_h=0, rule="not in v0.1; dialect top-up later"),
+    S(id="SPRINGLab/IndicTTS-English", sub=None, prio="P2", style="studio TTS",
+      what="IIT Madras Indic TTS: Indian-accented English, studio.", use="Indian English top-up if RL1 clears the licence",
+      keep_h=0, rule="only after RL1 confirms the licence"),
+    S(id="SPRINGLab/IndicTTS-Hindi", sub=None, prio="P2", style="studio TTS",
+      what="IIT Madras Indic TTS: Hindi, studio, ~10 h.", use="Cascade fallback voice (SV1) if RL1 clears the licence",
+      keep_h=0, rule="only after RL1 confirms the licence"),
+    S(id="SPRINGLab/IndicTTS_Bengali", sub=None, prio="P2", style="studio TTS",
+      what="IIT Madras Indic TTS: Bengali, studio.", use="Cascade fallback voice (SV1)", keep_h=0, rule="only for SV1"),
+    S(id="SPRINGLab/IndicTTS_Tamil", sub=None, prio="P2", style="studio TTS",
+      what="IIT Madras Indic TTS: Tamil, studio.", use="Cascade fallback voice (SV1)", keep_h=0, rule="only for SV1"),
+    S(id="SPRINGLab/IndicTTS_Telugu", sub=None, prio="P2", style="studio TTS",
+      what="IIT Madras Indic TTS: Telugu, studio.", use="Cascade fallback voice (SV1) if RL1 clears the licence",
+      keep_h=0, rule="only after RL1 confirms the licence"),
+    S(id="pengyizhou/seamless-interaction-audio-only", sub=None, prio="P2", style="two-person conversation",
+      what="Audio-only copy of Meta Seamless Interaction, ~4,000 h of English dyadic talk. Non-commercial.",
+      use="English turn-timing statistics only (pauses, overlaps, backchannels); never trains shipped weights",
+      hours=4000, keep_gb=0.1, rule="speech/silence timing table per speaker; no audio, no tokens"),
+    S(id="ai4bharat/indic-align", sub=None, prio="P2", style="text",
+      what="Indic instruction-tuning and safety data.", use="Thinker spoken-style tuning (PT2)",
+      keep_gb=1.0, rule="our 5 languages + English, sampled"),
+    S(id="Abhishekcr448/Hinglish-Everyday-Conversations-1M", sub=None, prio="P2", style="text dialogue",
+      what="1M synthetic everyday Hinglish conversations (romanised).", use="Seed scripts for synthetic Hinglish dialogues (DA2)",
+      keep_gb=0.2, rule="all, after a quality spot-check"),
+    # --- EVAL: test only, never trained on ---
+    S(id="google/fleurs", sub="data", prio="EVAL", style="read",
+      what="Google's standard multilingual read-speech benchmark, 102 languages.", use="ASR / codec round-trip tests (EV1, TK1)",
+      keep_gb=3.2, rule="test split of hi_in, bn_in, mr_in, ta_in, te_in, en_us, audio as-is"),
+    S(id="ai4bharat/Svarah", sub=None, prio="EVAL", style="read + extempore",
+      what="Indian-accented English benchmark, 117 speakers.", use="Indian English test", keep_gb=1.1, rule="all, audio as-is"),
+    S(id="ai4bharat/Lahaja", sub=None, prio="EVAL", style="read + extempore",
+      what="Hindi accent benchmark, 132 speakers from many regions.", use="Hindi accent test", keep_gb=1.4, rule="all, audio as-is"),
+    S(id="ARTPARK-IISc/Vaani-Benchmark-V1.0", sub="", prio="EVAL", style="spontaneous",
+      what="Vaani dialect benchmark.", use="Dialect robustness test", keep_gb=None, rule="our languages only, audio as-is"),
+    S(id="ai4bharat/IN22-Conv", sub=None, prio="EVAL", style="text",
+      what="Conversational translation benchmark, 22 languages.", use="Thinker conversation check", keep_gb=0.0, rule="all"),
 ]
 
 
@@ -98,49 +122,107 @@ def lang_sizes(repo, sub):
     tree = get(urllib.parse.quote(repo, safe="/") + "/tree/main" + ("/" + urllib.parse.quote(sub) if sub else ""))
     out = {}
     for e in tree:
-        name = e["path"].split("/")[-1].lower()
-        code = LANG.get(name) or ("en" if name == "en-indic" else None)
+        code = LANG.get(e["path"].split("/")[-1].lower())
         if e.get("type") == "directory" and code:
             out[code] = out.get(code, 0) + size(repo, e["path"])
     return out
 
 
+def card_info(card):
+    """Clip counts per language, split names and metadata fields from the card's dataset_info."""
+    di = card.get("dataset_info") or []
+    di = di if isinstance(di, list) else [di]
+    clips, splits, fields = {}, set(), []
+    for d in di:
+        code = LANG.get((d.get("config_name") or "").split("/")[-1].lower())
+        if len(di) > 1 and not code:
+            continue
+        for s in d.get("splits", []):
+            splits.add(s["name"])
+            clips[code or "all"] = clips.get(code or "all", 0) + s.get("num_examples", 0)
+        fields = fields or [f["name"] for f in d.get("features", []) if f.get("dtype") != "audio" and "audio" not in f["name"]]
+    return clips, sorted(splits), fields
+
+
 def main():
-    rows = []
-    for repo, sub, cat, langs, use, prio, hours, notes in SOURCES:
-        meta = get(urllib.parse.quote(repo, safe="/") + "?expand[]=gated&expand[]=cardData&expand[]=tags")
+    rows = {}
+    for s in SOURCES:
+        repo = s["id"]
+        meta = get(urllib.parse.quote(repo, safe="/") + "?expand[]=gated&expand[]=cardData&expand[]=tags"
+                   "&expand[]=lastModified&expand[]=downloads")
         card, tags = meta.get("cardData") or {}, meta.get("tags") or []
         lic = card.get("license") or [t.split(":", 1)[1] for t in tags if t.startswith("license:")]
         lic = ",".join(lic) if isinstance(lic, list) else lic
         total = size(repo)
-        per = lang_sizes(repo, sub) if sub is not None else {}
+        per = lang_sizes(repo, s["sub"]) if s["sub"] is not None else {}
         ours = sum(per.values()) if per else total
-        rows.append({
-            "hf_id": repo,
-            "url": "https://huggingface.co/datasets/" + repo,
-            "category": cat,
-            "languages": langs,
-            "use_in_formant": use,
-            "priority": prio,
-            "licence": lic or "none on card",
-            "commercial_ok": "no" if "nc" in (lic or "").lower() else ("check" if not lic or lic == "other" else "yes"),
-            "gated": {"auto": "yes (click to accept)", "manual": "yes (manual approval)"}.get(meta.get("gated"), "no"),
-            "total_size_gb": round(total / 1e9, 1),
-            "our_languages_size_gb": round(ours / 1e9, 1),
-            "size_by_language_gb": "; ".join(f"{k}:{v / 1e9:.1f}" for k, v in sorted(per.items())) or "",
-            "hours_reported": hours,
-            "notes": notes,
+        gb_h = total / 1e9 / s["hours"] if s.get("hours") else None
+        clips, splits, fields = card_info(card)
+        rows[repo] = dict(s, lic=lic, meta=meta, total=total, per=per, ours=ours, gb_h=gb_h,
+                          clips=clips, splits=splits, fields=fields, kept={})
+        print(f"{repo:52s} {lic or 'none':12s} {total / 1e9:9.1f} GB  ours {ours / 1e9:8.1f} GB")
+
+    # v0.1 allocation: walk each language's sources in order until its target hours are kept.
+    for lang, need in TARGET.items():
+        for repo in ORDER[lang]:
+            r = rows[repo]
+            have = r["per"].get(lang, 0) / 1e9 / r["gb_h"] * PASS if r["gb_h"] else float("inf")
+            take = min(have, need)
+            if take > 0:
+                r["kept"][lang] = take
+                need -= take
+
+    out = []
+    for r in rows.values():
+        keep_h = r.get("keep_h", sum(r["kept"].values()))
+        pull_gb = keep_h / PASS * r["gb_h"] if r["gb_h"] else None
+        stored = r["keep_gb"] if "keep_gb" in r else keep_h * TOKEN_MB_PER_H / 1000 + r.get("extra_gb", 0)
+        if stored is None:  # eval set kept as-is in our languages
+            stored = r["ours"] / 1e9
+        raw = r["ours"] / 1e9
+        hours_ours = {k: v / 1e9 / r["gb_h"] for k, v in r["per"].items()} if r["gb_h"] and r["per"] else {}
+        store_as = ("timing table" if r["style"].startswith("two-person") else "text, Parquet zstd" if "text" in r["style"]
+                    else "audio as-is" if r["prio"] == "EVAL" else "codec tokens + transcript, Parquet zstd" if keep_h else "-")
+        out.append({
+            "priority": r["prio"],
+            "dataset": r["id"],
+            "what_it_is": r["what"],
+            "style": r["style"],
+            "used_for": r["use"],
+            "licence": r["lic"] or "none on card",
+            "commercial_use": "no" if "nc" in (r["lic"] or "").lower() else ("check" if not r["lic"] or r["lic"] == "other" else "yes"),
+            "access": {"auto": "click to accept", "manual": "owner approval"}.get(r["meta"].get("gated"), "open"),
+            "hours_reported": r.get("hours") or "",
+            "hours_our_languages_est": round(sum(hours_ours.values())) if hours_ours else (round(r["hours"]) if r.get("hours") and not r["per"] else ""),
+            "hours_by_language_est": "; ".join(f"{k}:{v:,.0f}" for k, v in sorted(hours_ours.items())),
+            "clips_our_languages": sum(v for k, v in r["clips"].items()) or "",
+            "raw_gb_our_languages": round(raw, 1),
+            "raw_gb_by_language": "; ".join(f"{k}:{v / 1e9:.1f}" for k, v in sorted(r["per"].items())),
+            "raw_mb_per_hour": round(r["gb_h"] * 1000) if r["gb_h"] else "",
+            "v01_hours_kept": round(keep_h) if "tokens" in store_as else "",
+            "v01_hours_kept_by_language": r.get("by") or "; ".join(f"{k}:{v:,.0f}" for k, v in sorted(r["kept"].items())),
+            "v01_raw_gb_streamed": round(pull_gb, 1) if pull_gb else "",
+            "v01_stored_as": store_as,
+            "v01_stored_gb": round(stored, 2),
+            "times_smaller_than_raw": f"{raw / stored:,.0f}x" if stored and raw / stored >= 2 else "",
+            "keep_rule": r["rule"],
+            "splits": " ".join(r["splits"]),
+            "metadata_fields": " ".join(r["fields"]),
+            "total_repo_gb": round(r["total"] / 1e9, 1),
+            "last_updated": (r["meta"].get("lastModified") or "")[:10],
+            "downloads_30d": r["meta"].get("downloads", ""),
+            "url": "https://huggingface.co/datasets/" + r["id"],
         })
-        print(f"{repo:55s} {rows[-1]['licence']:14s} {rows[-1]['total_size_gb']:>9} GB  ours {rows[-1]['our_languages_size_gb']:>8} GB")
     OUT.parent.mkdir(parents=True, exist_ok=True)
     with OUT.open("w", newline="", encoding="utf-8") as f:
-        w = csv.DictWriter(f, fieldnames=list(rows[0]))
+        w = csv.DictWriter(f, fieldnames=list(out[0]))
         w.writeheader()
-        w.writerows(rows)
-    for p in ("P1", "P2", "P3", "EVAL"):
-        gb = sum(r["our_languages_size_gb"] for r in rows if r["priority"] == p)
-        print(f"{p}: {sum(r['priority'] == p for r in rows)} datasets, {gb:,.1f} GB in our languages")
-    print("wrote", OUT)
+        w.writerows(out)
+    for p in ("P1", "P2", "EVAL"):
+        rs = [o for o in out if o["priority"] == p]
+        print(f"{p}: {len(rs)} datasets, raw {sum(o['raw_gb_our_languages'] for o in rs):,.1f} GB in our languages"
+              f" -> stored {sum(o['v01_stored_gb'] for o in rs):,.2f} GB, {sum(o['v01_hours_kept'] or 0 for o in rs):,} h kept")
+    print("streamed:", round(sum(o["v01_raw_gb_streamed"] or 0 for o in out)), "GB; wrote", OUT)
 
 
 if __name__ == "__main__":
