@@ -96,6 +96,37 @@ Weights follow hours^0.5 (temperature sampling, as in mT5), and no language may 
 
 Before TR2 commits to these weights, TR1 runs a small mixture search. It trains 8 runs of the ~50M talker on different weightings and keeps the one with the best worst-language dev loss (a RegMix/DoReMi-style search, ~5 T4-hours).
 
+### Online selection inside each step (OPUS, trial in TR1)
+
+Temperature sampling fixes **how much** of each language the model sees. **OPUS** (Optimizer-induced Projected Utility Selection, arXiv 2602.05400, 2026) chooses **which** clips within that budget, at every step.
+
+**How it works:**
+1. The sampler draws a candidate buffer twice the batch size.
+2. Each candidate gets a score: its gradient, seen through the optimizer's preconditioner (AdamW's second moments), dot a proxy gradient from data that looks like what we want to be good at.
+3. Per-sample gradients come from "ghost" factors (layer input × output gradient), compressed with an m = 8,192 CountSketch.
+4. Half the buffer is kept, sampled with a softmax at τ = 0.9 and a redundancy penalty so the batch stays diverse.
+
+**Reported results:**
+- about 4.7% extra compute;
+- +2.2% average accuracy over random selection on 10 benchmarks;
+- 8× less compute to match GPT-2 XL trained on FineWeb;
+- Qwen3-8B continued pre-training matching 3B tokens with 0.5B (6×).
+
+**Fitted to Formant:**
+
+| Paper | Formant |
+|---|---|
+| Proxy built by retrieving pre-training documents close to the benchmark validation sets | Proxy pool = the **dev split** (speaker-disjoint, never the test sets) + tier-1 clips + conversational clips, weighted toward the worst languages in the latest eval |
+| Free choice across the whole buffer | **Selection inside each language bucket**, so the temperature ratios and the MoE global-batch balance hold |
+| AdamW / Muon preconditioner | AdamW (8-bit states dequantised for scoring) |
+| Sketch every layer | Sketch the last 4 blocks + output heads first, to keep the cost down on T4s |
+
+**The catch is cost on T4s.** Scoring needs a forward pass over the whole buffer, so the 4.7% figure may not carry over. TR1 measures it.
+
+**TR1 runs it as an A/B at equal T4-hours:** random vs OPUS on the dense ~50M talker, compared on worst-language dev loss. TR2 adopts it only if it wins after paying its overhead.
+
+**Possible upside:** if OPUS reaches the same dev loss in ~2 epochs instead of 3, pre-training drops by ~30–50 T4-hours, about a quarter of the gap to one Kaggle account. The budget does not count on this until TR1 shows it.
+
 ### Stages
 
 | Stage | Plan cell | Mixture | Why |
@@ -146,6 +177,7 @@ Before TR2 commits to these weights, TR1 runs a small mixture search. It trains 
 - **DoReMi** (Xie et al., 2023) and **RegMix** (Liu et al., 2024): choosing mixtures with small proxy runs.
 - **Sparse upcycling** (Komatsuzaki et al., 2022): building an MoE from a dense checkpoint.
 - **DeepSeek-V3** (2024): load balancing without an auxiliary loss.
+- **OPUS** (arXiv 2602.05400, 2026): per-step data selection in the optimizer's update space.
 - **Qiu et al., 2025**, "Demons in the Detail": global-batch load balancing lets experts specialise.
 - **Emilia-Pipe** (He et al., 2024): speech preprocessing (separation, VAD, quality scoring).
 - **Llama 3** (2024): annealing on high-quality data, and document masking for packed sequences.

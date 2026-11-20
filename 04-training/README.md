@@ -41,11 +41,11 @@ Pre-training the talker: smoke runs, speech pre-training on the voice set, two-s
 
 ### TR1 · Week 1 · Smoke runs
 
-~50M talker on pilot or public codec tokens, dense and MoE: check fp16 stability, router balance, loss per codebook, resume after a killed session. Run 8 tiny mixture-search runs and pick the language weights with the best worst-language dev loss (01-data/DATA_PLAN.md).
+~50M talker on pilot or public codec tokens, dense and MoE: check fp16 stability, router balance, loss per codebook, resume after a killed session. Run 8 tiny mixture-search runs and pick the language weights with the best worst-language dev loss; A/B online data selection (OPUS) against random at equal T4-hours (01-data/DATA_PLAN.md).
 
-- **Done when:** Loss falls on every codebook; experts stay balanced; resume reproduces the curve; mixture weights fixed.
+- **Done when:** Loss falls on every codebook; experts stay balanced; resume reproduces the curve; mixture weights fixed; OPUS adopted or dropped with numbers.
 - **Needs:** IN1 (same-week handoff), MO1 (same-week handoff)
-- **GPU:** 8–10 T4-hours
+- **GPU:** 10–12 T4-hours
 - **Plan:** [plans/TR1.md](plans/TR1.md)
 - **Status:** todo
 

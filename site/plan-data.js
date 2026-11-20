@@ -6,7 +6,7 @@
    status: "todo" | "doing" | "done" | "cut" */
 window.PLAN = {
   name: "Formant",
-  version: "v11",
+  version: "v12",
   updated: "2026-11-20",
   goal: "Formant v0.1 in four weeks: an offline voice agent on one i3 laptop that holds a full-duplex conversation in Hindi, English and Hinglish, with Bengali, Marathi, Tamil and Telugu answered through the cascade fallback until v0.2.",
   constraints: [
@@ -78,7 +78,7 @@ window.PLAN = {
       inputs: ["Token shards (01-data)", "Frozen tokenizers (02-tokenizer)", "Runner (10-infrastructure)", "Dashboards (11-monitoring)"],
       outputs: ["Talker checkpoints on the Hub → 05-post-training, 07-quantization, 09-serving"],
       cells: [
-        { id: "TR1", title: "Smoke runs", goal: "~50M talker on pilot or public codec tokens, dense and MoE: check fp16 stability, router balance, loss per codebook, resume after a killed session. Run 8 tiny mixture-search runs and pick the language weights with the best worst-language dev loss (01-data/DATA_PLAN.md).", done: "Loss falls on every codebook; experts stay balanced; resume reproduces the curve; mixture weights fixed.", needs: ["~IN1", "~MO1"], gpu: "8–10", status: "todo" },
+        { id: "TR1", title: "Smoke runs", goal: "~50M talker on pilot or public codec tokens, dense and MoE: check fp16 stability, router balance, loss per codebook, resume after a killed session. Run 8 tiny mixture-search runs and pick the language weights with the best worst-language dev loss; A/B online data selection (OPUS) against random at equal T4-hours (01-data/DATA_PLAN.md).", done: "Loss falls on every codebook; experts stay balanced; resume reproduces the curve; mixture weights fixed; OPUS adopted or dropped with numbers.", needs: ["~IN1", "~MO1"], gpu: "10–12", status: "todo" },
         { id: "TR2", title: "Launch pre-training", goal: "Upcycle Qwen3-0.6B into the AR1 MoE with the frozen tables; ZeRO-2 across 2× T4 with 8-bit AdamW; global-batch load balancing (bias-based, no auxiliary loss); single-language micro-batches mixed to the DATA_PLAN ratios; add shards as they land.", done: "Run passes 1 epoch with stable loss and no dead experts; checkpoint every 30–45 min on the Hub.", needs: ["TR1", "AR1", "~TK2", "~DA2", "~PF2"], gpu: "30–45", status: "todo" },
         { id: "TR3", title: "Finish pre-training, dialogue", goal: "Complete 2–3 epochs; then train both streams on Hindi, English and Hinglish dialogues (synthetic + split real).", done: "Probe CER ≤ 25% in all six languages; takeover rate ≥ 0.8 in Hindi and English on held-out clips.", needs: ["TR2", "DA2", "TK2"], gpu: "80–125", status: "todo" },
         { id: "TR4", title: "Robustness", goal: "Add noise, far-field audio, crosstalk and echo-like leakage; pick the final checkpoint with evaluation.", done: "Noisy CER within 5 points of clean; final checkpoint tagged.", needs: ["TR3", "EV3"], gpu: "10", status: "todo" }
@@ -216,6 +216,7 @@ window.PLAN = {
     { name: "Dessa", who: "Block · Oct 2026", what: "Full-duplex speech model trained from scratch on human conversation only, no text; runs locally on a laptop-class Mac; research preview, no weights.", use: "Evidence that real conversation data drives natural timing; watch only." },
     { name: "OpenVINO 2026.4", who: "Intel · Sep 2026", what: "MoE support on CPUs and Xe GPUs (validated on Qwen3-30B-A3B, Arc A770); MoE weight offloading.", use: "Runtime for the MoE talker; the UHD 620 (Gen9.5) is not listed, so PF1 tests it." },
     { name: "llama.cpp MTP speculation", who: "ggml · 2026", what: "Built-in multi-token-prediction speculative decoding (--spec-type draft-mtp), ~2× generation speed for models that ship MTP layers; n-gram speculation without extra weights.", use: "Thinker speed-up (QZ1, PF3)." },
+    { name: "OPUS data selection", who: "arXiv 2602.05400 · 2026", what: "Per-step data selection: score a candidate buffer by each sample's optimizer-preconditioned gradient against a proxy gradient (CountSketch, Boltzmann sampling with a redundancy penalty); ~4.7% overhead; 6–8× data or compute efficiency reported.", use: "TR1 A/B at equal T4-hours; selection inside each language bucket with a dev-split proxy; adopted for TR2 only if it wins." },
     { name: "OpusLM", who: "CMU, NVIDIA and others · 2025", what: "Fully open unified speech language models up to 7B, built only from public data with a transparent recipe.", use: "Reference for a fully reproducible open recipe (RL4)." },
     { name: "Mimi", who: "Kyutai", what: "12.5 Hz, 8 RVQ codebooks; the codec behind Moshi and most open duplex models.", use: "TK1 incumbent; the safest choice if LiquidCodec's licence or Indic quality fails." },
     { name: "LFM3-Audio-2B", who: "Liquid AI · 2026", what: "2B audio model that runs on laptops and phones; 18 speech languages, none Indian; LFM Open License.", use: "Reference only: as a talker it would need ~12.5 GB/s on the i3's bus. A laptop full-duplex fine-tune of it (Alba) is useful prior art." },
@@ -241,7 +242,7 @@ window.PLAN = {
   ],
   risks: [
     ["Data in week 2", "Ingest, tokenising and synthetic dialogues all land in one week. Start downloads in week 1; cut to Hindi + English if late."],
-    ["GPU budget", "v0.1 needs about 305–465 T4-hours; one account gives ~240 in four weeks. Plan on two teammates' accounts."],
+    ["GPU budget", "v0.1 needs about 310–465 T4-hours; one account gives ~240 in four weeks. Plan on two teammates' accounts."],
     ["Codec on Indian languages", "Retroflex and aspirated sounds may smear. TK1 catches it in week 1; the fix is a decoder-only fine-tune that keeps tokens valid."],
     ["Echo on laptop speakers", "Full duplex hears itself. AEC3 in SV2; headset fallback for demos."],
     ["Shared memory bus", "iGPU and CPU share 20.8 GB/s. PF4 throttles the thinker to protect the talker's frame."],

@@ -1,8 +1,8 @@
 # TR1 · Smoke runs — week 1 plan
 
 **Goal:** prove the training stack on a ~50M talker, dense and MoE, before TR2 spends real T4-hours. Also fix the data-mixture weights.
-**Done when:** loss falls on every codebook; experts stay balanced; resume reproduces the curve; mixture weights are fixed.
-**Needs:** ~IN1 (runner), ~MO1 (metrics). **GPU:** 8–10 T4-hours.
+**Done when:** loss falls on every codebook; experts stay balanced; resume reproduces the curve; mixture weights are fixed; OPUS adopted or dropped, with numbers.
+**Needs:** ~IN1 (runner), ~MO1 (metrics). **GPU:** 10–12 T4-hours.
 
 ## Setup
 
@@ -41,6 +41,20 @@
 - **Runs:** 8 runs of the dense ~50M model, ~0.5 T4-hour each, on the DA1 pilot tokens. Weights are sampled around the DATA_PLAN prior: hi 23 / en 16.5 / bn, mr, ta, te 14 each / Hinglish 4.
 - **Pick:** the weights with the best **worst-language** dev loss (a RegMix/DoReMi-style search). If no run beats the prior by more than noise, keep the prior.
 
+## OPUS A/B (Friday, ~2 T4-hours)
+
+Online data selection per step (01-data/DATA_PLAN.md, section 5): score a 2× candidate buffer, keep the best half.
+
+| Setting | Value |
+|---|---|
+| Buffer | 2× the micro-batch, drawn from one language bucket |
+| Score | Per-sample gradient sketches (ghost factors, CountSketch m = 8,192) of the last 4 blocks + heads, preconditioned by AdamW's second moments, dot the proxy gradient |
+| Proxy | Dev-split clips (speaker-disjoint), tier-1 and conversational, refreshed every 500 steps |
+| Keep | 50%, softmax sampling at τ = 0.9 with a redundancy penalty |
+| Compare | Random vs OPUS at **equal T4-hours**, not equal steps; worst-language dev loss and per-codebook loss |
+
+**Adopt for TR2 only if OPUS wins after paying its overhead.** Also report the overhead itself; the paper says ~4.7%, but a T4 with a full candidate forward pass may cost more.
+
 ## Week
 
 | Day | Work |
@@ -49,7 +63,7 @@
 | Tue | MoE variant; dispatch benchmark; fp16 and router checks |
 | Wed | Kill-and-resume test; metric set from MO1 wired in |
 | Thu | Mixture search on the DA1 pilot tokens |
-| Fri | `reports/TR1.md`: curves, throughput, chosen weights, TR2 config draft |
+| Fri | OPUS A/B; `reports/TR1.md`: curves, throughput, chosen weights, OPUS verdict, TR2 config draft |
 
 ## Risks
 
