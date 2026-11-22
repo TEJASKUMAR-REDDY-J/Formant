@@ -41,7 +41,7 @@ Ledger of every dataset and model licence (codec candidates included); voice con
 - **Done when:** Every source tagged train-only, shareable or excluded.
 - **Needs:** nothing
 - **Plan:** [plans/RL1.md](plans/RL1.md)
-- **Status:** todo
+- **Status:** doing
 
 ### RL2 · Week 2 · Public site
 
