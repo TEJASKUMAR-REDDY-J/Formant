@@ -183,7 +183,7 @@ window.PLAN = {
       inputs: ["Runs (04, 05)", "Harness (06)", "Runtime (09)"],
       outputs: ["Dashboards and alerts → every section"],
       cells: [
-        { id: "MO1", title: "Training metrics", goal: "Loss per codebook, text loss, loss per language, grad norm, fp16 loss scale and overflows, tokens/s, memory; expert use per language, router entropy and load imbalance; logged to Trackio on the Hub.", done: "Every run logs the same metric set.", needs: ["~IN1"], gpu: "", status: "todo" },
+        { id: "MO1", title: "Training metrics", goal: "Loss per codebook, text loss, loss per language, grad norm, fp16 loss scale and overflows, tokens/s, memory; expert use per language, router entropy and load imbalance; logged to Trackio on the Hub.", done: "Every run logs the same metric set.", needs: ["~IN1"], gpu: "", status: "doing" },
         { id: "MO2", title: "Alarms", goal: "Auto-stop on NaN, loss spikes, falling codebook entropy and dead or collapsed experts; roll back to the last good checkpoint; data-gate pass-rate dashboard.", done: "A deliberately broken run is stopped automatically.", needs: ["MO1", "~TR2"], gpu: "", status: "todo" },
         { id: "MO3", title: "Listening probes", goal: "Every N steps generate 10 fixed prompts per language; auto CER and speaker similarity; audio on the dashboard.", done: "Probe trends visible for TR3.", needs: ["MO2", "EV2"], gpu: "", status: "todo" },
         { id: "MO4", title: "Runtime telemetry", goal: "Missed frames, latency p50/p95, CPU clock and temperature, leftover echo, logged for every demo session.", done: "Telemetry attached to the release demo.", needs: ["MO3", "SV3"], gpu: "", status: "todo" }
