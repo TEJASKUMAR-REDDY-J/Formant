@@ -1,0 +1,21 @@
+[project]
+name = "formant"
+version = "0.0.1"
+requires-python = ">=3.11,<3.13"
+dependencies = ["numpy>=1.26,<3", "pyarrow>=17", "torch>=2.6", "safetensors>=0.4", "huggingface_hub>=0.34"]
+
+[project.optional-dependencies]
+laptop = ["openvino==2026.4.1", "psutil"]
+test = ["pytest>=8"]
+
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+namespaces = true
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]

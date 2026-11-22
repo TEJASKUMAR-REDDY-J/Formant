@@ -19,7 +19,12 @@ exports/
 *.parquet
 *.arrow
 
+# Built by Vercel from plan-data.js and the section folders (10-infrastructure/scripts/gen-sections.js)
+site/sections/*.html
+
 # Tools and environments
+*.egg-info/
+.pytest_cache/
 .venv/
 venv/
 __pycache__/
