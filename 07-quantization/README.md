@@ -41,7 +41,7 @@ Sarvam 30B at Q3_K_M, IQ3_S, IQ4_XS and a mixed MoE recipe (routed experts low-b
 - **Done when:** Speed–quality curve; one setting chosen.
 - **Needs:** PF1 (same-week handoff), EV1 (same-week handoff)
 - **Plan:** [plans/QZ1.md](plans/QZ1.md)
-- **Status:** todo
+- **Status:** doing
 
 ### QZ2 · Week 2 · Codec on the iGPU
 

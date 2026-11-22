@@ -1,5 +1,7 @@
 # QZ1 · Thinker sweep — week 1 plan
 
+> **Superseded in part:** [reports/QZ1.md](../reports/QZ1.md) corrects the speed estimate, MTP speculation and the list of quantisations.
+
 **Goal:** pick the Sarvam 30B quantisation that fits ≤ 14 GB, runs at ≥ 5 tokens/s on the i3, and keeps Indic quality.
 **Done when:** the speed–quality curve is published and one setting is chosen.
 **Needs:** ~PF1 (i3 timing), ~EV1 (metrics). **GPU:** none counted (Kaggle T4s only compute reference logits).
