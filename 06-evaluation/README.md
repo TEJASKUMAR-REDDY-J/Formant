@@ -40,7 +40,7 @@ Define every metric (two-recogniser CER, speaker similarity, DNSMOS and CMOS, Fu
 - **Done when:** Metric spec and frozen test-speaker lists.
 - **Needs:** DA1 (same-week handoff)
 - **Plan:** [plans/EV1.md](plans/EV1.md)
-- **Status:** todo
+- **Status:** doing
 
 ### EV2 · Week 2 · Harness and Indic-FDB scripts
 
