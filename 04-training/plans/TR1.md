@@ -1,5 +1,7 @@
 # TR1 · Smoke runs — week 1 plan
 
+> **Superseded in part:** [reports/TR1.md](../reports/TR1.md) corrects the upcycling recipe and the order of work.
+
 **Goal:** prove the training stack on a ~50M talker, dense and MoE, before TR2 spends real T4-hours. Also fix the data-mixture weights.
 **Done when:** loss falls on every codebook; experts stay balanced; resume reproduces the curve; mixture weights are fixed; OPUS adopted or dropped, with numbers.
 **Needs:** ~IN1 (runner), ~MO1 (metrics). **GPU:** 10–12 T4-hours.
