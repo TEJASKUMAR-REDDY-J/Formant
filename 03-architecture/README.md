@@ -45,7 +45,7 @@ Fix layers, width, streams, acoustic delay, context (3–5 min, sliding window) 
 - **Done when:** Spec sheet whose active bytes fit the talker's 4.4 GB/s share and whose total fits ≤ 1.5 GB at int8; dense fallback spec kept.
 - **Needs:** PF1 (same-week handoff), TK1 (same-week handoff)
 - **Plan:** [plans/AR1.md](plans/AR1.md)
-- **Status:** todo
+- **Status:** doing
 
 ### AR2 · Week 2 · Thinker and turn state
 
