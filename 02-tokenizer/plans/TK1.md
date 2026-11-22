@@ -1,5 +1,7 @@
 # TK1 · Codec and vocabulary audit — week 1 plan
 
+> **Superseded in part:** [reports/TK1.md](../reports/TK1.md) corrects the text vocabulary and several codec facts.
+
 **Goal:** choose the audio codec by Friday on per-language evidence, and measure how each candidate text tokenizer handles our six languages.
 **Done when:** codec chosen with per-language numbers; fertility table published.
 **Needs:** ~DA1 (pilot clips), ~PF1 (UHD 620 timing harness). **GPU:** 2 T4-hours.
