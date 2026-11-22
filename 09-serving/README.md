@@ -41,7 +41,7 @@ Silero VAD → IndicConformer on the iGPU (Whisper-turbo or Moonshine for Englis
 - **Done when:** ≤ 1.5 s p50 response latency on the i3.
 - **Needs:** PF1 (same-week handoff), QZ1 (same-week handoff)
 - **Plan:** [plans/SV1.md](plans/SV1.md)
-- **Status:** todo
+- **Status:** doing
 
 ### SV2 · Week 2 · Duplex audio loop
 
