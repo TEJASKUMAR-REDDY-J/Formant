@@ -42,7 +42,7 @@ Score Sarvam 30B on Indic QA with spoken-style prompts; write the style spec: sh
 - **Done when:** Baseline scores and style spec.
 - **Needs:** EV1 (same-week handoff)
 - **Plan:** [plans/PT1.md](plans/PT1.md)
-- **Status:** todo
+- **Status:** doing
 
 ### PT2 · Week 2 · Thinker style tuning
 

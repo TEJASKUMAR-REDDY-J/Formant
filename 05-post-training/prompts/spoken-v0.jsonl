@@ -1,0 +1,70 @@
+{"id": "en-weather", "lang": "en", "topic": "weather", "prompt": "Will I need an umbrella tomorrow?", "native_reviewed": false}
+{"id": "en-price", "lang": "en", "topic": "price", "prompt": "How much is a kilo of tomatoes these days?", "native_reviewed": false}
+{"id": "en-phone_number", "lang": "en", "topic": "phone_number", "prompt": "What number do I call for an ambulance?", "native_reviewed": false}
+{"id": "en-date", "lang": "en", "topic": "date", "prompt": "When is Republic Day?", "native_reviewed": false}
+{"id": "en-recipe", "lang": "en", "topic": "recipe", "prompt": "How do I make ginger tea?", "native_reviewed": false}
+{"id": "en-directions", "lang": "en", "topic": "directions", "prompt": "How do I get to the railway station from the bus stand?", "native_reviewed": false}
+{"id": "en-advice", "lang": "en", "topic": "advice", "prompt": "I can't sleep at night. What should I do?", "native_reviewed": false}
+{"id": "en-explain", "lang": "en", "topic": "explain", "prompt": "Why is the sky blue?", "native_reviewed": false}
+{"id": "en-time", "lang": "en", "topic": "time", "prompt": "How long does it take from Delhi to Jaipur by train?", "native_reviewed": false}
+{"id": "en-chat", "lang": "en", "topic": "chat", "prompt": "I had a really tiring day today.", "native_reviewed": false}
+{"id": "hi-weather", "lang": "hi", "topic": "weather", "prompt": "कल छाता लेकर जाना पड़ेगा क्या?", "native_reviewed": false}
+{"id": "hi-price", "lang": "hi", "topic": "price", "prompt": "आजकल टमाटर कितने रुपये किलो है?", "native_reviewed": false}
+{"id": "hi-phone_number", "lang": "hi", "topic": "phone_number", "prompt": "एम्बुलेंस के लिए कौन सा नंबर लगाऊँ?", "native_reviewed": false}
+{"id": "hi-date", "lang": "hi", "topic": "date", "prompt": "गणतंत्र दिवस कब होता है?", "native_reviewed": false}
+{"id": "hi-recipe", "lang": "hi", "topic": "recipe", "prompt": "अदरक वाली चाय कैसे बनाते हैं?", "native_reviewed": false}
+{"id": "hi-directions", "lang": "hi", "topic": "directions", "prompt": "बस अड्डे से रेलवे स्टेशन कैसे जाऊँ?", "native_reviewed": false}
+{"id": "hi-advice", "lang": "hi", "topic": "advice", "prompt": "रात को नींद नहीं आती, क्या करूँ?", "native_reviewed": false}
+{"id": "hi-explain", "lang": "hi", "topic": "explain", "prompt": "आसमान नीला क्यों होता है?", "native_reviewed": false}
+{"id": "hi-time", "lang": "hi", "topic": "time", "prompt": "दिल्ली से जयपुर ट्रेन में कितना समय लगता है?", "native_reviewed": false}
+{"id": "hi-chat", "lang": "hi", "topic": "chat", "prompt": "आज बहुत थका देने वाला दिन था।", "native_reviewed": false}
+{"id": "bn-weather", "lang": "bn", "topic": "weather", "prompt": "কাল কি ছাতা নিয়ে বেরোতে হবে?", "native_reviewed": false}
+{"id": "bn-price", "lang": "bn", "topic": "price", "prompt": "আজকাল টমেটো কত টাকা কিলো?", "native_reviewed": false}
+{"id": "bn-phone_number", "lang": "bn", "topic": "phone_number", "prompt": "অ্যাম্বুলেন্সের জন্য কোন নম্বরে ফোন করব?", "native_reviewed": false}
+{"id": "bn-date", "lang": "bn", "topic": "date", "prompt": "প্রজাতন্ত্র দিবস কবে?", "native_reviewed": false}
+{"id": "bn-recipe", "lang": "bn", "topic": "recipe", "prompt": "আদা চা কীভাবে বানায়?", "native_reviewed": false}
+{"id": "bn-directions", "lang": "bn", "topic": "directions", "prompt": "বাস স্ট্যান্ড থেকে রেল স্টেশন কীভাবে যাব?", "native_reviewed": false}
+{"id": "bn-advice", "lang": "bn", "topic": "advice", "prompt": "রাতে ঘুম আসে না, কী করব?", "native_reviewed": false}
+{"id": "bn-explain", "lang": "bn", "topic": "explain", "prompt": "আকাশ নীল কেন?", "native_reviewed": false}
+{"id": "bn-time", "lang": "bn", "topic": "time", "prompt": "দিল্লি থেকে জয়পুর ট্রেনে কত সময় লাগে?", "native_reviewed": false}
+{"id": "bn-chat", "lang": "bn", "topic": "chat", "prompt": "আজ খুব ক্লান্তিকর একটা দিন গেল।", "native_reviewed": false}
+{"id": "mr-weather", "lang": "mr", "topic": "weather", "prompt": "उद्या छत्री घेऊन जावी लागेल का?", "native_reviewed": false}
+{"id": "mr-price", "lang": "mr", "topic": "price", "prompt": "आजकाल टोमॅटो किती रुपये किलो आहेत?", "native_reviewed": false}
+{"id": "mr-phone_number", "lang": "mr", "topic": "phone_number", "prompt": "रुग्णवाहिकेसाठी कोणता नंबर लावू?", "native_reviewed": false}
+{"id": "mr-date", "lang": "mr", "topic": "date", "prompt": "प्रजासत्ताक दिन कधी असतो?", "native_reviewed": false}
+{"id": "mr-recipe", "lang": "mr", "topic": "recipe", "prompt": "आल्याचा चहा कसा करतात?", "native_reviewed": false}
+{"id": "mr-directions", "lang": "mr", "topic": "directions", "prompt": "बस स्थानकापासून रेल्वे स्टेशनला कसं जाऊ?", "native_reviewed": false}
+{"id": "mr-advice", "lang": "mr", "topic": "advice", "prompt": "रात्री झोप येत नाही, काय करू?", "native_reviewed": false}
+{"id": "mr-explain", "lang": "mr", "topic": "explain", "prompt": "आकाश निळं का दिसतं?", "native_reviewed": false}
+{"id": "mr-time", "lang": "mr", "topic": "time", "prompt": "दिल्लीहून जयपूरला ट्रेनने किती वेळ लागतो?", "native_reviewed": false}
+{"id": "mr-chat", "lang": "mr", "topic": "chat", "prompt": "आजचा दिवस खूप थकवणारा होता.", "native_reviewed": false}
+{"id": "ta-weather", "lang": "ta", "topic": "weather", "prompt": "நாளைக்கு குடை எடுத்துட்டு போகணுமா?", "native_reviewed": false}
+{"id": "ta-price", "lang": "ta", "topic": "price", "prompt": "இப்போ தக்காளி கிலோ எவ்வளவு?", "native_reviewed": false}
+{"id": "ta-phone_number", "lang": "ta", "topic": "phone_number", "prompt": "ஆம்புலன்ஸுக்கு எந்த நம்பருக்கு கூப்பிடணும்?", "native_reviewed": false}
+{"id": "ta-date", "lang": "ta", "topic": "date", "prompt": "குடியரசு தினம் எப்போ வரும்?", "native_reviewed": false}
+{"id": "ta-recipe", "lang": "ta", "topic": "recipe", "prompt": "இஞ்சி டீ எப்படி போடறது?", "native_reviewed": false}
+{"id": "ta-directions", "lang": "ta", "topic": "directions", "prompt": "பஸ் ஸ்டாண்டிலிருந்து ரயில்வே ஸ்டேஷனுக்கு எப்படி போகணும்?", "native_reviewed": false}
+{"id": "ta-advice", "lang": "ta", "topic": "advice", "prompt": "ராத்திரி தூக்கம் வரலை, என்ன பண்ணலாம்?", "native_reviewed": false}
+{"id": "ta-explain", "lang": "ta", "topic": "explain", "prompt": "வானம் ஏன் நீலமா இருக்கு?", "native_reviewed": false}
+{"id": "ta-time", "lang": "ta", "topic": "time", "prompt": "டெல்லியிலிருந்து ஜெய்ப்பூருக்கு ரயில்ல எவ்வளவு நேரம் ஆகும்?", "native_reviewed": false}
+{"id": "ta-chat", "lang": "ta", "topic": "chat", "prompt": "இன்னைக்கு ரொம்ப களைப்பான நாள்.", "native_reviewed": false}
+{"id": "te-weather", "lang": "te", "topic": "weather", "prompt": "రేపు గొడుగు తీసుకెళ్ళాలా?", "native_reviewed": false}
+{"id": "te-price", "lang": "te", "topic": "price", "prompt": "ఈ మధ్య టమాటా కిలో ఎంత?", "native_reviewed": false}
+{"id": "te-phone_number", "lang": "te", "topic": "phone_number", "prompt": "అంబులెన్స్ కోసం ఏ నంబర్‌కి ఫోన్ చేయాలి?", "native_reviewed": false}
+{"id": "te-date", "lang": "te", "topic": "date", "prompt": "గణతంత్ర దినోత్సవం ఎప్పుడు?", "native_reviewed": false}
+{"id": "te-recipe", "lang": "te", "topic": "recipe", "prompt": "అల్లం టీ ఎలా చేస్తారు?", "native_reviewed": false}
+{"id": "te-directions", "lang": "te", "topic": "directions", "prompt": "బస్ స్టాండ్ నుంచి రైల్వే స్టేషన్‌కి ఎలా వెళ్ళాలి?", "native_reviewed": false}
+{"id": "te-advice", "lang": "te", "topic": "advice", "prompt": "రాత్రి నిద్ర పట్టడం లేదు, ఏం చేయాలి?", "native_reviewed": false}
+{"id": "te-explain", "lang": "te", "topic": "explain", "prompt": "ఆకాశం నీలంగా ఎందుకు ఉంటుంది?", "native_reviewed": false}
+{"id": "te-time", "lang": "te", "topic": "time", "prompt": "ఢిల్లీ నుంచి జైపూర్‌కి రైల్లో ఎంత సమయం పడుతుంది?", "native_reviewed": false}
+{"id": "te-chat", "lang": "te", "topic": "chat", "prompt": "ఈ రోజు చాలా అలసటగా గడిచింది.", "native_reviewed": false}
+{"id": "hi-en-weather", "lang": "hi-en", "topic": "weather", "prompt": "Kal umbrella leke jaana padega kya?", "native_reviewed": false}
+{"id": "hi-en-price", "lang": "hi-en", "topic": "price", "prompt": "Aajkal tomato kitne rupaye kilo hai?", "native_reviewed": false}
+{"id": "hi-en-phone_number", "lang": "hi-en", "topic": "phone_number", "prompt": "Ambulance ke liye kaunsa number call karun?", "native_reviewed": false}
+{"id": "hi-en-date", "lang": "hi-en", "topic": "date", "prompt": "Republic Day kab hota hai?", "native_reviewed": false}
+{"id": "hi-en-recipe", "lang": "hi-en", "topic": "recipe", "prompt": "Ginger chai kaise banate hain?", "native_reviewed": false}
+{"id": "hi-en-directions", "lang": "hi-en", "topic": "directions", "prompt": "Bus stand se railway station kaise jaun?", "native_reviewed": false}
+{"id": "hi-en-advice", "lang": "hi-en", "topic": "advice", "prompt": "Raat ko neend nahi aati, kya karun?", "native_reviewed": false}
+{"id": "hi-en-explain", "lang": "hi-en", "topic": "explain", "prompt": "Sky blue kyun hota hai?", "native_reviewed": false}
+{"id": "hi-en-time", "lang": "hi-en", "topic": "time", "prompt": "Delhi se Jaipur train mein kitna time lagta hai?", "native_reviewed": false}
+{"id": "hi-en-chat", "lang": "hi-en", "topic": "chat", "prompt": "Aaj ka din bahut tiring tha yaar.", "native_reviewed": false}

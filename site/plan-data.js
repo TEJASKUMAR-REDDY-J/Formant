@@ -93,7 +93,7 @@ window.PLAN = {
       inputs: ["Thinker choice (03-architecture)", "Talker checkpoints (04-training)", "Thinker text (01-data)"],
       outputs: ["Tuned thinker and talker → 07-quantization, 09-serving"],
       cells: [
-        { id: "PT1", title: "Thinker baseline", goal: "Score Sarvam 30B on Indic QA with spoken-style prompts; write the style spec: short replies, spoken numbers, code-mixing on request.", done: "Baseline scores and style spec.", needs: ["~EV1"], gpu: "", status: "todo" },
+        { id: "PT1", title: "Thinker baseline", goal: "Score Sarvam 30B on Indic QA with spoken-style prompts; write the style spec: short replies, spoken numbers, code-mixing on request.", done: "Baseline scores and style spec.", needs: ["~EV1"], gpu: "", status: "doing" },
         { id: "PT2", title: "Thinker style tuning", goal: "QLoRA on 2× T4 with the spoken-style set.", done: "Replies under ~3 spoken sentences; Indic QA no worse than baseline.", needs: ["PT1", "~DA2", "~AR2"], gpu: "30–45", status: "todo" },
         { id: "PT3", title: "Voice lock", goal: "Fine-tune the talker on ~50–100 h of one voice. Preferred: a designed synthetic voice from an Apache-licensed Indic TTS, so no real person is imitated (the tiny-voca recipe); otherwise a Rasa speaker whose terms allow synthesis.", done: "Speaker similarity ≥ 0.85 to the reference across languages.", needs: ["TR2", "DA2", "RL1"], gpu: "10–15", status: "todo" },
         { id: "PT4", title: "Coupled fine-tune", goal: "Teacher-force thinker plan text into the monologue slot; train fillers for late plans and stopping on barge-in.", done: "≥ 80% complete replies and p50 latency ≤ 400 ms on a GPU.", needs: ["TR3", "AR3", "PT2"], gpu: "15–25", status: "todo" }
