@@ -1,5 +1,7 @@
 # SV1 · Cascade floor — week 1 plan
 
+> **Superseded in part:** [reports/SV1.md](../reports/SV1.md) corrects the latency target.
+
 **Goal:** a working offline voice agent in all six languages by Friday: recogniser → thinker → TTS, push-to-talk, on the i3. It is the fallback the duplex system must beat, and the voice for Bengali, Marathi, Tamil and Telugu in v0.1.
 **Done when:** ≤ 1.5 s p50 response latency on the i3.
 **Needs:** ~PF1 (timings), ~QZ1 (thinker quant). **GPU:** none.
