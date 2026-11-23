@@ -11,8 +11,8 @@ How we work on Formant. Short on purpose; if a rule gets in the way, change it h
 ## 2. The plan is the contract
 
 - `site/plan-data.js` is the single source of truth for scope, phases, dependencies and status. The board (`site/plan.html`) and every folder README come from it.
-- After editing it, or any document in a section folder, regenerate the READMEs and the site's section pages:
-  `node 10-infrastructure/scripts/gen-readmes.js` and `node 10-infrastructure/scripts/gen-sections.js`
+- After editing it, regenerate your own folder's README: `node 10-infrastructure/scripts/gen-readmes.js`, then commit only `<NN-section>/README.md`.
+- The section pages under `site/sections/` are not in git. Vercel builds them on every deploy; to see them locally run `node 10-infrastructure/scripts/gen-sections.js`.
 - Every piece of work belongs to a phase ID such as `DA2` or `TR3`. If it has no ID, it is not in v0.1; add it to the backlog instead.
 - Status values: `todo`, `doing`, `done`, `cut`. A phase is `done` only when its "Done when" line is true and its report exists.
 
@@ -28,7 +28,7 @@ Each phase is one week, and all twelve sections work on the same phase number at
 
 - One owner per folder. The owner reviews every change in it.
 - A folder talks to others only through what its README lists under "Takes in" and "Hands over": paths on the Hub, file formats, spec documents. Changing a handover means telling the folders that consume it.
-- Code shared by two or more folders moves to `src/formant/` when that first happens, not before.
+- Code shared by two or more folders lives in `src/formant/`, with its tests in `tests/` (`python -m pytest`). `formant` is a namespace package: no `__init__.py`, so sections can add modules without touching the same file.
 - Subfolders inside a section: `configs/`, `scripts/`, `notebooks/`, `plans/`, `reports/`. Create them only when needed.
 - Each phase gets `plans/<ID>.md` before it starts (what, how, SOTA picks, efficiency, day-by-day) and `reports/<ID>.md` when it ends.
 
@@ -70,7 +70,7 @@ da2-voice-set          sec/01-data                       (Vercel deploys main)
 | `site/plan-data.js` | Any section, but only its own cells and scope; statuses change at the Friday demo |
 | `src/formant/` (shared code) | The section that needs it first; later changes through `sec/10-infrastructure` |
 
-After editing `site/plan-data.js` or any section document, regenerate the READMEs and section pages in the same PR (section 2).
+After editing `site/plan-data.js`, regenerate and commit your own folder's README in the same PR (section 2). Section pages are built by Vercel and never committed: when every section committed the same generated index, every pair of section PRs conflicted.
 
 **Writing**
 

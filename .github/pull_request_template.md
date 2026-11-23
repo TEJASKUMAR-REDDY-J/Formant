@@ -15,5 +15,6 @@
 
 **T4-hours used:** <!-- 0 if none -->
 
-- [ ] READMEs and section pages regenerated if `site/plan-data.js` or a section document changed
+- [ ] Own folder README regenerated if `site/plan-data.js` changed
+- [ ] `python -m pytest` passes if code changed
 - [ ] No large files (audio, tokens, checkpoints) in git

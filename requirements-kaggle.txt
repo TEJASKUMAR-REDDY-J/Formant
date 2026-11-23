@@ -1,0 +1,5 @@
+# Only what the Kaggle image may lack. Kaggle's own torch, numpy and pyarrow are kept: replacing them can break CUDA.
+# The first session records `pip freeze`; pin these to that.
+huggingface_hub>=0.34
+safetensors>=0.4
+trackio
