@@ -48,7 +48,7 @@ Pre-training the talker: smoke runs, speech pre-training on the voice set, two-s
 - **Needs:** IN1 (same-week handoff), MO1 (same-week handoff)
 - **GPU:** 10–12 T4-hours
 - **Plan:** [plans/TR1.md](plans/TR1.md)
-- **Status:** todo
+- **Status:** doing
 
 ### TR2 · Week 2 · Launch pre-training
 
