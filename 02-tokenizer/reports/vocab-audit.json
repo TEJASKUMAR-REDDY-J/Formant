@@ -1,0 +1,104 @@
+{
+ "Qwen3": {
+  "vocabulary": 151669,
+  "kept_by_script": 98807,
+  "by_class": {
+   "Latin (ASCII)": 88492,
+   "other script": 46645,
+   "neutral": 8692,
+   "Latin (accented)": 6101,
+   "byte fragment": 1448,
+   "our Indic scripts": 149,
+   "other Indic scripts": 116,
+   "special": 26
+  },
+  "fertility": {
+   "bn": {
+    "tokens_per_word": 5.68,
+    "max": 7.17,
+    "n": 10
+   },
+   "en": {
+    "tokens_per_word": 1.2,
+    "max": 1.33,
+    "n": 10
+   },
+   "hi": {
+    "tokens_per_word": 4.59,
+    "max": 4.86,
+    "n": 10
+   },
+   "hi-en": {
+    "tokens_per_word": 1.77,
+    "max": 2.17,
+    "n": 10
+   },
+   "mr": {
+    "tokens_per_word": 5.67,
+    "max": 8.0,
+    "n": 10
+   },
+   "ta": {
+    "tokens_per_word": 8.7,
+    "max": 11.25,
+    "n": 10
+   },
+   "te": {
+    "tokens_per_word": 9.78,
+    "max": 13.0,
+    "n": 10
+   }
+  }
+ },
+ "Sarvam 30B": {
+  "vocabulary": 262144,
+  "kept_by_script": 186088,
+  "by_class": {
+   "Latin (ASCII)": 139589,
+   "other script": 43865,
+   "our Indic scripts": 31650,
+   "other Indic scripts": 23174,
+   "Latin (accented)": 9017,
+   "neutral": 8179,
+   "special": 6414,
+   "byte fragment": 256
+  },
+  "fertility": {
+   "bn": {
+    "tokens_per_word": 1.61,
+    "max": 2.17,
+    "n": 10
+   },
+   "en": {
+    "tokens_per_word": 1.18,
+    "max": 1.44,
+    "n": 10
+   },
+   "hi": {
+    "tokens_per_word": 1.4,
+    "max": 1.71,
+    "n": 10
+   },
+   "hi-en": {
+    "tokens_per_word": 1.43,
+    "max": 1.86,
+    "n": 10
+   },
+   "mr": {
+    "tokens_per_word": 1.99,
+    "max": 2.75,
+    "n": 10
+   },
+   "ta": {
+    "tokens_per_word": 2.32,
+    "max": 3.0,
+    "n": 10
+   },
+   "te": {
+    "tokens_per_word": 2.07,
+    "max": 3.0,
+    "n": 10
+   }
+  }
+ }
+}

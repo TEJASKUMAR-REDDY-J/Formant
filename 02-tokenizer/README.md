@@ -45,7 +45,7 @@ Round-trip 50 clips per language through each codec: CER, speaker similarity, PE
 - **Needs:** DA1 (same-week handoff), PF1 (same-week handoff)
 - **GPU:** 2 T4-hours
 - **Plan:** [plans/TK1.md](plans/TK1.md)
-- **Status:** todo
+- **Status:** doing
 
 ### TK2 · Week 2 · Freeze tokenizers
 
