@@ -1,5 +1,7 @@
 # RL1 · Licences and consent — week 1 plan
 
+> **Superseded in part:** [reports/RL1.md](../reports/RL1.md) corrects Sarvam 30B, LiquidCodec and NVIDIA licences.
+
 **Goal:**
 - a ledger of every dataset and model licence (codec candidates included);
 - a voice-consent rule;

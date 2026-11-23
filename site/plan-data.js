@@ -198,7 +198,7 @@ window.PLAN = {
       inputs: ["Results (06)", "Bundle (07)", "Data recipe (01)"],
       outputs: ["Public releases"],
       cells: [
-        { id: "RL1", title: "Licences and consent", goal: "Ledger of every dataset and model licence (codec candidates included); voice consent; PII policy; project licence.", done: "Every source tagged train-only, shareable or excluded.", needs: [], gpu: "", status: "todo" },
+        { id: "RL1", title: "Licences and consent", goal: "Ledger of every dataset and model licence (codec candidates included); voice consent; PII policy; project licence.", done: "Every source tagged train-only, shareable or excluded.", needs: [], gpu: "", status: "doing" },
         { id: "RL2", title: "Public site", goal: "Public repo; site and plan on Vercel; alpha video of the cascade.", done: "Site live; plan status visible to anyone.", needs: ["IN1", "SV1", "RL1"], gpu: "", status: "todo" },
         { id: "RL3", title: "Cards", goal: "Draft model, data and Indic-FDB cards with limitations.", done: "Cards reviewed by two teammates.", needs: ["RL2", "DA2", "EV2"], gpu: "", status: "todo" },
         { id: "RL4", title: "v0.1 release", goal: "Quantised talker, tokenizers, recipe, Indic-FDB v0, technical note, demo video.", done: "v0.1 tag; a stranger can run the demo.", needs: ["RL3", "~QZ4", "~EV4", "~DA4"], gpu: "", status: "todo" }

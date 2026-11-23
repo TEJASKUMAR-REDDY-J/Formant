@@ -1,0 +1,43 @@
+item,kind,role,licence,licence_source,gated,tag,why,confirmed,revision,checked
+ai4bharat/indicvoices_r,dataset,P1: Talker training speech (first pick); TK3 codec decoder fine-tune re-streams it from the manifest,cc-by-4.0,Hub card,click to accept,shareable,attribution required in the model or data card,no,5f4495c91d50,2026-11-22
+ai4bharat/IndicVoices,dataset,P1: Talker training speech (bulk); real conversations for turn-timing statistics,cc-by-4.0,Hub card,click to accept,shareable,attribution required in the model or data card,no,c96f9088f138,2026-11-22
+ai4bharat/Kathbath,dataset,"P1: Talker training speech (read style, many speakers)",cc-by-4.0,Hub card,click to accept,shareable,attribution required in the model or data card,no,5b9e92849222,2026-11-22
+ai4bharat/Rasa,dataset,P1: Voice-lock candidates for the talker's own voice (PT3),cc-by-4.0,Hub card,click to accept,shareable,attribution required in the model or data card,no,632f55c7ac59,2026-11-22
+ai4bharat/NPTEL,dataset,P1: Indian-accented English for the talker,cc-by-4.0,Hub card,click to accept,shareable,attribution required in the model or data card,no,9e488c74c228,2026-11-22
+dianavdavidson/MUCS-Hinglish,dataset,P1: Hinglish talker speech; Hinglish test (its test split),cc-by-4.0,Hub card,open,train-only,community mirror: the original MUCS 2021 terms are not confirmed,no,3c66ee127a7b,2026-11-22
+ai4bharat/sangraha,dataset,P1: Tokenizer vocabulary merges (TK2),cc-by-4.0,Hub card,open,shareable,attribution required in the model or data card,no,8b813c3f62d3,2026-11-22
+ai4bharat/Shrutilipi,dataset,P2: Hindi top-up only if P1 falls short,cc-by-4.0,Hub card,click to accept,shareable,attribution required in the model or data card,no,f4beb2f2cfae,2026-11-22
+ARTPARK-IISc/Vaani-transcription-part,dataset,"P2: Robustness top-up (accents, noisy phones)",cc-by-4.0,Hub card,click to accept,shareable,attribution required in the model or data card,no,418f8f160c6e,2026-11-22
+SPRINGLab/IndicTTS-English,dataset,P2: Indian English top-up if RL1 clears the licence,none on card,Hub card,open,excluded,no standard licence on the card,no,db1813df187a,2026-11-22
+SPRINGLab/IndicTTS-Hindi,dataset,P2: Cascade fallback voice (SV1) if RL1 clears the licence,none on card,Hub card,open,excluded,no standard licence on the card,no,e8de3acc27c7,2026-11-22
+SPRINGLab/IndicTTS_Bengali,dataset,P2: Cascade fallback voice (SV1),cc-by-4.0,Hub card,open,shareable,attribution required in the model or data card,no,3b30a1c5012f,2026-11-22
+SPRINGLab/IndicTTS_Tamil,dataset,P2: Cascade fallback voice (SV1),cc-by-4.0,Hub card,open,shareable,attribution required in the model or data card,no,6bd9a353470a,2026-11-22
+SPRINGLab/IndicTTS_Telugu,dataset,P2: Cascade fallback voice (SV1) if RL1 clears the licence,none on card,Hub card,open,excluded,no standard licence on the card,no,7ab3c18491be,2026-11-22
+pengyizhou/seamless-interaction-audio-only,dataset,"P2: English turn-timing statistics only (pauses, overlaps, backchannels); never trains shipped weights",cc-by-nc-4.0,Hub card,open,statistics-only,"non-commercial: timing statistics only, never trains released weights",no,7b70a581a1ea,2026-11-22
+ai4bharat/indic-align,dataset,P2: Thinker spoken-style tuning (PT2),cc-by-4.0,Hub card,open,shareable,attribution required in the model or data card,no,032b6a9070e7,2026-11-22
+Abhishekcr448/Hinglish-Everyday-Conversations-1M,dataset,P2: Seed scripts for synthetic Hinglish dialogues (DA2),mit,Hub card,open,shareable,permissive,no,cf040b1b8085,2026-11-22
+google/fleurs,dataset,"EVAL: ASR / codec round-trip tests (EV1, TK1)",cc-by-4.0,Hub card,open,evaluation-only,test set: never trained on,no,70bb2e84b976,2026-11-22
+ai4bharat/Svarah,dataset,EVAL: Indian English test,none on card,Hub card,click to accept,excluded,no standard licence on the card,no,ebbf7777fe77,2026-11-22
+ai4bharat/Lahaja,dataset,EVAL: Hindi accent test,mit,Hub card,click to accept,evaluation-only,test set: never trained on,no,d4ffd2ecbdd9,2026-11-22
+ARTPARK-IISc/Vaani-Benchmark-V1.0,dataset,EVAL: Dialect robustness test,cc-by-4.0,Hub card,click to accept,evaluation-only,test set: never trained on,no,fd0c16be2cc9,2026-11-22
+ai4bharat/IN22-Conv,dataset,EVAL: Thinker conversation check,cc-by-4.0,Hub card,click to accept,evaluation-only,test set: never trained on,no,18cd45870ff0,2026-11-22
+Qwen/Qwen3-0.6B,model,talker base,apache-2.0,Hub card,open,shareable,permissive,no,c1899de289a0,2026-11-22
+sarvamai/sarvam-30b,model,thinker,apache-2.0,Hub card,open,shareable,permissive,no,2784c524a2f2,2026-11-22
+sarvamai/sarvam-30b-gguf,model,"thinker, official quantised files",apache-2.0,Hub card,open,shareable,permissive,no,54e15edbbcb1,2026-11-22
+kyutai/mimi,model,codec candidate,cc-by-4.0,Hub card,open,shareable,attribution required in the model or data card,no,89091b3e466e,2026-11-22
+LiquidAI/Liquid-Codec,model,codec candidate,other (lfm1.0),Hub card,open,excluded,LFM licence 1.0: commercial use is conditional; read it before TK1 may choose this codec,no,b5abfac46ef9,2026-11-22
+nvidia/nemo-nano-codec-22khz-0.6kbps-12.5fps,model,codec candidate,other (nvidia-open-model-license),Hub card,open,excluded,NVIDIA Open Model License: read it before TK1 may choose this codec,no,5c8e22ed763c,2026-11-22
+nvidia/nemo-nano-codec-22khz-1.78kbps-12.5fps,model,codec candidate,other (nvidia-open-model-license),Hub card,open,excluded,NVIDIA Open Model License: read it before TK1 may choose this codec,no,c4ab84a92c8d,2026-11-22
+Qwen/Qwen3-TTS-Tokenizer-12Hz,model,codec candidate,apache-2.0,Hub card,open,shareable,permissive,no,7dd38ad4e9ba,2026-11-22
+ai4bharat/indic-conformer-600m-multilingual,model,recogniser,mit,Hub card,click to accept,shareable,permissive,no,2a77d305038d,2026-11-22
+openai/whisper-large-v3-turbo,model,"recogniser (English, second opinion)",mit,Hub card,open,shareable,permissive,no,41f01f3fe87f,2026-11-22
+UsefulSensors/moonshine-base,model,recogniser (English),mit,Hub card,open,shareable,permissive,no,7a73d8d55ac0,2026-11-22
+ai4bharat/indic-parler-tts,model,voice,apache-2.0,Hub card,click to accept,shareable,permissive,no,660bc53c64ae,2026-11-22
+ai4bharat/IndicF5,model,voice,mit,Hub card,click to accept,shareable,permissive,no,fb652a96e508,2026-11-22
+hexgrad/Kokoro-82M,model,voice,apache-2.0,Hub card,open,shareable,permissive,no,f3ff3571791e,2026-11-22
+n4ze3m/tiny-voca,model,recipe reference,apache-2.0,Hub card,open,shareable,permissive,no,5fe06641d0af,2026-11-22
+microsoft/wavlm-large,model,speaker-similarity metric,none on card,Hub card,open,excluded,no standard licence on the card,no,c1423ed94bb0,2026-11-22
+Silero VAD,software,voice activity,mit,github.com/snakers4/silero-vad,open,shareable,permissive,no,,2026-11-22
+llama.cpp,software,thinker runtime,mit,github.com/ggml-org/llama.cpp,open,shareable,permissive,no,,2026-11-22
+OpenVINO,software,talker and codec runtime,apache-2.0,github.com/openvinotoolkit/openvino,open,shareable,permissive,no,,2026-11-22
+WebRTC AEC3,software,echo cancellation,bsd-3-clause,webrtc.org,open,shareable,permissive,no,,2026-11-22
