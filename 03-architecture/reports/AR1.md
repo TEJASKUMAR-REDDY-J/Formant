@@ -1,6 +1,6 @@
 # AR1 · Talker spec
 
-**Status:** in progress. The budgets are computed and PF1 has measured the two shapes. **The dense-or-MoE decision is the team's;** the codec head waits for TK1.
+**Status:** in progress. The budgets are computed and PF1 has measured the two shapes. **Dense on the laptop, MoE as the T4 teacher (decided 23 Nov 2026);** the codec head waits for TK1.
 
 ## What was done
 
@@ -38,11 +38,11 @@ The dense budget reproduces Qwen3-0.6B's published 751.6M parameters (tied head 
 | **C. MoE in training only,** then distil into the dense talker for the laptop | More T4-hours | The MoE as a teacher; meets the course's MoE goal off the laptop |
 | **D. MoE in a few layers only** (say the last 4) | About +7 ms (fp16 experts) to +15 ms (int8) over dense | A small MoE on the laptop |
 
-**Recommendation:** A for the laptop, with C if an MoE is required: the MoE trains on T4s, where expert routing is not a bottleneck, and the laptop ships the distilled dense model. TR2's plan needs the team's choice before it launches.
+**Decision (23 Nov 2026): A for the laptop, with C.** The team chose the dense talker on the laptop, distilled from an MoE teacher trained on T4s. Reasoning, as recommended: the MoE trains on T4s, where expert routing is not a bottleneck, and the laptop ships the distilled dense model. TR2's plan needs the team's choice before it launches.
 
 ## What changes next
 
-1. The team picks A–D.
+1. ~~The team picks A–D.~~ Done: A with C.
 2. A valid quiet-machine run of PF1 (this report's timings come from a run on a busy machine; the ratios are stable).
 3. Codec-dependent head after TK1.
 
