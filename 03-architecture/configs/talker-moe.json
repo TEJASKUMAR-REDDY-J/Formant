@@ -1,0 +1,40 @@
+{
+ "name": "MoE talker (shared 1536 + 32 routed of 384, top-4), int8 experts as benchmarked",
+ "d": 1024,
+ "layers": 28,
+ "q_heads": 16,
+ "kv_heads": 8,
+ "head_dim": 128,
+ "ffn": 3072,
+ "text_vocab": 40000,
+ "streams": 2,
+ "codebooks": 8,
+ "code_vocab": 2048,
+ "window": 750,
+ "global_layers": 4,
+ "global_window": 2250,
+ "talker_share_gbs": 4.4,
+ "depth_share_gbs": 2.5,
+ "depth": {
+  "layers": 4,
+  "d": 512,
+  "ffn": 1536
+ },
+ "bits": {
+  "attn": 4,
+  "ffn": 4,
+  "experts": 8,
+  "router": 16,
+  "head": 8,
+  "embed": 8,
+  "depth": 4,
+  "kv": 16
+ },
+ "moe": {
+  "first_dense": 2,
+  "shared": 1536,
+  "routed": 384,
+  "experts": 32,
+  "top_k": 4
+ }
+}

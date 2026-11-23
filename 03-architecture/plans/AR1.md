@@ -1,5 +1,7 @@
 # AR1 · Talker spec — week 1 plan
 
+> **Superseded in part:** [reports/AR1.md](../reports/AR1.md) corrects the MoE decision, the bandwidth-bound claim and the depth-decoder budget.
+
 **Goal:** fix the talker's shape, so that its active bytes per frame fit the talker's 4.4 GB/s share of the bus and its total size is ≤ 1.5 GB at int8. Keep a dense fallback.
 **Needs:** ~PF1 (UHD 620 timings), ~TK1 (codec). **GPU:** none.
 
