@@ -41,7 +41,7 @@ Loss per codebook, text loss, loss per language, grad norm, fp16 loss scale and 
 - **Done when:** Every run logs the same metric set.
 - **Needs:** IN1 (same-week handoff)
 - **Plan:** [plans/MO1.md](plans/MO1.md)
-- **Status:** todo
+- **Status:** doing
 
 ### MO2 · Week 2 · Alarms
 
